@@ -3,7 +3,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'lkajsdfoiaueslkjavnlifunacslkj20893740274'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
@@ -16,7 +16,7 @@ class Config:
 
     @staticmethod
     def init_app(app):
-        pass
+        pass 
 
 
 class DevelopmentConfig(Config):

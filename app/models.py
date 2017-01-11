@@ -1,18 +1,19 @@
 from . import db
 
+from flask.ext.login import UserMixin
+
 db.verbosity = 2
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    acronym = db.Column(db.String(4), unique=True, index=True)
-    first_name = db.Column(db.String(25))
-    last_name = db.Column(db.String(25))
-    email = db.Column(db.String(25))
+    sigle = db.Column(db.String(4), unique=True, index=True)
+    name = db.Column(db.String(128))
+    email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128), nullable=False)
     
     # link to roles
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
@@ -22,6 +23,32 @@ class User(db.Model):
     
     def __repr__(self):
         return '<User %r>' % self.username
+        
+    @staticmethod
+    def insert_admin():
+        admin = User()
+        admin.username = 'admin'
+        admin.email = 'morisodi@edufr.ch'
+        admin.first_name = 'Admin'
+        admin.last_name = 'Admin'
+    
+    @staticmethod
+    def insert_teachers(sigles):
+        for s in sigles:
+            teacher = User.query.filter_by(sigle=s).first()
+            teacher_role = Role.query.filter_by(name='teacher').one()
+            if teacher is None:
+                teacher = User(
+                    name=sigles[s],
+                    sigle=s,
+                    email=None,
+                    username=s.lower(),
+                    password_hash='unsecure',
+                    role=teacher_role
+                )
+                db.session.add(teacher)
+                
+        db.session.commit()
 
 
 class Role(db.Model):
@@ -34,16 +61,32 @@ class Role(db.Model):
 
     def __repr__(self):
         return '<Role %r>' % self.name
+        
+    @staticmethod
+    def insert_roles():
+        levels = {
+            'student' : 1,
+            'teacher' : 3,
+            'admin' : 100
+        }
+        
+        for r in levels:
+            role = Role.query.filter_by(name=r).first()
+            if role is None:
+                role = Role(name=r, level=levels[r])
+            db.session.add(role)
+        db.session.commit()
+        
 
-class StudentGroup(db.Model):
-    __tablename__ = 'student_groups'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20))
-    school_level = db.Column(db.Integer)
-
-    def __repr__(self):
-        return '<StudentGroup %r>' % self.name
+# class StudentGroup(db.Model):
+#     __tablename__ = 'student_groups'
+# 
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(20))
+#     school_level = db.Column(db.Integer)
+# 
+#     def __repr__(self):
+#         return '<StudentGroup %r>' % self.name
         
         
 class Room(db.Model):
@@ -51,10 +94,23 @@ class Room(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(15))
+    
+    # link to reservations
+    reservations = db.relationship('Reservation', backref='room')
 
 
     def __repr__(self):
         return '<Room %r>' % self.name
+        
+    @staticmethod
+    def insert_rooms(rooms):
+        for r in rooms:
+            room = Room.query.filter_by(name=r).first()
+            if room is None:
+                room = Room(name=r)
+                db.session.add(room)
+
+        db.session.commit()
 
 
 class Timeslot(db.Model):
@@ -62,9 +118,11 @@ class Timeslot(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     # Représente le numéro de la page horaire dans un jour donné (nombre entier entre 1 et 10 par exemple)
-    no = db.Column(db.Integer)
-    start_time = db.Column(db.Time)
-    end_time = db.Column(db.Time)
+    no = db.Column(db.String(10), unique=True, index=True)
+    # Les heures sont de la forme 8h15 ou 10h15 ==> String(5)
+    start_time = db.Column(db.String(5))
+    end_time = db.Column(db.String(5))
+    order = db.Column(db.Integer, unique=True)
     
     # link to reservations ==> already done through reservations_timeslots
     
@@ -73,7 +131,13 @@ class Timeslot(db.Model):
         # TODO : il faut encore rajouter le jour auquel cette plage est liée
         return '<Timeslot no=%r>' % self.no
 
-
+    @staticmethod
+    def insert_timeslots(timeslots):
+        for order, ts in enumerate(timeslots):
+            timeslot = Timeslot(no=ts['no'], start_time=ts['start'], end_time=ts['end'], order=order)
+            db.session.add(timeslot)
+            
+        db.session.commit()
 
 class Weekday(db.Model):
     __tablename__ = 'weekdays'
@@ -88,6 +152,29 @@ class Weekday(db.Model):
     def __repr__(self):
         # TODO : il faut encore rajouter le jour auquel cette plage est liée
         return '<Weekday id=%r, name=%r>' % (self.id, self.name)
+        
+        
+    @staticmethod
+    def insert_days():
+        # initialize table weekdays
+        string_days = '''
+            Lundi
+            Mardi
+            Mercredi
+            Jeudi
+            Vendredi
+            Samedi
+            Dimanche'''
+        weekdays = [d.strip() for d in string_days.split() if d is not '']
+            
+        for d in weekdays:
+            day = Weekday()
+            day.name = d
+            db.session.add(day)
+        
+        db.session.commit()
+        
+        
 
     
 
@@ -110,15 +197,21 @@ class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
-    reason = db.Column(db.Unicode)
+    # pour les cours de l'horaire officiel, correspond au champ mat_code
+    reason_short = db.Column(db.Unicode)
+    # pour les cours de l'horaire officiel, correspond au champ mat_libelle
+    reason_details = db.Column(db.Unicode)
+    # durée de la réservation
     duration = db.Column(db.Integer)
+    # nom du groupe classe pour lequel cette réservation a été effectuée, correspond au champ ``CLASSE``
+    student_group = db.Column(db.String(20))
     
 
     # many-to-many association between users and reservations (benefits)
     users = db.relationship('User',
                             secondary=reservations_users,
                             backref=db.backref('reservations', lazy='dynamic'),
-                            lazy='dynamic')   
+                            lazy='dynamic')
                             
     # many-to-many link between timeslots and reservations
     timeslots = db.relationship('Timeslot',
@@ -131,37 +224,10 @@ class Reservation(db.Model):
     
     # link to weekdays
     weekday_id = db.Column(db.Integer, db.ForeignKey('weekdays.id'))
-    # link to timeslots
-    timeslot_id = db.Column(db.Integer, db.ForeignKey('timeslots.id'))
+    
+    # link to rooms
+    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+
 
     def __repr__(self):
         return '<Reservation %r => %r>' % (self.start_date, self.end_date)
-
-
-
-
-def init_weekdays():
-    # initialize table weekdays
-    if db.verbosity > 0: print('Initializing table weekdays ...')
-    weekdays = [d.strip() for d in '''
-        Lundi
-        Mardi
-        Mercredi
-        Jeudi
-        Vendredi
-        Samedi
-        Dimanche'''.split() if d is not '']
-        
-    for d in weekdays:
-        day = Weekday()
-        day.name = d
-        db.session.add(day)
-    
-    db.session.commit()
-    
-    if db.verbosity > 1: 
-        for weekday in Weekday.query.all():
-            print(weekday)
-    if db.verbosity > 0: print('done')
-        
-    

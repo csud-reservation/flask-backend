@@ -1,7 +1,25 @@
-Flasky
-======
+# Système de réservation CSUD
 
-This repository contains the source code examples for my O'Reilly book [Flask Web Development](http://www.flaskbook.com).
+## Installation
 
-The commits and tags in this repository were carefully created to match the sequence in which concepts are presented in the book. Please read the section titled "How to Work with the Example Code" in the book's preface for instructions.
+### Démarrage du projet
+
+Pour démarrer le projet, il faut commencer par créer un environnement virtuel Python. Sous Cloud9, il faut faire
+
+```{bash}
+sudo pip3 install virtualenv
+virtualenv -p python3 venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### ERAlchemy
+
+Pour pouvoir générer les diagrammes entité-associations du modèle SQLAlchemy, il est nécessaire d'installer GraphViz de la manière suivante :
+
+```{bash}
+$ sudo apt-get install graphviz
+$ sudo apt-get install libgraphviz-dev
+$ pip install eralchemy
+```
 

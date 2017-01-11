@@ -40,3 +40,17 @@ nosetests.xml
 
 # Virtual environment
 venv
+
+# Database files
+data-dev-ddl.sql
+erd_from_sqlite.pdf
+data-dev.sqlite
+edt.csv
+
+data
+
+# schemas
+erd.png
+rel.*
+schema.*
+

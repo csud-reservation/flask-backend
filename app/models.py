@@ -1,6 +1,6 @@
 from . import db
 
-from flask.ext.login import UserMixin
+from flask_login import UserMixin
 
 db.verbosity = 2
 
@@ -10,19 +10,21 @@ class User(UserMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     sigle = db.Column(db.String(4), unique=True, index=True)
-    name = db.Column(db.String(128))
+    first_name = db.Column(db.String(128))
+    last_name = db.Column(db.String(128))
     email = db.Column(db.String(64), unique=True, index=True)
-    username = db.Column(db.String(64), unique=True, index=True)
+    # pas besoin de username puisque l'on utilise le courriel pour se logueur
+    # username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128), nullable=False)
     
     # link to roles
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     # link to reservations (owner)
     owned_reservations = db.relationship('Reservation', backref='owner')
-    # link to reservations (teacher) ==> already done through reser
+    # link to reservations (teacher) ==> already done through reservation
     
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %d, %r>' % (self.id, self.email)
         
     @staticmethod
     def insert_admin():
@@ -31,20 +33,49 @@ class User(UserMixin, db.Model):
         admin.email = 'morisodi@edufr.ch'
         admin.first_name = 'Admin'
         admin.last_name = 'Admin'
+        
+    @staticmethod
+    def insert_admin():
+        admin_role = Role.query.filter_by(name='admin').first()
+        admin = User.query.filter_by(role=admin_role).first()
+        
+        if admin is None:
+            admin = User(
+                first_name="Administrateur",
+                last_name="Système réservation CSUD",
+                email="morisodi@edufr.ch",
+                password_hash="super_secret_passwd",
+                role=admin_role
+            )
+            
+            db.session.add(admin)
+            db.session.commit()
     
     @staticmethod
-    def insert_teachers(sigles):
-        for s in sigles:
-            teacher = User.query.filter_by(sigle=s).first()
-            teacher_role = Role.query.filter_by(name='teacher').one()
+    def insert_teachers(teachers):
+        for t in teachers:
+            teacher = User.query.filter_by(sigle=t['Sigle']).first()
+            
+            roles = {
+                'Enseignant' : 'teacher',
+                'Stag_ens' : 'intern',
+                'Rempl' : 'substitute',
+                'Aumônerie' : 'staff',
+                'Admin' : 'staff',
+            }
+            
+            role = Role.query.filter_by(
+                name=roles[t['Fonction Identifiant FR']]
+            ).one()
+
             if teacher is None:
                 teacher = User(
-                    name=sigles[s],
-                    sigle=s,
-                    email=None,
-                    username=s.lower(),
+                    first_name=t['Prenom'],
+                    last_name=t['Nom'],
+                    sigle=t['Sigle'],
+                    email=t['Email Ecole'],
                     password_hash='unsecure',
-                    role=teacher_role
+                    role=role
                 )
                 db.session.add(teacher)
                 
@@ -55,7 +86,8 @@ class Role(db.Model):
     __tablename__ = 'roles'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
+    name = db.Column(db.String(64), index=True)
+    description = db.Column(db.String(128))
     level = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
 
@@ -64,16 +96,29 @@ class Role(db.Model):
         
     @staticmethod
     def insert_roles():
-        levels = {
-            'student' : 1,
-            'teacher' : 3,
-            'admin' : 100
+        roles = {
+            # étudiants
+            'student' : (1, 'Étudiant'),
+            # stagiaires
+            'intern' : (2, 'Stagiaire'),
+            # enseignants
+            'teacher' : (3, 'Enseignant'),
+            # remplaçant
+            'substitute' : (3, 'Remplaçant'),
+            # personnel administratif
+            'staff' : (3, 'Personnel administratif'),
+            # administrateur
+            'admin' : (100, 'Administrateur des réservations'),
         }
         
-        for r in levels:
+        for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
-                role = Role(name=r, level=levels[r])
+                role = Role(
+                    name=r,
+                    level=roles[r][0],
+                    description=roles[r][1]
+                )
             db.session.add(role)
         db.session.commit()
         
@@ -129,7 +174,7 @@ class Timeslot(db.Model):
 
     def __repr__(self):
         # TODO : il faut encore rajouter le jour auquel cette plage est liée
-        return '<Timeslot no=%r>' % self.no
+        return '<Timeslot no=%r, start_time=%r>' % (self.no, self.start_time)
 
     @staticmethod
     def insert_timeslots(timeslots):
@@ -198,13 +243,14 @@ class Reservation(db.Model):
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
     # pour les cours de l'horaire officiel, correspond au champ mat_code
-    reason_short = db.Column(db.Unicode)
+    reason_short = db.Column(db.String(128))
     # pour les cours de l'horaire officiel, correspond au champ mat_libelle
-    reason_details = db.Column(db.Unicode)
-    # durée de la réservation
+    reason_details = db.Column(db.String(128))
+    # durée de la réservation (en nombres de plages horaires)
+    # ATTENTION : cela constitue une redondance si on lie aussi toutes les pages horaires avec les réservations
     duration = db.Column(db.Integer)
     # nom du groupe classe pour lequel cette réservation a été effectuée, correspond au champ ``CLASSE``
-    student_group = db.Column(db.String(20))
+    student_group = db.Column(db.String(60))
     
 
     # many-to-many association between users and reservations (benefits)

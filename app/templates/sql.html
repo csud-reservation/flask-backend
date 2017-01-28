@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Résultat de la requête SQL{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Requête SQL</h1>
+    <code>
+        {{ sql }}
+    </code>
+    
+    <h1 class="result-table">Table résultat</h1>
+    
+    <table class="sql-result">
+        <thead>
+          <tr>
+            {% for col in cols %}
+            <th>
+                {{ col }}
+            </th>
+            {% endfor %}
+          </tr>
+         </thead>
+    </table>
+</div>
+{% endblock %}

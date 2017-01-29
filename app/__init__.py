@@ -16,9 +16,9 @@ db = SQLAlchemy()
 api_manager = APIManager(flask_sqlalchemy_db=db)
 toolbar = DebugToolbarExtension()
 
-
 def create_app(config_name, models=[]):
     app = Flask(__name__)
+    
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
@@ -33,7 +33,6 @@ def create_app(config_name, models=[]):
     
     # initialisation de la barre de déboguage
     toolbar.init_app(app)
-    
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

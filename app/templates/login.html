@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc">
+      <form class="form-horizontal marges">
+        <div class="form-group">
+          <h1 class="gros_titre">Se connecter</h1>
+        </div>
+        <div class="row">
+          <div class="form-group" id="form_login_utilisateur">
+            <label for="login_utilisateur" class="col-sm-3 control-label">
+              Nom d'utilisateur
+            </label>
+            <div class="col-sm-9">
+              <input type="text" 
+              class="form-control" 
+              id="login_utilisateur"
+              placeholder="sigle ou email"
+              onkeypress="verifier_enter(event, this, login);">
+              <span class="help-block message_erreur"
+                id="login_incorrect">
+                Le nom d'utilisateur ou le mot de passe est incorrect.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group" id="form_login_password">
+            <label for="login_password" class="col-sm-3 control-label">
+              Mot de passe
+            </label>
+            <div class="col-sm-9">
+              <input type="password"
+              class="form-control"
+              id="login_password"
+              onkeypress="verifier_enter(event, this, login);">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <span
+            class="pull-right btn btn-primary"
+            style="margin-top: 2px;"
+            onclick="login();">
+            Login
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

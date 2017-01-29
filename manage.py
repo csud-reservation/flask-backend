@@ -24,6 +24,7 @@ models = dict(
     Timeslot=Timeslot,
     Weekday=Weekday
 )
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default', models)
 
 manager = Manager(app)

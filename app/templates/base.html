@@ -6,6 +6,7 @@
 {{ super() }}
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -23,6 +24,8 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
+                <li><a href="admin/">Admin</a></li>
+                <li><a href="{{ url_for('main.login_show') }}">Login</a></li>
             </ul>
         </div>
     </div>
@@ -43,6 +46,8 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='general.js') }}"></script>
+<script src="{{ url_for('static', filename='custom.js') }}"></script>
 {{ super() }}
 {{ moment.include_moment() }}
 {% endblock %}

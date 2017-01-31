@@ -49,11 +49,14 @@ def insert_reservation(db, row, start_date, end_date):
     
     # Si le champ 'teacher' est vide, il s'agit d'une heure générique qu'il ne faut pas insérer dans l'occupation des salles. Elle n'est là que pour la forme dans le fichier edt.csv ==> autre alternative serait de faire un prétraitement sur ce fichier edt.csv
     # Ne pas tenir compte des heures de gymnastique
-    if teachers == [None] or row['MAT_CODE'] == 'GY': return
+    if teachers == [None] or row['MAT_CODE'] == 'GY' or row['SALLE'] == '': return
 
     duration = int(row['DUREE'].split('h')[0])
-
-    room = Room.query.filter_by(name=row['SALLE']).first()
+    
+    # certaines lignes dans le fichier csv se déroulent dans plusieurs salles...
+    room_names = [r.strip() for r in row['SALLE'].split(',')]
+    rooms = [Room.query.filter_by(name=room_name).first() for room_name in room_names]
+    
     weekday = Weekday.query.filter_by(
         # il faut rajouter .title() pour faire lundi ==> Lundi
         name=row['JOUR'].title()
@@ -75,23 +78,30 @@ def insert_reservation(db, row, start_date, end_date):
         )
     ).all()
     
-
-    reservation = Reservation(
-        # dates du début et de fin d'année
-        start_date=start_date,
-        end_date=end_date,
-        reason_short=row['MAT_CODE'],
-        reason_details=row['MAT_LIBELLE'],
-        duration=duration,
-        student_group=row['CLASSE'],
-        users=teachers,
-        room=room,
-        timeslots=timeslots,
-        weekday=weekday,
-        owner=admin_user
-    )
     
-    db.session.add(reservation)
+    # Pour chaque salle, il faut faire une réservation identique
+    for room in rooms:
+        if room is None:
+            print("Erreur salle : ", room)
+            print(row)
+            
+        reservation = Reservation(
+            # dates du début et de fin d'année
+            start_date=start_date,
+            end_date=end_date,
+            reason_short=row['MAT_CODE'],
+            reason_details=row['MAT_LIBELLE'],
+            duration=duration,
+            student_group=row['CLASSE'],
+            users=teachers,
+            room=room,
+            timeslots=timeslots,
+            weekday=weekday,
+            owner=admin_user
+        )
+        
+        db.session.add(reservation)
+        
     db.session.commit()
     
     

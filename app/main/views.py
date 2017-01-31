@@ -12,9 +12,16 @@ from . import main
 from sqlalchemy.sql import select
 from sqlalchemy import func
 
+from flask import copy_current_request_context
+from gevent import spawn
+
 @main.route('/')
 def index():
-    return render_template('index.html', message="Ravis de vous revoir")
+    if ('userID' in session):
+        message = 'Ravis de vous revoir, ' + session['first_name'] + ' ' + session['last_name'] + ' !'
+    else:
+        message = 'Veuillez vous connecter pour accéder à toutes les fonctionnalités de cette application'
+    return render_template('index.html', message=message)
 
 @main.route('/sql', methods=['GET', 'POST'])
 def sql():
@@ -22,25 +29,47 @@ def sql():
     #result = db.session.execute(query)
     return render_template('sql.html', sql=query)
     
-@main.route('/login', methods=['GET'])
-def login_show():
-    return render_template('login.html')
-    
-@main.route('/login', methods=['POST'])
-def login_control():
-    user = request.args.get('user').lower()
-    password = request.args.get('password')
-    if ('@' in user):
-        query = select(['*']).where(func.lower(User.email) == user)
+@main.route('/search', methods=['GET'])
+def search_page():
+    if ('userID' in session):
+        return render_template('search.html')
     else:
-        query = select(['*']).where(func.lower(User.sigle) == user)
-    try:
-        result = db.session.execute(query).first()
-        true_password = result['password_hash']
-        first_name, last_name = result['first_name'], result['last_name']
-        if (password == true_password):
-            return 'bonjour, ' + first_name + ' ' + last_name + ' !'
+        return redirect(url_for('main.login')+'?please_login')
+    
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    # http://flask.pocoo.org/docs/0.12/api/#flask.copy_current_request_context
+    # @copy_current_request_context
+    # def s(): session.permanent = True
+    # spawn(s)  
+    
+    if (request.method == 'GET'):
+        return render_template('login.html')
+    if (request.method == 'POST'):
+        user = request.args.get('user').lower()
+        password = request.args.get('password')
+        if ('@' in user):
+            query = select(['*']).where(func.lower(User.email) == user)
         else:
-            return 'mot de passe erroné'
-    except:
-        return 'utilisateur introuvable'
+            query = select(['*']).where(func.lower(User.sigle) == user)
+        try:
+            result = db.session.execute(query).first()
+            true_password = result['password_hash']
+            first_name, last_name = result['first_name'], result['last_name']
+            userID = str(result['id'])
+            if (password == true_password):
+                # enregistrement de la session
+                session['first_name'] = first_name
+                session['last_name'] = last_name
+                session['userID'] = userID
+                return 'successfuly logged in'
+            else:
+                return 'login error' # faux mot de passe
+        except TypeError:
+            return 'login error' # utilisateur introuvable
+
+@main.route('/logout', methods=['GET', 'POST'])
+def logout(): 
+    for element in ['userID', 'first_name', 'last_name']:
+        session.pop(element, None)
+    return redirect(url_for('main.login')+'?just_logged_out')

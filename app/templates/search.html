@@ -1,0 +1,120 @@
+{% set rooms_types = [
+  ['ALL','Toutes les salles'],
+  ['INF','Informatique'],
+  ['BIO','Biologie'],
+  ['BIL','Biologie labo'],
+  ['CHI','Chimie'],
+  ['CHL','Chimie labo'],
+  ['PHY','Physique'],
+  ['PHL','Physique labo'],
+  ['MUS','Musique'],
+  ['ARV','Arts visuels'],
+  ['GEO','Géographie'],
+  ['VDO','Vidéo']
+  ] %}
+  
+{% set rooms_numbers = ['001','002','006','008','010','101 (INF)','102 (INF)',
+'103','104','105','106','107','108','109','110','111','112','113','114','115',
+'116 (BIO)','117 (GEO)','118 (BIL)','123 (GEO/MUS)','125 (MUS)','126 (BIL)',
+'128 (BIO)','201 (ARV)','202 (INF)','203','204','205','206','207','208','209',
+'210','211','212','213','214','215 (PHY)','216 (CHI)','217 (PHY)','218 (CHL)',
+'225 (PHL)','227 (PHL)','228 (CHI)','230 (CHL)','301 (ARV)','302 (ARV)','303',
+'304','307','308','309','310','313','314','315','316','319','320','321'] %}
+
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+      <div class="alert alert-info hidden" id="message_login"></div>
+        <script>
+          if (/just_logged_in$/.test(window.location.href)) {
+            byId('message_login').className = 'alert alert-info';
+            byId('message_login').innerHTML = 
+              'Bonjour, ' + byId('active_user').innerHTML + ' !';
+          }
+        </script>
+      <form class="form-horizontal marges">
+        <div class="form-group">
+          <h1 class="gros_titre">Réservation</h1>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <div class="ajustement_sm">
+              <label class="col-sm-3 control-label">Date</label>
+              <div class="col-sm-5">
+                <div class="input-group input-daterange">
+                  <input type="text" class="form-control">
+                  <div class="input-group-addon">à</div>
+                  <input type="text" class="form-control">
+                </div>
+                <!-- <span class="help-block">
+                  Date de début de la réservation
+                </span> -->
+              </div>
+            </div>
+            <div>
+              <label class="col-sm-1 control-label">Salle</label>
+              <div class="col-sm-3">
+                <select class="form-control">
+                  {% for room_type in rooms_types %}
+                    <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <span class="pull-right btn btn-primary bouton_recherche">
+            Rechercher salle disponible
+          </span>
+        </div>
+      </form>
+      <form class="form-horizontal marges">
+        <div class="form-group">
+          <h1 class="gros_titre">Horaire</h1>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <div class="ajustement_sm">
+              <label class="col-sm-2 control-label">Date</label>
+              <div class="col-sm-3">
+                <input type="text" class="form-control date">
+              </div>
+            </div>
+            <div class="ajustement_sm">
+              <label class="col-sm-1 control-label">Salle</label>
+              <div class="col-sm-3">
+                <select class="form-control">
+                  {% for room_type in rooms_types %}
+                    <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-1">
+              <label class="control-label">Numéro</label>
+            </div>
+            <div class="col-sm-2">
+              <select class="form-control">
+                  {% for room_number in rooms_numbers %}
+                    <option value={{ room_number[:3] }}>{{ room_number }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <span class="pull-right btn btn-primary bouton_recherche">
+            Rechercher horaire
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

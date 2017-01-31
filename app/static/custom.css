@@ -1,24 +1,51 @@
 .blanc {
-  background-color: white;
+    background-color: white;
 }
+
 .gros_titre {
-  font-size: 40px;
-  text-decoration:bold;
-  text-align:center;
-  margin-top: 30px;
-  margin-bottom: 15px;
+    font-size: 40px;
+    text-decoration: bold;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 15px;
 }
+
 .ligne {
-  border-top: solid 3px rgb(235,235,235);
-  margin-left: -15px;
-  margin-right: -15px;
+    border-top: solid 3px rgb(235, 235, 235);
+    margin-left: -15px;
+    margin-right: -15px;
 }
+
 #login_incorrect {
-  position: relative; 
-    top: 8px;
+  position: relative;
+  top: 8px;
+}
+
+.hidden {
   display: none;
 }
+
 .marges {
-  padding-left: 25px;
-  padding-right: 25px;
+    padding-left: 25px;
+    padding-right: 25px;
+    margin-bottom: -20px;
+}
+
+.espace_dessous {
+    padding-bottom: 20px;
+}
+
+.bouton_recherche {
+    margin-top: 2px;
+}
+
+#message_login {
+  margin-bottom: -5px;
+  text-align: center;
+}
+
+@media(max-width:767px) {
+    .ajustement_sm {
+        margin-bottom: 15px;
+    }
 }

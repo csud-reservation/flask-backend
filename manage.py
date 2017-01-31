@@ -26,6 +26,8 @@ models = dict(
 )
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default', models)
+# une page qui s'affiche à chaque redirection en mode développement
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 manager = Manager(app)
 migrate = Migrate(app, db)

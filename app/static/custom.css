@@ -39,8 +39,12 @@
     margin-top: 2px;
 }
 
-#message_login {
+#message_url {
   margin-bottom: -5px;
+  text-align: center;
+}
+
+.infos_profil {
   text-align: center;
 }
 

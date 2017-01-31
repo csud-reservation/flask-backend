@@ -25,9 +25,12 @@ def index():
 
 @main.route('/sql', methods=['GET', 'POST'])
 def sql():
-    query = "SELECT * FROM users LIMIT 10;"
-    #result = db.session.execute(query)
-    return render_template('sql.html', sql=query)
+    if ('userID' in session):
+        query = "SELECT * FROM users LIMIT 10;"
+        # result = db.session.execute(query)
+        return render_template('sql.html', sql=query)
+    else:
+        return redirect(url_for('main.login')+'?please_login')
     
 @main.route('/search', methods=['GET'])
 def search_page():
@@ -73,3 +76,12 @@ def logout():
     for element in ['userID', 'first_name', 'last_name']:
         session.pop(element, None)
     return redirect(url_for('main.login')+'?just_logged_out')
+
+@main.route('/user/<int:userID>', methods=['GET', 'POST'])
+def profil(userID):
+    if ('userID' in session):
+        query = select(['*']).where(User.id == userID)
+        result = db.session.execute(query).first()
+        return render_template('profil.html', infos=result)
+    else:
+        return redirect(url_for('main.login')+'?please_login')

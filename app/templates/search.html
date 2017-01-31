@@ -23,18 +23,19 @@
 
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Recherche{% endblock %}
 
 {% block content %}
 <div class="container">
   <div class="row">
     <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-      <div class="alert alert-info hidden" id="message_login"></div>
+      <!-- message qui s'affiche en fonction de l'URL indiquée-->
+      <div class="alert alert-info hidden" id="message_url"></div>
         <script>
           if (/just_logged_in$/.test(window.location.href)) {
-            byId('message_login').className = 'alert alert-info';
-            byId('message_login').innerHTML = 
-              'Bonjour, ' + byId('active_user').innerHTML + ' !';
+            byId('message_url').className = 'alert alert-info';
+            byId('message_url').innerHTML = 
+              'Bienvenue, ' + byId('active_user').innerHTML + ' !';
           }
         </script>
       <form class="form-horizontal marges">

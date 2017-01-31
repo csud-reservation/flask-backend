@@ -19,7 +19,7 @@ function login() {
           }
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
-          return;
+          alert('Erreur de connexion. Veuillez réactualiser la page et réessayer.');
       })
     }
   });
@@ -41,3 +41,4 @@ function datepickers() {
       $('.date').datepicker({language: "fr"});
     });
 }
+datepickers()

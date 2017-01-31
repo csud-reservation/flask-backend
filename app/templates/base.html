@@ -7,6 +7,7 @@
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css">
 <script src="{{ url_for('static', filename='general.js') }}"></script>
 {% endblock %}
 
@@ -31,7 +32,7 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if ('userID' in session) %}
-                    <li><a href="{{ url_for('main.index') }}" id="active_user">{{ session['first_name'] + ' ' + session['last_name'] }}</a></li> 
+                    <li><a href="/user/{{ session['userID'] }}" id="active_user">{{ session['first_name'] + ' ' + session['last_name'] }}</a></li> 
                     <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
                 {% else %}
                     <li><a href="{{ url_for('main.login') }}">Login</a></li>
@@ -56,7 +57,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='custom.js') }}"></script>
 {{ super() }}
 {{ moment.include_moment() }}
+<script src="{{ url_for('static', filename='custom.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
 {% endblock %}

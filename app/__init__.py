@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import config
 
 from flask_debugtoolbar import DebugToolbarExtension
-
+from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_restless import APIManager
 
 bootstrap = Bootstrap()
@@ -15,10 +15,26 @@ moment = Moment()
 db = SQLAlchemy()
 api_manager = APIManager(flask_sqlalchemy_db=db)
 toolbar = DebugToolbarExtension()
+lm = LoginManager()
+lm.login_view = 'main.login'
 
-def create_app(config_name, models=[]):
+
+ 
+
+def create_app(config_name, models={}):
     app = Flask(__name__)
+
+
+    lm.init_app(app)
     
+    
+    User = models['User']
+    @lm.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
+    
+
+
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
@@ -38,4 +54,7 @@ def create_app(config_name, models=[]):
     app.register_blueprint(main_blueprint)
     
     return app
+    
+
+
 

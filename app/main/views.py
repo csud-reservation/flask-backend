@@ -96,3 +96,4 @@ def profil():
             
     session['CombinationPP'] = 0 
     return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])
+

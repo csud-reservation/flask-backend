@@ -4,7 +4,7 @@ import sys
 def print_to_console(toprint):
     print(toprint, file=sys.stderr)
 
-from flask import render_template, session, redirect, url_for, current_app, request
+from flask import render_template, session, redirect, url_for, current_app, request, g
 from .. import db
 from ..models import User
 from ..email import send_email
@@ -12,80 +12,87 @@ from . import main
 from sqlalchemy.sql import select
 from sqlalchemy import func
 
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
 from flask import copy_current_request_context
 from gevent import spawn
+from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from ..forms import LoginForm, ChangePasswordForm
+
+
 
 @main.route('/')
 def index():
-    if ('userID' in session):
-        message = 'Ravis de vous revoir, ' + session['first_name'] + ' ' + session['last_name'] + ' !'
-    else:
-        message = 'Veuillez vous connecter pour accéder à toutes les fonctionnalités de cette application'
-    return render_template('index.html', message=message)
+    return render_template('index.html')
 
-@main.route('/sql', methods=['GET', 'POST'])
-def sql():
-    if ('userID' in session):
-        query = "SELECT * FROM users LIMIT 10;"
-        # result = db.session.execute(query)
-        return render_template('sql.html', sql=query)
-    else:
-        return redirect(url_for('main.login')+'?please_login')
-    
+
 @main.route('/search', methods=['GET'])
+@login_required
 def search_page():
-    if ('userID' in session):
-        return render_template('search.html')
-    else:
-        return redirect(url_for('main.login')+'?please_login')
-    
+    return render_template('search.html')
+   
+#========================================================================================================================================================
+#=====LOGIN==============================================================================================================================================
+#========================================================================================================================================================
+
 @main.route('/login', methods=['GET', 'POST'])
 def login():
-    # http://flask.pocoo.org/docs/0.12/api/#flask.copy_current_request_context
-    # @copy_current_request_context
-    # def s(): session.permanent = True
-    # spawn(s)  
-    
-    if request.method == 'GET':
-        return render_template('login.html')
-    if request.method == 'POST':
-        user = request.args.get('user').lower()
-        password = request.args.get('password')
-        if '@' in user:
-            query = select(['*']).where(func.lower(User.email) == user)
-        else:
-            # je ne permettrais pas cette deuxième solution de login. Il faut se limiter à une seule information d'identification
-            query = select(['*']).where(func.lower(User.sigle) == user)
-        try:
-            # DONC: cette façon de tester le mot de passe est très insécurisée, car le mot de passe est en clair dans la base de données ... il faut utiliser le module flask_login et les modules de hashage du mot de passe
-            result = db.session.execute(query).first()
-            true_password = result['password_hash']
-            first_name, last_name = result['first_name'], result['last_name']
-            userID = str(result['id'])
-            if (password == true_password):
-                # enregistrement de la session
-                # DONC : pourquoi sauver le nom et le prénom dans la session ??? il suffit de l'IDuser ...
-                session['first_name'] = first_name
-                session['last_name'] = last_name
-                session['userID'] = userID
-                return 'successfuly logged in'
-            else:
-                return 'login error' # faux mot de passe
-        except TypeError:
-            return 'login error' # utilisateur introuvable
+    loginForm = LoginForm()
+    session['wrongCombinationAP'] = False
+    if loginForm.validate_on_submit():
+        
+        if '@' in loginForm.account.data :
+            user = User.query.filter_by(email=loginForm.account.data).first()
+        else: #Alors il s'agit du sigle
+            user = User.query.filter_by(sigle=loginForm.account.data.upper()).first()
 
+        
+        if user is None or not user.verify_password(loginForm.password.data):
+            session['wrongCombinationAP'] = True
+            return render_template('login.html', form=loginForm, wrongCombination=session['wrongCombinationAP'])
+        session['wrongCombinationAP'] = False
+        login_user(user, loginForm.remember_me.data)
+        return redirect(request.args.get('next') or url_for('main.search_page'))
+    return render_template('login.html', form=loginForm, wrongCombination=session['wrongCombinationAP'])
+
+#========================================================================================================================================================
 
 @main.route('/logout', methods=['GET', 'POST'])
-def logout(): 
-    for element in ['userID', 'first_name', 'last_name']:
-        session.pop(element, None)
-    return redirect(url_for('main.login')+'?just_logged_out')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('main.index'))
 
-@main.route('/user/<int:userID>', methods=['GET', 'POST'])
-def profile(userID):
-    if 'userID' in session:
-        query = select(['*']).where(User.id == userID)
-        result = db.session.execute(query).first()
-        return render_template('profil.html', infos=result)
-    else:
-        return redirect(url_for('main.login')+'?please_login')
+#========================================================================================================================================================
+
+@main.route('/user', methods=['GET', 'POST'])
+@login_required
+def profil():
+    session['CombinationPP'] = 0
+    changePWForm = ChangePasswordForm()
+    query = select(['*']).where(User.id == current_user.id)
+    result = db.session.execute(query).first()
+    
+    if changePWForm.validate_on_submit():
+        
+        
+        if not current_user.verify_password(changePWForm.old_pw.data):
+            session["CombinationPP"] = 2
+            
+        elif not changePWForm.new_pw.data == changePWForm.new_pw2.data:
+            session["CombinationPP"] = 3
+            
+        else:
+            session["CombinationPP"] = 1
+            current_user.password_hash = generate_password_hash(changePWForm.new_pw2.data)
+            db.session.commit()
+        return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])
+        
+            
+
+            
+            
+    session['CombinationPP'] = 0 
+    return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])

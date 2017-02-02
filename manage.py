@@ -40,7 +40,10 @@ for model in models.values():
 
 
 def make_shell_context():
-    return dict(dict(app=app, db=db).items() + models.items())
+    preloaded = dict(app=app, db=db)
+    preloaded.update(models)
+    print(preloaded)
+    return preloaded
     
 
 if os.getenv('C9_HOSTNAME'):

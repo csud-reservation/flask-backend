@@ -1,67 +1,24 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
 <div class="container">
+
   <div class="row">
-    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc">
-      <form class="form-horizontal marges">
-        <!-- message qui s'affiche en fonction de l'URL indiquée -->
-        <div class="alert alert-info hidden" id="message_url"></div>
-        <script>
-          if (/just_logged_out$/.test(window.location.href)) {
-            byId('message_url').className = 'alert alert-info';
-            byId('message_url').innerHTML = 'Au revoir !';
-          } if (/please_login$/.test(window.location.href)) {
-            byId('message_url').className = 'alert alert-info';
-            byId('message_url').innerHTML = 'Veuillez vous connecter pour afficher cette page';
-          }
-        </script>
-        <div class="form-group">
-          <h1 class="gros_titre">Se connecter</h1>
+    <h1>Login</h1>
+    {% if wrongCombination%}
+        <div class="has-error">
+    {%endif%}
+    
+    {{ wtf.quick_form(form) }}
+    
+    {% if wrongCombination%}
+
         </div>
-        <div class="row">
-          <div class="form-group" id="form_login_user">
-            <label for="login_user" class="col-sm-3 control-label">
-              Nom d'utilisateur
-            </label>
-            <div class="col-sm-9">
-              <input type="text" 
-              class="form-control" 
-              id="login_user"
-              placeholder="sigle ou email"
-              onkeypress="verifier_enter(event, this, login);">
-              <span class="help-block hidden"
-                id="login_incorrect">
-                Le nom d'utilisateur ou le mot de passe est incorrect.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="form-group" id="form_login_password">
-            <label for="login_password" class="col-sm-3 control-label">
-              Mot de passe
-            </label>
-            <div class="col-sm-9">
-              <input type="password"
-              class="form-control"
-              id="login_password"
-              onkeypress="verifier_enter(event, this, login);">
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <span
-            class="pull-right btn btn-primary"
-            style="margin-top: 2px;"
-            onclick="login();">
-            Login
-          </span>
-        </div>
-      </form>
-    </div>
+    {%endif%}
+    
   </div>
 </div>
 {% endblock %}

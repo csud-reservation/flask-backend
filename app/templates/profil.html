@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% import "bootstrap/wtf.html" as wtf %}
 {% block title %}Login{% endblock %}
 
 {% block content %}
@@ -12,6 +12,30 @@
         Nom : {{ infos['last_name'] }}<br>
         Email : <a href="mailto:{{ infos['email'] }}">{{ infos['email'] }}</a><br>
         Sigle : {{ infos['sigle'] }}<br>
+      </div>
+      
+      <div class="changePW">
+        <p>Modifier le mot de passe</p>
+        
+         {% if combination == 2 %}
+            <div class="has-error">
+              <p>Mot de passe actuel erroné</p>
+        {%endif%}
+        
+        {% if combination == 3 %}
+            <div class="has-error">
+              <p>La confirmation du nouveau mot de passe a échouée</p>
+        {%endif%}
+        
+        {% if combination == 1 %}
+            <div class="has-success">
+              <p>Le mot de passe a été modifié avec succès :)</p>
+        {%endif%}
+        
+          {{ wtf.quick_form(form) }}
+        {% if combination > 0 %}
+            </div>
+        {%endif%}
       </div>
     </div>
   </div>

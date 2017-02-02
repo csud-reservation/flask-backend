@@ -6,11 +6,12 @@ def print_to_console(toprint):
 
 from flask import render_template, session, redirect, url_for, current_app, request, g
 from .. import db
-from ..models import User
+from ..models import *
 from ..email import send_email
 from . import main
 from sqlalchemy.sql import select
-from sqlalchemy import func
+from sqlalchemy import func, text
+
 
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,6 +22,7 @@ from gevent import spawn
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from ..forms import LoginForm, ChangePasswordForm
 
+from datetime import timedelta, date, datetime
 
 
 @main.route('/')
@@ -29,9 +31,61 @@ def index():
 
 
 @main.route('/search', methods=['GET'])
-@login_required
+#@login_required
 def search_page():
-    return render_template('search.html')
+    
+    #@SAMUEL : Là c'est toutes les variables "placeholder" que j'ai mises jusqu'à maintenant.
+    #Il faudrait les remplacer avec les vraies valeurs du formulaire !
+    
+    start_date = datetime.strptime("02/02/2017", "%d/%m/%Y")
+    end_date = datetime.strptime("16/02/2017", "%d/%m/%Y")
+    week_id = 1
+    first_period = 1
+    last_period = 1
+    room_type = "(PHL)"
+    
+    
+    number_of_weeks = (end_date - start_date)//7
+    number_of_weeks = number_of_weeks.days+1
+    
+    current_date = start_date
+    a_week = timedelta(weeks = 1)
+    
+    
+    disponibilities = {}
+    for w in range(number_of_weeks):
+        
+        current_date = current_date + a_week
+        #print(current_date.date())
+
+        sql = text('''SELECT rooms.name 
+                    FROM rooms
+                    WHERE rooms.id NOT IN
+                        (SELECT rooms.id
+                        FROM rooms
+                        LEFT JOIN reservations ON reservations.room_id = rooms.id
+                        LEFT JOIN reservations_timeslots ON reservations.id = reservations_timeslots.reservation_id
+                        WHERE reservations.weekday_id = {week_id}
+                            AND reservations_timeslots.timeslot_id BETWEEN {first_period} AND {last_period}
+                            AND reservations.start_date < "{start_date}"
+                            AND reservations.end_date > "{end_date}")
+                    AND rooms.name LIKE "%{room_type}";
+                            '''.format(week_id = week_id, first_period=first_period, last_period=last_period, start_date = current_date.date(), end_date = current_date.date(), room_type=room_type ))
+        
+                            
+        result = db.engine.execute(sql)
+        rooms = []
+        for row in result:
+            if not row[0] in disponibilities.keys() :
+                disponibilities[row[0]] = 0
+            else :
+                disponibilities[row[0]] = disponibilities[row[0]] + 1
+                
+    for keys,values in disponibilities.items():
+        print (keys, values)
+
+
+    return render_template('search.html', rooms=rooms)
    
 #========================================================================================================================================================
 #=====LOGIN==============================================================================================================================================
@@ -96,4 +150,3 @@ def profil():
             
     session['CombinationPP'] = 0 
     return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])
-

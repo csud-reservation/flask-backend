@@ -79,13 +79,15 @@ def initdb():
     timeslots = extract_timeslots()
     rooms = extract_rooms()
     sigles = extract_sigles()
+    teachers_edt = load_teachers('data/teachers_edt.csv')
+    teachers_admin = load_teachers('data/teachers_admin.csv')
     
     # auto data loading from different datasources
     Timeslot.insert_timeslots(timeslots)
     Weekday.insert_days()
     Role.insert_roles()
     User.insert_admin()
-    User.insert_teachers(load_teachers())
+    User.insert_teachers(teachers_edt, teachers_admin)
     Room.insert_rooms(rooms)
     
     

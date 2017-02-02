@@ -52,9 +52,9 @@ class User(UserMixin, db.Model):
             db.session.commit()
     
     @staticmethod
-    def insert_teachers(teachers):
-        for t in teachers:
-            teacher = User.query.filter_by(sigle=t['Sigle']).first()
+    def insert_teachers(teachers_edt, teachers_admin):
+        for t in teachers_edt:
+            teacher = User.query.filter_by(sigle=t['ABREV']).first()
             
             roles = {
                 'Enseignant' : 'teacher',
@@ -64,16 +64,22 @@ class User(UserMixin, db.Model):
                 'Admin' : 'staff',
             }
             
+
+            try:
+                teacher_admin = [t_admin for t_admin in teachers_admin if t_admin['Sigle'] == t['ABREV']][0]
+            except:
+                print(teacher_admin)
+            
             role = Role.query.filter_by(
-                name=roles[t['Fonction Identifiant FR']]
+                name=roles[teacher_admin['Fonction Identifiant FR']]
             ).one()
 
             if teacher is None:
                 teacher = User(
-                    first_name=t['Prenom'],
-                    last_name=t['Nom'],
-                    sigle=t['Sigle'],
-                    email=t['Email Ecole'],
+                    first_name=t['PRENOM'],
+                    last_name=t['NOM'],
+                    sigle=t['ABREV'],
+                    email=teacher_admin['Email Ecole'],
                     password_hash=generate_password_hash('unsecure'),
                     role=role
                 )

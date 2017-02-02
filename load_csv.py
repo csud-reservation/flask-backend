@@ -2,7 +2,7 @@ import csv
 
 from app.models import *
 
-def load_teachers(filename='data/profs-sigles-courriel.csv'):
+def load_teachers(filename):
     with open(filename, 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         
@@ -40,12 +40,16 @@ def insert_reservation(db, row, start_date, end_date):
     teachers_lnames = [t.strip() for t in row['PROF_NOM'].split(',')]
     
     #print(teachers_fnames, teachers_lnames)
-    teachers = [
-        User.query.filter_by(
-            first_name=fn,
-            last_name=ln
-        ).first() for fn, ln in zip(teachers_fnames, teachers_lnames)
-    ]
+    teachers = []
+    
+    for fn, ln in zip(teachers_fnames, teachers_lnames):
+        
+        teacher = User.query.filter_by(first_name=fn, last_name=ln).first()
+        if teacher is None and (fn + ln).strip() != '':
+            # Discordance entre le fichier CSV et profs-sigles-courriel.txt
+            print('Erreur de chargement : ', row)
+            
+        teachers.append(teacher)
     
     # Si le champ 'teacher' est vide, il s'agit d'une heure générique qu'il ne faut pas insérer dans l'occupation des salles. Elle n'est là que pour la forme dans le fichier edt.csv ==> autre alternative serait de faire un prétraitement sur ce fichier edt.csv
     # Ne pas tenir compte des heures de gymnastique

@@ -46,22 +46,25 @@ def login():
     # def s(): session.permanent = True
     # spawn(s)  
     
-    if (request.method == 'GET'):
+    if request.method == 'GET':
         return render_template('login.html')
-    if (request.method == 'POST'):
+    if request.method == 'POST':
         user = request.args.get('user').lower()
         password = request.args.get('password')
-        if ('@' in user):
+        if '@' in user:
             query = select(['*']).where(func.lower(User.email) == user)
         else:
+            # je ne permettrais pas cette deuxième solution de login. Il faut se limiter à une seule information d'identification
             query = select(['*']).where(func.lower(User.sigle) == user)
         try:
+            # DONC: cette façon de tester le mot de passe est très insécurisée, car le mot de passe est en clair dans la base de données ... il faut utiliser le module flask_login et les modules de hashage du mot de passe
             result = db.session.execute(query).first()
             true_password = result['password_hash']
             first_name, last_name = result['first_name'], result['last_name']
             userID = str(result['id'])
             if (password == true_password):
                 # enregistrement de la session
+                # DONC : pourquoi sauver le nom et le prénom dans la session ??? il suffit de l'IDuser ...
                 session['first_name'] = first_name
                 session['last_name'] = last_name
                 session['userID'] = userID
@@ -71,6 +74,7 @@ def login():
         except TypeError:
             return 'login error' # utilisateur introuvable
 
+
 @main.route('/logout', methods=['GET', 'POST'])
 def logout(): 
     for element in ['userID', 'first_name', 'last_name']:
@@ -78,8 +82,8 @@ def logout():
     return redirect(url_for('main.login')+'?just_logged_out')
 
 @main.route('/user/<int:userID>', methods=['GET', 'POST'])
-def profil(userID):
-    if ('userID' in session):
+def profile(userID):
+    if 'userID' in session:
         query = select(['*']).where(User.id == userID)
         result = db.session.execute(query).first()
         return render_template('profil.html', infos=result)

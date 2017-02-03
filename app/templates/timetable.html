@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Horaire de la salle{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <h1>Horaire de la salle {{ room.name }} </h1>
+    </div>
+
+    <div class="table-responsive">
+
+    <table class="table table-bordered room-timetable">
+        <thead class="thead-default">
+            <tr>
+                <td>Heure</td>
+            {% for day in days %}
+                <td class="timetable-cell">{{ day.name }}</td>
+            {% endfor %}
+        </thead>
+        <tbody>
+        {% for ts in timeslots %}
+        <tr>
+            <td class="timeslot-time">
+                {{ ts.start_time }} <br>
+                {{ ts.end_time }}
+            </td>
+            {% for day in days %}
+                {% set cell = timetable[ts.order|int][day.id - 1] %}
+                {% if cell %}
+                <td class="reserved">
+                {% else %}
+                <td>
+                {% endif %}
+                <div class="timetable cell-info reason-short">
+                    {{ cell['reason'] }}
+                </div>
+                <div class="timetable cell-info users">
+                    {{ cell['users'] }}
+                </div>
+                <div class="timetable cell-info student-group">
+                    {{ cell['student_group'] }}
+                </div>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+            
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock %}

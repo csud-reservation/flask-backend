@@ -11,10 +11,8 @@ def search_query(weekday_id, first_period, last_period, current_date, room_type)
     
     
     data = [weekday_id, first_period, last_period, current_date, current_date, room_type]
-<<<<<<< HEAD
     #print (data)
-=======
->>>>>>> grille-horaire-salles
+
     
     result = db.engine.execute(
         ''' SELECT rooms.name 

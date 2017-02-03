@@ -153,14 +153,13 @@ tbody tr:first-child {
         bottom: 7px;
 }
 
-.date_input_form, .type_salle {
+#date_non_ponctuelle, .type_salle {
     max-width:220px;
 }
 
-.type {
-    max-width:220px;
-}
 
 .bouton_recherche {
     width: 200px;
 }
+
+.today { text-align: center; }

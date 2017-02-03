@@ -178,3 +178,9 @@
 	})
 
 }(jQuery);
+
+
+// Switch désactivé par défaut
+$( document ).ready(function () {
+	$('label.btn').prop('checked', false);
+})

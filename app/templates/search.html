@@ -72,13 +72,13 @@
               <div class="col-sm-3 date_input_form">
                 <div id="recurrence_on">
                   <div class="input-group input-daterange">
-                    <input type="text" id="date_de" class="form-control">
+                    <input type="text" id="date_de" class="form-control today">
                     <div class="input-group-addon">à</div>
                     <input type="text" id="date_a" class="form-control">
                   </div>
                 </div>
                   <div id="recurrence_off">
-                    <input type="text" id="date_non_ponctuelle" class="form-control date">
+                    <input type="text" id="date_non_ponctuelle" class="form-control date today">
                   </div>
                 </div>
             </div>
@@ -123,7 +123,12 @@
         <div class="row ajustement_sm">
           <label class="col-sm-3 control-label">Type de salle</label>
           <div class="col-sm-3">
-            <select class="form-control type_salle">
+            <select class="form-control type_salle" id="type_salle_hidden" style="display: none;">
+              {% for room_type in rooms_types %}
+                <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-control type_salle" id="type_salle">
               {% for room_type in rooms_types %}
                 <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
               {% endfor %}
@@ -131,16 +136,15 @@
           </div>
         </div>
       </form>
-              <form action="search" method="post">
-        <p>
-            <input type="hidden" name="prenom" value="Samuel" />
-            <input type="hidden" name="nom" value="Fringeli" />
-            <div class="form-group">
-              <input value="Rechercher salle disponible" type="submit" class="pull-right btn btn-primary bouton_recherche">
-              </span>
-            </div>
-        </p>
-        </form>
+      <!-- le formulaire invisible est créé en jQuery -->
+      <div id="invisible_form">
+        <div id="input_invisible_base"></div>
+      </div>
+      <div class="form-group">
+        <input value="Rechercher salle disponible" class="pull-right btn btn-primary bouton_recherche"
+          onclick="submit_invisible_form();">
+        </span>
+      </div>
     </div>
   </div>
 </div>

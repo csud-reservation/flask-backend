@@ -12,21 +12,65 @@
 <div class="container">
   <div class="row">
     <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-
-  
-
-        Bonjour, {{ prenom }} {{ nom }} !<br><br>
-        Salles disponibles :<br>
-      <ul class="list-group">
-         {% for room in disponibilities | dictsort %}
-                <li class="list-group-item">{{room[0]}}</li>
-          {% endfor %}
-      </ul>
-
-
+      <label>Salles disponibles</label>
+      <div class="espace_dessous">
+          <select class="form-control type_salle" id="room_select">
+            {% for room in disponibilities | dictsort %}
+              
+              <option value="{{room[0]}}">{{ room[0]}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      
+      <div class="form-group">
+        <label>Raison de la réservation:</label>
+        <textarea class="form-control" rows="5" id="reason"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Groupe d'étudiants (optionnel)</label>
+        <input type="text" class="form-control" id="student_group">
+      </div>
+      
+      <label>Résumé de la réservation</label>
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <th>Date</th>
+            <td>{{start_date}}</td>
+            <td>
+              {% if end_date != start_date %}
+                jusqu'au {{end_date}}
+                
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>Période</th>
+            <td >{{first_period}}</td>
+            <td>
+              {% if first_period != last_period %}
+                jusqu'à {{last_period}}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>Salle</th>
+            <td id="room"></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div id="invisible_form">
+        <div id="input_invisible_base"></div>
+      </div>
+      <div class="form-group">
+        <input value="Confirmer la réservation" class="pull-right btn btn-primary bouton_recherche"
+        onclick="submit_invisible_form();">
+      </span>
     </div>
   </div>
-</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -35,5 +79,5 @@
 <script src="{{ url_for('static', filename='datepicker.js') }}"></script>
 <!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
 <script src="{{ url_for('static', filename='switch.js') }}"></script>
-<script src="{{ url_for('static', filename='search.js') }}"></script>
+<script src="{{ url_for('static', filename='search_results.js') }}"></script>
 {% endblock %}

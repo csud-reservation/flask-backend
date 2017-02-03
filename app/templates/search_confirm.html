@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Confirmation{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc corps_page">
+      <h1 class="gros_titre">Confirmation</h1>
+      <a href = "{{ url_for('main.mes_reservations') }}">Accéder à mes réservations</a>
+     
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Confirmation{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc corps_page">
+      <h1 class="gros_titre">Mes réservations</h1>
+      <table class="table table-striped">
+          <theader>
+              <th>Date de début</th>
+              <th>Date de fin</th>
+              <th>Salle</th>
+              <th>Durée</th>
+              <th>Raison</th>
+              <th>Groupe d'étudiants</th>
+          </theader>
+        <tbody>
+            {% for res in reservations %}
+                 <tr>
+                     <td>{{res.start_date}}</td>
+                     <td>{{res.end_date}}</td>
+                     <td>{{res.room.name}}</td>
+                     <td>{{res.duration}}</td>
+                     <td>{{res.reason_details}}</td>
+                     <td>{{res.student_group}}</td>
+                </tr>
+              {% endfor %}
+          
+        </tbody>
+      </table>
+
+     
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock %}

@@ -7,7 +7,7 @@ def search_query(weekday_id, first_period, last_period, current_date, room_type)
     
     
     data = [weekday_id, first_period, last_period, current_date, current_date, room_type]
-    print (data)
+    #print (data)
     
     result = db.engine.execute(
         ''' SELECT rooms.name 
@@ -25,3 +25,14 @@ def search_query(weekday_id, first_period, last_period, current_date, room_type)
             ''', data)
     
     return result
+    
+def my_reservations(user_id):
+    
+    result = db.engine.execute(
+    ''' SELECT reservations.* 
+        FROM reservations
+        WHERE reservations.owner_id = ?;
+        ''', user_id)
+    return result
+    
+    

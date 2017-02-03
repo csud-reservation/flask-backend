@@ -21,6 +21,7 @@ from flask import copy_current_request_context
 from gevent import spawn
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from ..forms import LoginForm, ChangePasswordForm
+from ..queries import search_query
 
 from datetime import timedelta, date, datetime
 
@@ -30,62 +31,51 @@ def index():
     return render_template('index.html')
 
 
-@main.route('/search', methods=['GET'])
-#@login_required
+@main.route('/search', methods=['GET', 'POST'])
+@login_required
 def search_page():
     
     #@SAMUEL : Là c'est toutes les variables "placeholder" que j'ai mises jusqu'à maintenant.
     #Il faudrait les remplacer avec les vraies valeurs du formulaire !
+    #Grâce au code qui suit, tu reçois un dictionnaire "disponibilities" dans lequel il y a toutes les salles disponibles ainsi que le nombre d'heures sur lesquelles elles sont disponibles
     
-    start_date = datetime.strptime("02/02/2017", "%d/%m/%Y")
-    end_date = datetime.strptime("16/02/2017", "%d/%m/%Y")
-    week_id = 1
-    first_period = 1
-    last_period = 1
-    room_type = "(PHL)"
-    
-    
-    number_of_weeks = (end_date - start_date)//7
-    number_of_weeks = number_of_weeks.days+1
-    
-    current_date = start_date
-    a_week = timedelta(weeks = 1)
-    
-    
-    disponibilities = {}
-    for w in range(number_of_weeks):
+    if request.method == 'POST':
+        start_date = datetime.strptime("12.12.2016", "%d.%m.%Y")
+        end_date = datetime.strptime("26.12.2016", "%d.%m.%Y")
+        weekday_id = 1
+        first_period = 1
+        last_period = 1
+        room_type = "%"
+
+        number_of_weeks = (end_date - start_date)//7
+        number_of_weeks = number_of_weeks.days+1
+
         
-        current_date = current_date + a_week
-        #print(current_date.date())
-
-        sql = text('''SELECT rooms.name 
-                    FROM rooms
-                    WHERE rooms.id NOT IN
-                        (SELECT rooms.id
-                        FROM rooms
-                        LEFT JOIN reservations ON reservations.room_id = rooms.id
-                        LEFT JOIN reservations_timeslots ON reservations.id = reservations_timeslots.reservation_id
-                        WHERE reservations.weekday_id = {week_id}
-                            AND reservations_timeslots.timeslot_id BETWEEN {first_period} AND {last_period}
-                            AND reservations.start_date < "{start_date}"
-                            AND reservations.end_date > "{end_date}")
-                    AND rooms.name LIKE "%{room_type}";
-                            '''.format(week_id = week_id, first_period=first_period, last_period=last_period, start_date = current_date.date(), end_date = current_date.date(), room_type=room_type ))
+        current_date = start_date
+        a_week = timedelta(weeks = 1)
         
-                            
-        result = db.engine.execute(sql)
-        rooms = []
-        for row in result:
-            if not row[0] in disponibilities.keys() :
-                disponibilities[row[0]] = 0
-            else :
-                disponibilities[row[0]] = disponibilities[row[0]] + 1
-                
-    for keys,values in disponibilities.items():
-        print (keys, values)
+        disponibilities = {}
+        print (number_of_weeks)
+        for w in range(number_of_weeks):
 
 
-    return render_template('search.html', rooms=rooms)
+
+            result = search_query(weekday_id, first_period, last_period, current_date.date(), room_type)
+            current_date = current_date + a_week
+            
+            for rooms in result:
+                #print("rooms", rooms)
+                if not rooms['name'] in disponibilities.keys() :
+                    disponibilities[rooms['name']] = 1
+                else :
+                    disponibilities[rooms[0]] = disponibilities[rooms[0]] + 1
+            print (disponibilities)
+            
+            
+        return render_template('search_results.html', disponibilities=disponibilities, prenom=request.form.get('prenom'), nom=request.form.get('nom'))
+
+    else:
+        return render_template('search.html')
    
 #========================================================================================================================================================
 #=====LOGIN==============================================================================================================================================
@@ -94,6 +84,7 @@ def search_page():
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     loginForm = LoginForm()
+    #wrongCombinationAP permet d'envoyer au client si la combinaison Account-Password est correcte ou non
     session['wrongCombinationAP'] = False
     if loginForm.validate_on_submit():
         
@@ -124,6 +115,8 @@ def logout():
 @main.route('/user', methods=['GET', 'POST'])
 @login_required
 def profil():
+    
+    # CombinationPP (pour Combinaison Password-Password) permet d'envoyer au client le type d'erreur dans le changement de mot de passe
     session['CombinationPP'] = 0
     changePWForm = ChangePasswordForm()
     query = select(['*']).where(User.id == current_user.id)
@@ -150,3 +143,11 @@ def profil():
             
     session['CombinationPP'] = 0 
     return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])
+    
+    
+    
+    
+@main.route('/horaires', methods=['GET', 'POST'])
+@login_required
+def horaires():
+    return render_template('horaire.html')

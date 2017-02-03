@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Recherche{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css">
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+
+  
+
+        Bonjour, {{ prenom }} {{ nom }} !<br><br>
+        Salles disponibles :<br>
+      <ul class="list-group">
+         {% for room in disponibilities | dictsort %}
+                <li class="list-group-item">{{room[0]}}</li>
+          {% endfor %}
+      </ul>
+
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>-->
+<script src="{{ url_for('static', filename='datepicker.js') }}"></script>
+<!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
+<script src="{{ url_for('static', filename='switch.js') }}"></script>
+<script src="{{ url_for('static', filename='search.js') }}"></script>
+{% endblock %}

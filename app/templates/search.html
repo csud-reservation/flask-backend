@@ -21,6 +21,22 @@
 '225 (PHL)','227 (PHL)','228 (CHI)','230 (CHL)','301 (ARV)','302 (ARV)','303',
 '304','307','308','309','310','313','314','315','316','319','320','321'] %}
 
+{% set periods = [
+['Période 1', '8h10 - 8h55'],
+['Période 2', '9h00 - 9h45'],
+['Pause', '9h45 - 10h05'],
+['Période 3', '10h05 - 10h50'],
+['Période 4', '10h55 - 11h40'],
+['Période 5', '11h45 - 12h30'],
+['Période 6', '12h35 - 13h20'],
+['Période 7', '13h25 - 14h10'],
+['Période 8', '14h15 - 15h00'],
+['Période 9', '15h05 - 15h50'],
+['Période 10', '15h55 - 16h40'],
+['Période 11', '16h45 - 17h30'],
+['Période 12', '17h35 - 18h20']
+] %}
+
 {% extends "base.html" %}
 
 {% block title %}Recherche{% endblock %}
@@ -40,7 +56,7 @@
           <h1 class="gros_titre">Réservation</h1>
         </div>
         <div class="row espace_dessous">
-          <label class="col-sm-3 control-label rec_ajustement">Récurrence</label> 
+          <label class="col-sm-3 control-label rec_ajustement" rel="tooltip" title="Activez ce paramètre si vous souhaitez effectuer une réservation qui se répète sur plusieurs semaines">Réservation récurrente</label> 
           <div class="col-sm-9">
             <div class="checkbox">
               <label>
@@ -51,18 +67,18 @@
         </div>
         <div class="row marges">
           <div class="form-group">
-            <div class="ajustement_sm">
+            <div>
               <label class="col-sm-3 control-label">Date</label>
               <div class="col-sm-3 date_input_form">
                 <div id="recurrence_on">
                   <div class="input-group input-daterange">
-                    <input type="text" class="form-control">
+                    <input type="text" id="date_de" class="form-control">
                     <div class="input-group-addon">à</div>
-                    <input type="text" class="form-control">
+                    <input type="text" id="date_a" class="form-control">
                   </div>
                 </div>
                   <div id="recurrence_off">
-                    <input type="text" class="form-control date">
+                    <input type="text" id="date_non_ponctuelle" class="form-control date">
                   </div>
                 </div>
             </div>
@@ -87,58 +103,12 @@
                   <div class="modal-body">
                     <table class="table table-striped horaire">
                       <tbody>
-                        <tr onclick="select(this);">
-                          <td>Période 1</td>
-                          <td>8h10 - 8h55</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 2</td>
-                          <td>9h00 - 9h45</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Pause</td>
-                          <td>9h45 - 10h05</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 3</td>
-                          <td>10h05 - 10h50</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 4</td>
-                          <td>10h55 - 11h40</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 5</td>
-                          <td>11h45 - 12h30</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 6</td>
-                          <td>12h35 - 13h20</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 7</td>
-                          <td>13h25 - 14h10</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 8</td>
-                          <td>14h15 - 15h00</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 9</td>
-                          <td>15h05 - 15h50</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 10</td>
-                          <td>15h55 - 16h40</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 11</td>
-                          <td>16h45 - 17h30</td>
-                        </tr>
-                        <tr onclick="select(this);">
-                          <td>Période 12</td>
-                          <td>17h35 - 18h20</td>
-                        </tr>
+                        {% for i in range(13) %}
+                          <tr id="periode_{{ i }}" onclick="select(this, {{ i }});">
+                            <td>{{ periods[i][0] }}</td>
+                            <td>{{ periods[i][1] }}</td>
+                          </tr>
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>
@@ -153,69 +123,28 @@
         <div class="row ajustement_sm">
           <label class="col-sm-3 control-label">Type de salle</label>
           <div class="col-sm-3">
-            <select class="form-control">
+            <select class="form-control type_salle">
               {% for room_type in rooms_types %}
                 <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <span class="pull-right btn btn-primary bouton_recherche">
-            Rechercher salle disponible
-          </span>
-        </div>
       </form>
-      <!--
-      <form class="form-horizontal marges">
-        <div class="form-group">
-          <h1 class="gros_titre">Horaire</h1>
-        </div>
-        <div class="row">
-          <div class="form-group">
-            <div class="ajustement_sm">
-              <label class="col-sm-2 control-label">Date</label>
-              <div class="col-sm-3">
-                <input type="text" class="form-control date">
-              </div>
+              <form action="search" method="post">
+        <p>
+            <input type="hidden" name="prenom" value="Samuel" />
+            <input type="hidden" name="nom" value="Fringeli" />
+            <div class="form-group">
+              <input value="Rechercher salle disponible" type="submit" class="pull-right btn btn-primary bouton_recherche">
+              </span>
             </div>
-            <div class="ajustement_sm">
-              <label class="col-sm-1 control-label">Salle</label>
-              <div class="col-sm-3">
-                <select class="form-control">
-                  {% for room_type in rooms_types %}
-                    <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-1">
-              <label class="control-label">Numéro</label>
-            </div>
-            <div class="col-sm-2">
-              <select class="form-control">
-                  {% for room_number in rooms_numbers %}
-                    <option value={{ room_number[:3] }}>{{ room_number }}</option>
-                  {% endfor %}
-                </select>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <span class="pull-right btn btn-primary bouton_recherche">
-            Rechercher horaire
-          </span>
-        </div>
-      </form>
-      -->
-    </div>
-  </div>
-</div>
+        </p>
+        </form>
     </div>
   </div>
 </div>
 {% endblock %}
-<!-- je suis un commentaire -->
 
 {% block scripts %}
 {{ super() }}

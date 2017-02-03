@@ -26,12 +26,11 @@
                 <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('main.search_page') }}">Rechercher</a></li>
-                    <li><a href="{{ url_for('main.profil') }}">Profil</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                   
+                    <li><a href="{{ url_for('main.profil') }}">Profil</a></li>
                     <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
                 {% else %}
                     <li><a href="{{ url_for('main.login') }}">Login</a></li>

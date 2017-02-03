@@ -6,8 +6,7 @@
     font-size: 40px;
     text-decoration: bold;
     text-align: center;
-    margin-top: 30px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .ligne {
@@ -31,6 +30,7 @@
     margin-bottom: -20px;
 }
 
+
 .espace_dessous {
     padding-bottom: 15px;
 }
@@ -52,7 +52,7 @@
 .selected { background: #CEE0EC !important; }
 
 tbody tr:first-child {
-    border-top: 2px solid #cccccc;
+    border-top: 2px solid #E1E2E2;
 }
 
 .modal-title {
@@ -60,18 +60,107 @@ tbody tr:first-child {
     text-align: center;
 }
 
-.horaire td { text-align: center; }
+.horaire td { 
+    text-align: center;
+    
+}
 
-#recurrence_on { display: none; }
+#recurrence_on { 
+    display: none;
+    
+}
 
 .rec_ajustement { 
     position: relative; 
         top: 5px; 
 }
 
+.titre_login {
+    margin-bottom: 30px;
+}
+
+.label_login {
+    text-align: right;
+    position: relative;
+        top: 5px;
+    padding-left: 15px;
+    padding-bottom: 5px;
+}
+
+.required {
+    margin-bottom: 8px;
+}
+
+#submit {
+    position: relative;
+        bottom: 35px;
+}
+
+.mod_pw_title {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.corps_page {
+    margin-bottom: 40px;
+}
+
+@media(min-width: 768px) {
+    .input_login {
+        padding-bottom: 15px;
+    }
+    .rm_checkbox {
+        position: relative;
+            bottom: 10px;
+    }
+}
+
 @media(max-width:767px) {
     .ajustement_sm {
         margin-bottom: 15px;
     }
+    .rm_checkbox {
+        position: relative;
+            bottom: 5px;
+    }
+    #modify {
+        position: relative;
+            top: 8px;
+    }
 }
 
+.success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+.success, .error {
+    opacity: 1;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;   
+    display: block;
+    text-align: center;
+    position: relative;
+        bottom: 7px;
+}
+
+.date_input_form, .type_salle {
+    max-width:220px;
+}
+
+.type {
+    max-width:220px;
+}
+
+.bouton_recherche {
+    width: 200px;
+}

@@ -32,3 +32,41 @@ function verifier_enter(event, form, callback) {
     callback();
   }
 }
+
+
+
+
+
+
+
+/*
+$(function() {
+  $('#date').change(function(){
+    var date = $(this).val();
+    alert(date);
+  });
+});*/
+
+/*
+$(document).ready(function() {
+    function changeDate(newdate) {
+        var date = newdate;
+        alert(date);
+    }
+
+    $('input.date').change(function() {
+        changeDate($(this).val());
+    });
+
+    changeDate($('input.date').val());
+});*/
+
+
+
+
+
+/*
+
+$('input.form-control.date').val()
+var weekDay = new Date().getDay();
+*/

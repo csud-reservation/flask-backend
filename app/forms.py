@@ -12,5 +12,5 @@ class LoginForm(Form):
 class ChangePasswordForm(Form):
     old_pw = PasswordField("Mot de passe actuel",validators=[Required()], render_kw={"placeholder": 'Mot de passe actuel'})
     new_pw = PasswordField("Nouveau mot de passe",validators=[Required(), Length(8,128)], render_kw={"placeholder": 'Nouveau mot de passe'})
-    new_pw2 = PasswordField("Confirmation du nouveau mot de passe",validators=[Required(), Length(8,128)], render_kw={"placeholder": 'Confirmation du nouveau mot de passe'})
+    new_pw2 = PasswordField("Confirmation",validators=[Required(), Length(8,128)], render_kw={"placeholder": 'Confirmation du nouveau mot de passe'})
     modify = SubmitField('Modifier')

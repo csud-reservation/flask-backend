@@ -1,8 +1,8 @@
 $(function() {
     $('.input-daterange input').each(function() {
-        $(this).datepicker({language: "fr"});
+        $(this).datepicker({language: "fr", daysOfWeekDisabled: "0,6"});
      });
-    $('.date').datepicker({language: "fr"});
+    $('.date').datepicker({language: "fr", daysOfWeekDisabled: "0,6"});
     $("#switch").change(function() {
         if(this.checked) {
             //$(".end_dp").hide()
@@ -19,14 +19,45 @@ $(function() {
     });
 });
 
-function select(element) {
+function redirect(url, method) {
+    $('<form>', {
+        method: method,
+        action: url
+    }).submit();
+};
+
+function select(element, index) {
     $(function() {
-        $(element).toggleClass("selected");
+        if ($('.pivot').length) {
+            $('.selected').removeClass('selected');
+            var firstID = parseInt($('.pivot').get(0).id.replace('periode_', ''));
+            var lastID = index
+            if (firstID < lastID) {
+                while (firstID <= lastID) {
+                    $('#periode_'+firstID).addClass('selected');
+                    firstID = firstID + 1;
+                }
+            } else {
+                while (firstID >= lastID) {
+                    $('#periode_'+firstID).addClass('selected');
+                    firstID = firstID - 1;
+                }
+            }
+            $('.pivot').removeClass('pivot');
+            $('#periode_'+lastID).addClass('pivot');
+        } else {
+            $(element).addClass('pivot selected');
+        }
     });
 }
 
 function reset_modal_view() {
     $(function() {
         $('.selected').removeClass('selected');
+        $('.pivot').removeClass('pivot');
     });
+}
+
+function search() {
+    redirect('search', 'post');
 }

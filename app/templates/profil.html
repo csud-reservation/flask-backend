@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc corps_page">
       <h1 class="gros_titre">Profil</h1>
       <div class="infos_profil">
         Prénom : {{ infos['first_name'] }}<br>
@@ -15,21 +15,18 @@
       </div>
       
       <div class="changePW">
-        <p>Modifier le mot de passe</p>
-        
+        <h1 class="gros_titre mod_pw_title">Modifier le mot de passe</h1>
+              
          {% if combination == 2 %}
-            <div class="has-error">
-              <p>Mot de passe actuel erroné</p>
+              <div class="error">Mot de passe actuel erroné</div>
         {%endif%}
         
         {% if combination == 3 %}
-            <div class="has-error">
-              <p>La confirmation du nouveau mot de passe a échouée</p>
+              <div class="error">La confirmation du nouveau mot de passe a échoué</div>
         {%endif%}
         
         {% if combination == 1 %}
-            <div class="has-success">
-              <p>Le mot de passe a été modifié avec succès :)</p>
+              <div class="success">Le mot de passe a bien été modifié</div>
         {%endif%}
         
           {{ wtf.quick_form(form) }}
@@ -40,4 +37,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='profil.js') }}"></script>
 {% endblock %}

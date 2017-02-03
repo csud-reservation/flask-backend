@@ -6,7 +6,10 @@ from flask_script import Manager, Shell, Server
 from flask_migrate import Migrate, MigrateCommand
 
 # génération schéma relationnel
-import sadisplay
+try:
+    import sadisplay
+except:
+    print("Impossible de charger le module sadisplay ==> génération du modèle relationnel impossible")
 
 # interface d'administration
 from flask_admin import Admin

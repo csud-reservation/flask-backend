@@ -163,3 +163,14 @@ tbody tr:first-child {
 }
 
 .today { text-align: center; }
+table.room-timetable tbody td.reserved {
+    background-color: lightgray;
+}
+
+table.room-timetable div.timetable.cell-info {
+    margin: auto;
+}
+
+.cell-info.reason-short {
+    font-weight: bold;
+}

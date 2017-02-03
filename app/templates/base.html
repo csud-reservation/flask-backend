@@ -27,6 +27,7 @@
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('main.search_page') }}">Rechercher</a></li>
                     <li><a href="{{ url_for('main.horaires') }}">Horaires</a></li>
+                    <li><a href="{{ url_for('main.timetable') }}">Horaire des salles</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">

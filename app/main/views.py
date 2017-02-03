@@ -17,7 +17,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 from flask import copy_current_request_context
-from gevent import spawn
+
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from ..forms import LoginForm, ChangePasswordForm
 from ..queries import *
@@ -31,6 +31,23 @@ def test_regex(regex, to_test):
 @main.route('/')
 def index():
     return render_template('index.html')
+
+
+@main.route('/timetable/<int:room_id>', methods=['GET'])
+def timetable(room_id):
+    timetable = weekly_timetable(room_id)
+    timeslots = Timeslot.query.all()
+    room = Room.query.get(room_id)
+    days = Weekday.query.all()
+    return render_template(
+        'timetable.html',
+        room=room, 
+        timetable=timetable, 
+        days=days, 
+        timeslots=timeslots
+    )
+
+
 
 @main.route('/search', methods=['GET', 'POST'])
 @login_required
@@ -147,9 +164,9 @@ def search_confirm():
     return render_template('search_confirm.html')
    
    
-#========================================================================================================================================================
-#=====LOGIN==============================================================================================================================================
-#========================================================================================================================================================
+#======================================================================================
+# LOGIN
+#======================================================================================
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -172,16 +189,14 @@ def login():
         return redirect(request.args.get('next') or url_for('main.search_page'))
     return render_template('login.html', form=loginForm, wrongCombination=session['wrongCombinationAP'])
 
-#========================================================================================================================================================
-
+#============================================================================
 @main.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
-#========================================================================================================================================================
-
+#============================================================================
 @main.route('/user', methods=['GET', 'POST'])
 @login_required
 def profil():

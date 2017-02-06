@@ -27,7 +27,3 @@ $( "#room_select" ).change(function() {
   $("#room").text($("#room_select").val())
 });
 
-
-$(function() {
- $("#room").text($("#room_select").val())
-});

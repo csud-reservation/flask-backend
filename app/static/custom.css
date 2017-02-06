@@ -157,12 +157,10 @@ tbody tr:first-child {
     max-width:220px;
 }
 
-
 .bouton_recherche {
     width: 200px;
 }
 
-.today { text-align: center; }
 table.room-timetable tbody td.reserved {
     background-color: lightgray;
 }
@@ -173,4 +171,32 @@ table.room-timetable div.timetable.cell-info {
 
 .cell-info.reason-short {
     font-weight: bold;
+}
+
+.btn_recherche_horaires {
+    width: 144px;
+}
+
+#rooms_numbers_hidden {
+    display: none;
+}
+
+.date_hover {
+    background-color: rgb(238,238,238);
+}
+
+#result {
+    margin-top: 50px;
+}
+
+.nav_week {
+    margin-top: 20px;
+}
+
+.previous_week {
+    width: 160px;
+}
+
+.following_week {
+    width: 140px;
 }

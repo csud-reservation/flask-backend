@@ -39,7 +39,7 @@
 
 {% extends "base.html" %}
 
-{% block title %}Horaires{% endblock %}
+{% block title %}Horaire des salles{% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -51,42 +51,6 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-            <!--<form class="form-horizontal">
-                <div class="form-group">
-                    <h1 class="gros_titre">Horaires</h1>
-                </div>
-                <div class="row">
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Date</label>
-                        <div class="col-sm-3 date_input_form">
-                            <input type="text" id="date_non_ponctuelle" class="form-control date today">
-                        </div>
-                    </div>
-                        <div class="row espace_dessous">
-                            <label class="col-sm-3 control-label">Type de Salle</label>
-                            <div class="col-sm-3">
-                                <select class="form-control salle">
-                                {% for room_type in rooms_types %}
-                                    <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
-                                {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row espace_dessous">
-                            <label class="col-sm-3 control-label">Numéro</label>
-                            <div class="col-sm-3">
-                                <select class="form-control numero">
-                                {% for room_number in rooms_numbers %}
-                                    <option value={{ room_number[:3] }}>{{ room_number }}</option>
-                                {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    <div class="form-group">
-                    <input value="Rechercher Horaire" type="submit" class="pull-right btn btn-primary bouton_recherche">
-                    </div>
-                </div>
-            </form>-->
             <form class="form-horizontal marges">
               <div class="form-group">
                 <h1 class="gros_titre">Horaire</h1>
@@ -94,15 +58,15 @@
               <div class="row">
                 <div class="form-group">
                   <div class="ajustement_sm">
-                    <label class="col-sm-2 control-label">Date</label>
-                    <div class="col-sm-3">
-                      <input type="text" class="form-control date">
+                    <label class="col-sm-1 control-label">Date</label>
+                    <div class="col-sm-4">
+                      <input type="text" id="weekly_datepicker" class="form-control today">
                     </div>
                   </div>
                   <div class="ajustement_sm">
                     <label class="col-sm-1 control-label">Salle</label>
                     <div class="col-sm-3">
-                      <select class="form-control">
+                      <select class="form-control" id="rooms_type">
                         {% for room_type in rooms_types %}
                           <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
                         {% endfor %}
@@ -113,20 +77,35 @@
                     <label class="control-label">Numéro</label>
                   </div>
                   <div class="col-sm-2">
-                    <select class="form-control">
-                        {% for room_number in rooms_numbers %}
-                          <option value={{ room_number[:3] }}>{{ room_number }}</option>
-                        {% endfor %}
-                      </select>
+                    <select class="form-control" id="rooms_numbers_hidden">
+                      {% for room_number in rooms_numbers %}
+                        <option class="rooms_choice_hidden" value="{{ room_number }}">{{ room_number }}</option>
+                      {% endfor %}
+                    </select>
+                    <select class="form-control" id="rooms_numbers">
+                      {% for room_number in rooms_numbers %}
+                        <option class="rooms_choice" value="{{ room_number }}">{{ room_number }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
                 </div>
               </div>
+              <!-- le formulaire invisible est créé en jQuery -->
+              <div id="invisible_form">
+                <div id="input_invisible_base"></div>
+              </div>
               <div class="form-group">
-                <span class="pull-right btn btn-primary bouton_recherche">
-                  Rechercher horaire
-                </span>
+                <input value="Rechercher horaire" class="pull-right btn btn-primary btn_recherche_horaires"
+                  onclick="submit_invisible_form_timetable();">
               </div>
             </form>
+            <div class="form-group">
+              <!--<button class="btn btn-default nav_week previous_week"
+                onclick="submit_invisible_form_timetable();">Semaine précédente</button>
+              <button class="pull-right btn btn-default nav_week following_week"
+                onclick="submit_invisible_form_timetable();">Semaine suivante</button>-->
+            </div>
+            <div id="result"></div>
         </div>
     </div>
 </div>

@@ -9,7 +9,7 @@ def search_query(weekday_id, first_period, last_period, current_date, room_type)
     Retourne toutes les salles disponibles à la date donnée
     '''
     
-    
+    # la réservation récurrente ne fonctionne pas, puisque nous utilisons deux fois "current_date"
     data = [weekday_id, first_period, last_period, current_date, current_date, room_type]
     #print (data)
 
@@ -33,19 +33,8 @@ def search_query(weekday_id, first_period, last_period, current_date, room_type)
     
     return result
     
-def my_reservations(user_id):
-    
-    result = db.engine.execute(
-    ''' SELECT reservations.* 
-        FROM reservations
-        WHERE reservations.owner_id = ?;
-        ''', user_id)
-    return result
-    
-    
 
-
-def weekly_timetable(room_id):
+def weekly_timetable(room_number, start_date, end_date):
     '''
     Retourne la liste de tous les timeslots possédant une réservation pour la
     salle ``room_id`` durant la semaine comprenant la date ``day_date``.
@@ -73,12 +62,14 @@ def weekly_timetable(room_id):
             LEFT JOIN weekdays
                 ON reservations.weekday_id = weekdays.id
         WHERE 
-            rooms.id = ?
+            rooms.name = ?
+        AND reservations.start_date <= ?
+        AND reservations.end_date >= ?
         GROUP BY timeslots.id, weekdays.id
         ORDER BY weekdays.id, timeslots.id;
         '''
     
-    week_reservation = db.engine.execute(query, [room_id])
+    week_reservation = db.engine.execute(query, [room_number, start_date, end_date])
 
     weekdays = Weekday.query.all()
     timeslots = Timeslot.query.all()

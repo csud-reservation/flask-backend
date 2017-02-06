@@ -10,7 +10,7 @@ from ..models import *
 from ..email import send_email
 from . import main
 from sqlalchemy.sql import select
-from sqlalchemy import func, text
+from sqlalchemy import func, text, desc
 import re
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -33,11 +33,17 @@ def index():
     return render_template('index.html')
 
 
-@main.route('/timetable/<int:room_id>', methods=['GET'])
-def timetable(room_id):
-    timetable = weekly_timetable(room_id)
+@main.route('/timetable', methods=['POST'])
+def timetable():
+    
+    start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
+    start_date = start_date_str.date()
+    end_date_str = datetime.strptime(request.args.get('end_date'), "%d.%m.%Y")
+    end_date = start_date_str.date()
+    
+    timetable = weekly_timetable(request.args.get('room_number'), start_date, end_date)
     timeslots = Timeslot.query.all()
-    room = Room.query.get(room_id)
+    room = request.args.get('room_number')
     days = Weekday.query.all()
     return render_template(
         'timetable.html',
@@ -52,17 +58,14 @@ def timetable(room_id):
 @main.route('/search', methods=['GET', 'POST'])
 @login_required
 def search_page():
-    
-    #@SAMUEL : Là c'est toutes les variables "placeholder" que j'ai mises jusqu'à maintenant.
-    #Il faudrait les remplacer avec les vraies valeurs du formulaire !
-    #Grâce au code qui suit, tu reçois un dictionnaire "disponibilities" dans lequel il y a toutes les salles disponibles ainsi que le nombre d'heures sur lesquelles elles sont disponibles
-    
-    if (request.method == 'POST') and \
-    ((test_regex('^[0-9]{2}\.[0-9]{2}\.[0-9]{4}', request.form.get('start_date'))) or \
-    (test_regex('^[0-9]{2}\.[0-9]{2}\.[0-9]{4}', request.form.get('end_date'))) or \
-    (int(request.form.get('firstID')) >= 1 and int(request.form.get('firstID')) <= 13) or \
-    (int(request.form.get('lastID')) >= 1 and int(request.form.get('lastID')) <= 13) or \
-    (test_regex('^[a-zA-Z0-9\(\)\ ]{3,12}$', request.form.get('room_type').replace(' ', '')))):
+
+    # if (request.method == 'POST'): and \
+    # ((test_regex('^[0-9]{2}\.[0-9]{2}\.[0-9]{4}', request.form.get('start_date'))) or \
+    # (test_regex('^[0-9]{2}\.[0-9]{2}\.[0-9]{4}', request.form.get('end_date'))) or \
+    # (int(request.form.get('firstID')) >= 1 and int(request.form.get('firstID')) <= 13) or \
+    # (int(request.form.get('lastID')) >= 1 and int(request.form.get('lastID')) <= 13) or \
+    # (test_regex('^[a-zA-Z0-9\(\)\ ]{3,12}$', request.form.get('room_type').replace(' ', '')))):
+    if (request.method == 'POST'):
         
         session['start_date'] = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
         session['end_date'] = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
@@ -75,15 +78,12 @@ def search_page():
         number_of_weeks = (session['end_date'] - session['start_date'])//7
         number_of_weeks = number_of_weeks.days+1
 
-        
         current_date = session['start_date']
         a_week = timedelta(weeks = 1)
         
         disponibilities = {}
         #print (number_of_weeks)
         for w in range(number_of_weeks):
-
-
 
             result = search_query(session['weekday_id'], session['first_period'], session['last_period'], current_date.date(), session['room_type'])
             current_date = current_date + a_week
@@ -112,16 +112,25 @@ def search_page():
         if not bool(disponibilities) :
             return render_template('search_empty.html')
             
-        return render_template('search_results.html', disponibilities=disponibilities, start_date=session['start_date'].date(), end_date=session['end_date'].date(), first_period = session['first_period'], last_period = session['last_period'])
+        return render_template('search_results.html',
+            disponibilities=disponibilities,
+            start_date=session['start_date'].date(),
+            end_date=session['end_date'].date(),
+            first_period = session['first_period'],
+            last_period = session['last_period']
+        )
 
     else:
         return render_template('search.html')
         
-#========================================================================================================================================================        
+#===============================================================================
         
 @main.route('/search_confirm', methods=['POST'])
 @login_required
 def search_confirm():
+    ''' 
+    Effectue la réservation pour de vrai
+    '''
     
     room_select = request.form.get('room_select')
     student_group = request.form.get('student_group')
@@ -156,11 +165,6 @@ def search_confirm():
     db.session.add(reservation)
     db.session.commit()
     
-    # a = insert_reservation_query(
-    #     session['start_date'],
-    #     session['end_date'],
-    #     "jajaja", "jijiji",
-    #     (session['last_period']-session['first_period'])+1, student_group, current_user.id, session['weekday_id'], room_select)
     return render_template('search_confirm.html')
    
    
@@ -176,18 +180,29 @@ def login():
     if loginForm.validate_on_submit():
         
         if '@' in loginForm.account.data :
-            user = User.query.filter_by(email=loginForm.account.data).first()
+            user = User.query.filter_by(
+                email=loginForm.account.data
+            ).first()
         else: #Alors il s'agit du sigle
-            user = User.query.filter_by(sigle=loginForm.account.data.upper()).first()
+            user = User.query.filter_by(
+                sigle=loginForm.account.data.upper()
+            ).first()
 
         
         if user is None or not user.verify_password(loginForm.password.data):
             session['wrongCombinationAP'] = True
-            return render_template('login.html', form=loginForm, wrongCombination=session['wrongCombinationAP'])
+            return render_template('login.html',
+                form=loginForm,
+                wrongCombination=session['wrongCombinationAP']
+            )
         session['wrongCombinationAP'] = False
         login_user(user, loginForm.remember_me.data)
         return redirect(request.args.get('next') or url_for('main.search_page'))
-    return render_template('login.html', form=loginForm, wrongCombination=session['wrongCombinationAP'])
+        
+    return render_template('login.html',
+        form=loginForm,
+        wrongCombination=session['wrongCombinationAP']
+    )
 
 #============================================================================
 @main.route('/logout', methods=['GET', 'POST'])
@@ -220,21 +235,29 @@ def profil():
             session["CombinationPP"] = 1
             current_user.password_hash = generate_password_hash(changePWForm.new_pw2.data)
             db.session.commit()
-        return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])
+        return render_template('profil.html',
+            infos=result,
+            form=changePWForm,
+            combination=session['CombinationPP']
+        )
         
             
 
             
             
     session['CombinationPP'] = 0 
-    return render_template('profil.html', infos=result, form=changePWForm, combination=session['CombinationPP'])
+    return render_template('profil.html',
+        infos=result,
+        form=changePWForm,
+        combination=session['CombinationPP']
+    )
     
     
     
     
-@main.route('/horaires', methods=['GET', 'POST'])
+@main.route('/horaire', methods=['GET', 'POST'])
 @login_required
-def horaires():
+def horaire():
     return render_template('horaire.html')
     
     
@@ -243,4 +266,6 @@ def horaires():
 def mes_reservations():
     reservations = Reservation.query.filter_by(owner_id=current_user.id).all()
     # result = my_reservations(current_user.id)
-    return render_template('mes_reservations.html', reservations=reservations)
+    return render_template('mes_reservations.html',
+        reservations=reservations
+    )

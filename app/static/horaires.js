@@ -24,25 +24,19 @@ function select_days_in_week() {
 
 function format_week_dates(original_date) {
     // NB : ce code est un peu chaotique, mais j'étais fatigué au moment de l'écrire
-    var matches = /([0-9]{2})\.([0-9]{2})\.([0-9]{4})/.exec(original_date);
-    var date_formatted = new Date(parseInt(matches[3].replace(/^0(.+)/, '$1')),
-        parseInt(matches[2].replace(/^0(.+)/, '$1'))-1,
-        parseInt(matches[1].replace(/^0(.+)/, '$1')));
-    var vendredi = new Date();
+    var date_formatted = convert_dateString_to_Date(original_date);
     switch(date_formatted.getDay()) {
-        case 6: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()+2), 0, 0, 0, 0); break;
-        case 0: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()+1), 0, 0, 0, 0); break;
-        case 1: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()+0), 0, 0, 0, 0); break;
-        case 2: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()-1), 0, 0, 0, 0); break;
-        case 3: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()-2), 0, 0, 0, 0); break;
-        case 4: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()-3), 0, 0, 0, 0); break;
-        case 5: var lundi = new Date(date_formatted.getFullYear(), (date_formatted.getMonth()), (date_formatted.getDate()-4), 0, 0, 0, 0); break;
+        case 0: var lundi = add_days_to_date(date_formatted, 1); break;
+        case 1: var lundi = add_days_to_date(date_formatted, 0); break;
+        case 2: var lundi = remove_days_to_date(date_formatted, 1); break;
+        case 3: var lundi = remove_days_to_date(date_formatted, 2); break;
+        case 4: var lundi = remove_days_to_date(date_formatted, 3); break;
+        case 5: var lundi = remove_days_to_date(date_formatted, 4); break;
+        case 6: var lundi = add_days_to_date(date_formatted, 2); break;
     }
-    var vendredi = new Date(lundi.getFullYear(), lundi.getMonth(), (lundi.getDate()+4), 0, 0, 0, 0);
-    var str_lundi = (String(lundi.getDate()).replace(/^([0-9])$/, '0' + '$1') + '.' + 
-    (String(lundi.getMonth() + 1)).replace(/^([0-9])$/, '0' + '$1') + "." + lundi.getFullYear())
-    var str_vendredi = (String(vendredi.getDate()).replace(/^([0-9])$/, '0' + '$1') + '.' + 
-    (String(vendredi.getMonth() + 1)).replace(/^([0-9])$/, '0' + '$1') + "." + vendredi.getFullYear())
+    var vendredi = add_days_to_date(lundi, 4);
+    var str_lundi = convert_Date_to_dateString(lundi);
+    var str_vendredi = convert_Date_to_dateString(vendredi);
     
     return str_lundi + ' - ' + str_vendredi;
 }
@@ -52,20 +46,18 @@ function set_week_date() {
     $('#weekly_datepicker').val(format_week_dates(original_date));
 }
 
+function get_two_dates(two_dates_str) {
+    var matches = /^([0-9]{2}\.[0-9]{2}\.[0-9]{4})\ -\ ([0-9]{2}\.[0-9]{2}\.[0-9]{4})$/.exec(two_dates_str);
+    return [matches[1], matches[2]];
+}
+
 function submit_invisible_form_timetable() {
+    $('#titre').html('Salle ' + $('#rooms_numbers').val());
     $('#result').html('chargement des résultats');
     var dates = $('#weekly_datepicker').val();
     var room_number = $('#rooms_numbers').val();
-    var matches = /^([0-9]{2}\.[0-9]{2}\.[0-9]{4})\ -\ ([0-9]{2}\.[0-9]{2}\.[0-9]{4})$/.exec(dates);
-    var start_date = matches[1];
-    var end_date = matches[2];
-   
-    // add_to_form('room_number', room_number)
-    // add_to_form('start_date', start_date)
-    // add_to_form('end_date', end_date)
-    
-    // var full_form = $('#invisible_form').html();
-    // $('<form action="timetable" method="post">' + full_form + '</form>').submit();
+    var start_date = get_two_dates(dates)[0];
+    var end_date = get_two_dates(dates)[1];
     
     $.ajax({
     url: "timetable?" + $.param({
@@ -83,17 +75,27 @@ function submit_invisible_form_timetable() {
     })
 }
 
-$(function() {
-    $('#rooms_type').change(function() {
-        var value = $(this).val();
-        reset_select_rooms();
-        if (value !== 'ALL') {
-            filter_select_rooms(value);   
-        }
-    });
+function change_week(is_previous_week) {
+    var monday_str = get_two_dates($('#weekly_datepicker').val())[0];
+    var monday_Date = convert_dateString_to_Date(monday_str);
+    if (is_previous_week) {
+        var new_monday_Date = remove_days_to_date(monday_Date, 7);
+    } else {
+        var new_monday_Date = add_days_to_date(monday_Date, 7);
+    }
+    var new_monday_str = convert_Date_to_dateString(new_monday_Date);
     
-    set_week_date();
+    $('#weekly_datepicker').before('<input type="text" class="form-control today weekly_datepicker_replace">');
+    $('#weekly_datepicker').remove();
+    $('.weekly_datepicker_replace').attr('id', 'weekly_datepicker');
+    $('#weekly_datepicker').val(new_monday_str);
     
+    initialize_weekly_datepicker();
+    submit_invisible_form_timetable();
+}
+
+function initialize_weekly_datepicker() {
+    $('input').prop("readonly", true);
     $('#weekly_datepicker').datepicker({language: "fr", daysOfWeekDisabled: '0,6'})
     .on('show', function(e) {
         select_days_in_week();
@@ -109,8 +111,28 @@ $(function() {
     }).on('hide', function(e) {
         set_week_date();
     });
+    set_week_date();
+}
+
+$(function() {
+    $('#rooms_numbers').change(submit_invisible_form_timetable);
+    
+    $('#rooms_type').change(function() {
+        var value = $(this).val();
+        reset_select_rooms();
+        if (value !== 'ALL') {
+            filter_select_rooms(value);   
+        }
+        submit_invisible_form_timetable();
+    });
+    
+    initialize_weekly_datepicker();
+    
     $('#weekly_datepicker').change(function() {
         set_week_date();
         select_days_in_week();
+        submit_invisible_form_timetable();
     });
+    
+    submit_invisible_form_timetable();
 });

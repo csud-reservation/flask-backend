@@ -190,7 +190,8 @@ table.room-timetable div.timetable.cell-info {
 }
 
 .nav_week {
-    margin-top: 20px;
+    position: relative;
+    top: 30px;
 }
 
 .previous_week {

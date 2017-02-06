@@ -25,7 +25,7 @@
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('main.search_page') }}">Rechercher</a></li>
+                    <li><a href="{{ url_for('main.search_page') }}">Réservation</a></li>
                     <li><a href="{{ url_for('main.horaire') }}">Horaire des salles</a></li>
                 {% endif %}
             </ul>

@@ -1,11 +1,8 @@
 var nowDate = new Date();
-
-if (nowDate.getDay() == 6) {
-    var today2 = new Date(nowDate.getFullYear(), nowDate.getMonth(), (nowDate.getDate() + 2), 0, 0, 0, 0);
-} else if (nowDate.getDay() == 0) {
-    var today2 = new Date(nowDate.getFullYear(), nowDate.getMonth(), (nowDate.getDate() + 1), 0, 0, 0, 0);
-} else {
-    var today2 = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+switch(nowDate.getDay()) {
+    case 6: var today2 = add_days_to_date(nowDate, 2); break;
+    case 0: var today2 = add_days_to_date(nowDate, 1); break;
+    default: var today2 = add_days_to_date(nowDate, 0); break;
 }
 
 function submit_invisible_form() {
@@ -85,10 +82,16 @@ function reset_modal_view() {
     });
 }
 
+function initialize_datepicker(element, listBanned='0,6') {
+    $('input').prop("readonly", true);
+    $(element).datepicker({language: "fr", daysOfWeekDisabled: listBanned, autoclose: true})
+        .on('hide', function(e) {
+            return;
+        });
+}
+
 $(function() {
-    var curr_date_full = (String(today2.getDate()).replace(/^([0-9])$/, '0' + '$1') + '.' + 
-    (String(today2.getMonth() + 1)).replace(/^([0-9])$/, '0' + '$1') + "." + today2.getFullYear())
-    $('.today').val(curr_date_full);
+    $('.today').val(convert_Date_to_dateString(today2));
     
     $('#date_de').change(function() {
         var dateSelected = $(this).val();
@@ -101,30 +104,23 @@ $(function() {
         $('#date_a').before('<input type="text" class="form-control date_a_replace">');
         $('#date_a').remove();
         $('.date_a_replace').attr('id', 'date_a');
-        $('#date_a').datepicker({language: "fr", daysOfWeekDisabled: listBanned, autoclose: true});
         $('#date_a').val(dateSelected);
+        initialize_datepicker($('#date_a'), listBanned);
     });
 
-    $('#date_de').each(function () {
-        $(this).datepicker({language: "fr", daysOfWeekDisabled: '0,6', autoclose: true});
-    });
-    $('#date_a').each(function () {
-        $(this).datepicker({language: "fr", daysOfWeekDisabled: '0,6', autoclose: true});
-    });
-     
-    $('.date').datepicker({language: "fr", daysOfWeekDisabled: '0,6', autoclose: true});
+    initialize_datepicker($('#date_de'));
+    initialize_datepicker($('#date_a'));
+    initialize_datepicker($('.date'));
     
     $("#switch").change(function() {
         if(this.checked) {
-            //$(".end_dp").hide()
             $('#recurrence_off').hide()
             $('#recurrence_on').show()
             $(".date_input_form").first().removeClass('col-sm-3').addClass('col-sm-5')
         }
         else{
-            //$(".end_dp").show()
-            $('#recurrence_on').hide()             //new   
-            $('#recurrence_off').show()             //new 
+            $('#recurrence_on').hide() 
+            $('#recurrence_off').show()
             $(".date_input_form").first().removeClass('col-sm-5').addClass('col-sm-3')
         }
     });

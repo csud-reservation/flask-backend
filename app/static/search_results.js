@@ -22,8 +22,10 @@ function submit_invisible_form() {
     $('<form action="search_confirm" method="post">' + full_form + '</form>').submit();
 }
 
-$( "#room_select" ).change(function() {
-    console.log($("#room_select").val())
+$("#room_select").change(function() {
   $("#room").text($("#room_select").val())
 });
 
+$(function() {
+    $("#room").text($("#room_select").val());
+});

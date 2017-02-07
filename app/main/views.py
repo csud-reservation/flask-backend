@@ -33,9 +33,8 @@ def index():
     return render_template('index.html')
 
 
-@main.route('/timetable', methods=['POST'])
+@main.route('/timetable_ajax', methods=['POST'])
 def timetable():
-    
     start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
     start_date = start_date_str.date()
     end_date_str = datetime.strptime(request.args.get('end_date'), "%d.%m.%Y")
@@ -44,7 +43,7 @@ def timetable():
     timetable = weekly_timetable(request.args.get('room_number'), start_date, end_date)
     timeslots = Timeslot.query.all()
     room = request.args.get('room_number')
-    days = Weekday.query.all()
+    days = Weekday.query.limit(5).all()
     return render_template(
         'timetable.html',
         room=room, 
@@ -53,9 +52,7 @@ def timetable():
         timeslots=timeslots
     )
 
-
-
-@main.route('/search', methods=['GET', 'POST'])
+@main.route('/search')
 @login_required
 def search_page():
 
@@ -172,7 +169,7 @@ def search_confirm():
 # LOGIN
 #======================================================================================
 
-@main.route('/login', methods=['GET', 'POST'])
+@main.route('/login')
 def login():
     loginForm = LoginForm()
     #wrongCombinationAP permet d'envoyer au client si la combinaison Account-Password est correcte ou non
@@ -180,14 +177,13 @@ def login():
     if loginForm.validate_on_submit():
         
         if '@' in loginForm.account.data :
-            user = User.query.filter_by(
-                email=loginForm.account.data
+            user = User.query.filter(
+                func.lower(User.email) == func.lower(loginForm.account.data)
             ).first()
         else: #Alors il s'agit du sigle
             user = User.query.filter_by(
                 sigle=loginForm.account.data.upper()
             ).first()
-
         
         if user is None or not user.verify_password(loginForm.password.data):
             session['wrongCombinationAP'] = True
@@ -205,14 +201,14 @@ def login():
     )
 
 #============================================================================
-@main.route('/logout', methods=['GET', 'POST'])
+@main.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
 #============================================================================
-@main.route('/user', methods=['GET', 'POST'])
+@main.route('/user')
 @login_required
 def profil():
     
@@ -240,11 +236,7 @@ def profil():
             form=changePWForm,
             combination=session['CombinationPP']
         )
-        
-            
 
-            
-            
     session['CombinationPP'] = 0 
     return render_template('profil.html',
         infos=result,
@@ -252,16 +244,13 @@ def profil():
         combination=session['CombinationPP']
     )
     
-    
-    
-    
-@main.route('/horaire', methods=['GET', 'POST'])
+@main.route('/timetable')
 @login_required
 def horaire():
-    return render_template('horaire.html')
+    rooms = Room.query.all()
+    return render_template('horaire.html', rooms=rooms)
     
-    
-@main.route('/mes_reservations', methods=['GET', 'POST'])
+@main.route('/mes_reservations')
 @login_required
 def mes_reservations():
     reservations = Reservation.query.filter_by(owner_id=current_user.id).all()

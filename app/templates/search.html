@@ -12,14 +12,6 @@
   ['GEO','Géographie'],
   ['VDO','Vidéo']
 ] %}
-  
-{% set rooms_numbers = ['001','002','006','008','010','101 (INF)','102 (INF)',
-'103','104','105','106','107','108','109','110','111','112','113','114','115',
-'116 (BIO)','117 (GEO)','118 (BIL)','123 (GEO/MUS)','125 (MUS)','126 (BIL)',
-'128 (BIO)','201 (ARV)','202 (INF)','203','204','205','206','207','208','209',
-'210','211','212','213','214','215 (PHY)','216 (CHI)','217 (PHY)','218 (CHL)',
-'225 (PHL)','227 (PHL)','228 (CHI)','230 (CHL)','301 (ARV)','302 (ARV)','303',
-'304','307','308','309','310','313','314','315','316','319','320','321','R06','R11 (VDO)'] %}
 
 {% set periods = [
 ['Période 1', '8h10 - 8h55'],
@@ -141,8 +133,8 @@
         <div id="input_invisible_base"></div>
       </div>
       <div class="form-group">
-        <input value="Rechercher salle disponible" class="pull-right btn btn-primary bouton_recherche"
-          onclick="submit_invisible_form();">
+        <span class="pull-right btn btn-primary bouton_recherche"
+          onclick="submit_invisible_form();">Rechercher salle disponible</span>
       </div>
     </div>
   </div>

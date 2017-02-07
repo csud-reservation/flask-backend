@@ -60,7 +60,7 @@ function submit_invisible_form_timetable() {
     var end_date = get_two_dates(dates)[1];
     
     $.ajax({
-    url: "timetable?" + $.param({
+    url: "timetable_ajax?" + $.param({
         "room_number": room_number,
         "start_date": start_date,
         "end_date": end_date,

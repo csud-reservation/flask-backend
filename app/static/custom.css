@@ -113,9 +113,21 @@ tbody tr:first-child {
         position: relative;
             bottom: 10px;
     }
+    .mobile {
+        display: none;
+    }
+    .desktop {
+        display: block;
+    }
 }
 
 @media(max-width:767px) {
+    .mobile {
+        display: block;
+    }
+    .desktop {
+        display: none;
+    }
     .ajustement_sm {
         margin-bottom: 15px;
     }

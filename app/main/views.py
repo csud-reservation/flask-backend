@@ -155,7 +155,7 @@ def search_confirm():
     db.session.add(reservation)
     db.session.commit()
     
-    return render_template('search_confirm.html')
+    return redirect(url_for('main.my_reservations') + '?just_reserved')
    
    
 #======================================================================================
@@ -243,11 +243,11 @@ def horaire():
     rooms = Room.query.all()
     return render_template('horaire.html', rooms=rooms)
     
-@main.route('/mes_reservations')
+@main.route('/my_reservations')
 @login_required
-def mes_reservations():
+def my_reservations():
     reservations = Reservation.query.filter_by(owner_id=current_user.id).all()
     # result = my_reservations(current_user.id)
-    return render_template('mes_reservations.html',
+    return render_template('my_reservations.html',
         reservations=reservations
     )

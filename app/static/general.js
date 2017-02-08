@@ -7,11 +7,18 @@ function add_to_form(name, value) {
     $('#input_invisible_base').parent().hide();
 }
 
+function convert_sql_dateString_to_Date(sql_date_str) {
+    var matches = /([0-9]{4})-([0-9]{2})-([0-9]{2})/.exec(sql_date_str);
+    return new Date(parseInt(matches[1]),
+        parseInt(matches[2])-1,
+        parseInt(matches[3]));
+}
+
 function convert_dateString_to_Date(date_str) {
     var matches = /([0-9]{2})\.([0-9]{2})\.([0-9]{4})/.exec(date_str);
-    return new Date(parseInt(matches[3].replace(/^0(.+)/, '$1')),
-        parseInt(matches[2].replace(/^0(.+)/, '$1'))-1,
-        parseInt(matches[1].replace(/^0(.+)/, '$1')));
+    return new Date(parseInt(matches[3]),
+        parseInt(matches[2])-1,
+        parseInt(matches[1]));
 }
 
 function convert_Date_to_dateString(date) {
@@ -30,19 +37,10 @@ function remove_days_to_date(date, days_to_remove) {
 }
 
 $(function() {
-    $('.date_format').each(function(i, obj) {
-        
-    var date = new Date($(this).text())
-    var day = date.getDate()
-    if (day < 10){
-        day = "0"+day
-    }
-    
-    var month = date.getMonth()
-    if (month < 10){
-        month = "0"+month
-    }
-    $(this).text(day+"."+month+"."+date.getFullYear())
-    });
+    $('.date_format').each(function() {
+        var original_date = $(this).html();
+        var date_formated = convert_sql_dateString_to_Date(original_date);
+        var date_string = convert_Date_to_dateString(date_formated);
+        $(this).html(date_string);
+    });    
 });
-    

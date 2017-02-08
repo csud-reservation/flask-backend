@@ -90,8 +90,7 @@ function change_week(is_previous_week) {
     $('.weekly_datepicker_replace').attr('id', 'weekly_datepicker');
     $('#weekly_datepicker').val(new_monday_str);
     
-    initialize_weekly_datepicker();
-    submit_invisible_form_timetable();
+    main_datepicker_creation();
 }
 
 function initialize_weekly_datepicker() {
@@ -114,6 +113,18 @@ function initialize_weekly_datepicker() {
     set_week_date();
 }
 
+function datepicker_change() {
+    set_week_date();
+    select_days_in_week();
+    submit_invisible_form_timetable();
+}
+
+function main_datepicker_creation() {
+    initialize_weekly_datepicker();
+    $('#weekly_datepicker').change(datepicker_change);
+    submit_invisible_form_timetable();
+}
+
 $(function() {
     $('#rooms_numbers').change(submit_invisible_form_timetable);
     
@@ -126,13 +137,5 @@ $(function() {
         submit_invisible_form_timetable();
     });
     
-    initialize_weekly_datepicker();
-    
-    $('#weekly_datepicker').change(function() {
-        set_week_date();
-        select_days_in_week();
-        submit_invisible_form_timetable();
-    });
-    
-    submit_invisible_form_timetable();
+    main_datepicker_creation();
 });

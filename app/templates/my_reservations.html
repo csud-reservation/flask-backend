@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Mes réservations{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+        <div class="alert alert-success hidden" id="message_url"></div>
+        <h1 class="gros_titre">Mes réservations</h1>
+        <table class="table table-striped">
+          <theader>
+            <th>Date de début</th>
+            <th>Date de fin</th>
+            <th>Salle</th>
+            <th>Heure de début</th>
+            <th>Durée</th>
+            <th>Raison</th>
+            <th>Groupe d'étudiants</th>
+          </theader>
+          <tbody>
+            {% for res in reservations %}
+              <tr>
+                <td class="date_format">{{res.start_date}}</td>
+                <td class="date_format">{{res.end_date}}</td>
+                <td>{{res.room.name}}</td>
+                <td>{{res.timeslots.first().start_time}}</td>
+                <td>{{res.duration}}</td>
+                <td>{{res.reason_details}}</td>
+                <td>{{res.student_group}}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div class="col-lg-2 col-md-1"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='my_reservations.js') }}"></script>
+{% endblock %}

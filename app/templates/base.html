@@ -31,7 +31,7 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('main.mes_reservations') }}">Mes réservations</a></li>
+                    <li><a href="{{ url_for('main.my_reservations') }}">Mes réservations</a></li>
                     <li><a href="{{ url_for('main.profil') }}">Profil</a></li>
                     <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
                 {% else %}

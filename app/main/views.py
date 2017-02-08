@@ -52,16 +52,9 @@ def timetable():
         timeslots=timeslots
     )
 
-@main.route('/search')
+@main.route('/search', methods=['GET', 'POST'])
 @login_required
 def search_page():
-
-    # if (request.method == 'POST'): and \
-    # ((test_regex('^[0-9]{2}\.[0-9]{2}\.[0-9]{4}', request.form.get('start_date'))) or \
-    # (test_regex('^[0-9]{2}\.[0-9]{2}\.[0-9]{4}', request.form.get('end_date'))) or \
-    # (int(request.form.get('firstID')) >= 1 and int(request.form.get('firstID')) <= 13) or \
-    # (int(request.form.get('lastID')) >= 1 and int(request.form.get('lastID')) <= 13) or \
-    # (test_regex('^[a-zA-Z0-9\(\)\ ]{3,12}$', request.form.get('room_type').replace(' ', '')))):
     if (request.method == 'POST'):
         
         session['start_date'] = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")

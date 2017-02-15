@@ -162,7 +162,7 @@ def search_confirm():
 # LOGIN
 #======================================================================================
 
-@main.route('/login')
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     loginForm = LoginForm()
     #wrongCombinationAP permet d'envoyer au client si la combinaison Account-Password est correcte ou non

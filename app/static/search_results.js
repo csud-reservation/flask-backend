@@ -18,8 +18,8 @@ function submit_invisible_form() {
     add_to_form('student_group', student_group)
     add_to_form('reason', reason)
     
-    var full_form = $('#invisible_form').html();
-    $('<form action="search_confirm" method="post">' + full_form + '</form>').submit();
+    $('#invisible_form').wrap('<form id="full_invisible_form" action="search_confirm" method="post"></form>');
+    $('#full_invisible_form').submit();
 }
 
 $("#room_select").change(function() {

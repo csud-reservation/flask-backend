@@ -33,8 +33,9 @@ function submit_invisible_form() {
         add_to_form('firstID', firstID);
         add_to_form('lastID', lastID);
         
-        var full_form = $('#invisible_form').html();
-        $('<form action="search" method="post">' + full_form + '</form>').submit();
+        
+        $('#invisible_form').wrap('<form id="full_invisible_form" action="search" method="post"></form>');
+        $('#full_invisible_form').submit();
     } else {
         alert('vous n\'avez sélectionné aucune période');
     }

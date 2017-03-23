@@ -213,3 +213,7 @@ table.room-timetable div.timetable.cell-info {
 .following_week {
     width: 140px;
 }
+
+table.room-timetable tbody td.reserved.reserved_by_teacher {
+    background-color: #d4f7c9;
+}

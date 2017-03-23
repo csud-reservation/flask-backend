@@ -28,7 +28,7 @@ def test_regex(regex, to_test):
     pattern = re.compile("^.+$")
     return pattern.match(to_test)
 
-@main.route('/')
+@main.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
@@ -38,7 +38,7 @@ def timetable():
     start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
     start_date = start_date_str.date()
     end_date_str = datetime.strptime(request.args.get('end_date'), "%d.%m.%Y")
-    end_date = start_date_str.date()
+    end_date = end_date_str.date()
     
     timetable = weekly_timetable(request.args.get('room_number'), start_date, end_date)
     timeslots = Timeslot.query.all()
@@ -61,8 +61,8 @@ def search_page():
         session['end_date'] = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
         
         session['weekday_id'] = session['start_date'].weekday()+1
-        session['first_period'] = int(request.form.get('firstID')) + 1
-        session['last_period'] = int(request.form.get('lastID')) + 1
+        session['first_period'] = int(request.form.get('firstID'))
+        session['last_period'] = int(request.form.get('lastID'))
         session['room_type'] = request.form.get('room_type')
 
         number_of_weeks = (session['end_date'] - session['start_date'])//7
@@ -75,7 +75,7 @@ def search_page():
         #print (number_of_weeks)
         for w in range(number_of_weeks):
 
-            result = search_query(session['weekday_id'], session['first_period'], session['last_period'], current_date.date(), session['room_type'])
+            result = search_query(session['weekday_id'], session['first_period']+1, session['last_period']+1, current_date.date(), session['room_type'])
             current_date = current_date + a_week
             
             for rooms in result:
@@ -142,6 +142,7 @@ def search_confirm():
         # dates du début et de fin d'année
         start_date=session['start_date'],
         end_date=session['end_date'],
+        reason_short="RES",
         reason_details=reason,
         duration=duration,
         student_group=student_group,
@@ -155,7 +156,8 @@ def search_confirm():
     db.session.add(reservation)
     db.session.commit()
     
-    return redirect(url_for('main.my_reservations') + '?just_reserved')
+    session['just_reserved'] = True
+    return redirect(url_for('main.my_reservations'))
    
    
 #======================================================================================
@@ -201,7 +203,7 @@ def logout():
     return redirect(url_for('main.index'))
 
 #============================================================================
-@main.route('/user')
+@main.route('/user', methods=['GET', 'POST'])
 @login_required
 def profil():
     
@@ -243,11 +245,29 @@ def horaire():
     rooms = Room.query.all()
     return render_template('horaire.html', rooms=rooms)
     
-@main.route('/my_reservations')
+@main.route('/my_reservations', methods=['GET', 'POST'])
 @login_required
 def my_reservations():
-    reservations = Reservation.query.filter_by(owner_id=current_user.id).all()
-    # result = my_reservations(current_user.id)
-    return render_template('my_reservations.html',
-        reservations=reservations
-    )
+    
+    if (request.method == 'POST'):
+        db.engine.execute('DELETE FROM reservations WHERE reservations.id = ? ', request.args.get('id'))
+        db.engine.execute('DELETE FROM reservations_users WHERE reservation_id = ?', request.args.get('id'))
+        db.engine.execute('DELETE FROM reservations_timeslots WHERE reservation_id = ?', request.args.get('id'))
+
+        return 'success'
+
+    else:
+        today = datetime.today().date()
+        reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date))
+        
+        if not 'just_reserved' in session:
+            session['just_reserved'] = False
+            
+        if (session['just_reserved']):
+            just_reserved = True
+            session['just_reserved'] = False
+        else:
+            just_reserved = False
+            
+        return render_template('my_reservations.html',
+            reservations=reservations, today=today, just_reserved=just_reserved)

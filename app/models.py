@@ -239,7 +239,8 @@ class Weekday(db.Model):
 ## association table from reservations to users (teachers)
 reservations_users = db.Table('reservations_users',
     db.Column('reservation_id', db.Integer, db.ForeignKey('reservations.id'), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    
 )
 
 ## association table from reservations to timeslots

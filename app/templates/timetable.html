@@ -21,7 +21,7 @@
         {% for day in days %}
             {% set cell = timetable[ts.order|int][day.id - 1] %}
             {% if cell %}
-            <td class="reserved">
+            <td class="reserved reserved_by_{{ cell['owner_role'] }}">
             {% else %}
             <td>
             {% endif %}

@@ -44,8 +44,8 @@ def create_app(config_name, models={}):
     db.init_app(app)
     
     # initialisation de l'api REST ==> ne fonctionne pas ...
-    api_manager.create_api(models['User'], methods=['GET', 'DELETE'])
-    api_manager.init_app(app)
+    # api_manager.create_api(models['User'], methods=['GET', 'DELETE'])
+    # api_manager.init_app(app)
     
     # initialisation de la barre de déboguage
     toolbar.init_app(app)

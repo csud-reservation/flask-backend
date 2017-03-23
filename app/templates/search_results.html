@@ -1,3 +1,5 @@
+{% set start_period_time = ["8h10", "9h00", "9h45", "10h05", "10h55", "11h45", "12h35", "13h25", "14h15", "15h05", "15h55", "16h45", "17h35"] %}
+{% set end_period_time = ["8h55", "9h40", "10h00", "10h50", "11h40", "12h30", "13h20", "14h10", "15h00", "15h50", "16h40", "17h30", "18h20"] %}
 {% extends "base.html" %}
 
 {% block title %}Réservation{% endblock %}
@@ -39,17 +41,16 @@
             <td class="date_format">{{start_date}}</td>
             <td>
               {% if end_date != start_date %}
-                jusqu'au {{end_date}}
-                
+                jusqu'au <span class="date_format">{{end_date}}</span>
               {% endif %}
             </td>
           </tr>
           <tr>
             <th>Période</th>
-            <td >{{first_period}}</td>
+            <td >{{start_period_time[ first_period ] }}</td>
             <td>
               {% if first_period != last_period %}
-                jusqu'à {{last_period}}
+                jusqu'à {{end_period_time[ last_period ] }}
               {% endif %}
             </td>
           </tr>

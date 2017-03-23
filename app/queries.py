@@ -34,7 +34,7 @@ def search_query(weekday_id, first_period, last_period, current_date, room_type)
     return result
     
 
-def weekly_timetable(room_number, start_date, end_date):
+def weekly_timetable(room_number, week_start_date, week_end_date):
     '''
     Retourne la liste de tous les timeslots possédant une réservation pour la
     salle ``room_id`` durant la semaine comprenant la date ``day_date``.
@@ -43,6 +43,7 @@ def weekly_timetable(room_number, start_date, end_date):
     query = '''
         SELECT
             timeslots.id AS [timeslot_id],
+            roles.name AS [owner_role],
             weekdays.id as [weekday_id],
             weekdays.name as [day],
             reservations.reason_short [reason],
@@ -53,6 +54,10 @@ def weekly_timetable(room_number, start_date, end_date):
                 ON reservations_timeslots.timeslot_id = timeslots.id
             LEFT JOIN reservations
                 ON reservations.id = reservations_timeslots.reservation_id
+            LEFT JOIN users AS owner
+                ON reservations.owner_id = owner.id
+            LEFT JOIN roles
+                ON owner.role_id = roles.id
             LEFT JOIN rooms
                 ON reservations.room_id = rooms.id
             LEFT JOIN reservations_users
@@ -63,14 +68,18 @@ def weekly_timetable(room_number, start_date, end_date):
                 ON reservations.weekday_id = weekdays.id
         WHERE 
             rooms.name = ?
-        AND reservations.start_date <= ?
-        AND reservations.end_date >= ?
+        AND NOT (
+            reservations.start_date > ? OR reservations.end_date < ?
+        )
         GROUP BY timeslots.id, weekdays.id
         ORDER BY weekdays.id, timeslots.id;
         '''
+        
+    week_reservation = db.engine.execute(query, [
+        room_number,
+        week_end_date, week_start_date
+    ])
     
-    week_reservation = db.engine.execute(query, [room_number, start_date, end_date])
-
     weekdays = Weekday.query.all()
     timeslots = Timeslot.query.all()
 

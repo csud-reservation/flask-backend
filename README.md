@@ -23,3 +23,14 @@ $ sudo apt-get install libgraphviz-dev
 $ pip install eralchemy
 ```
 
+Pour installer le projet dans Cloud9, saisir les commandes suivantes dans le terminal pour pouvoir développer dans la branche `dev` :
+
+```{bash}
+$ rm -rf *
+$ virtualenv -p python3 venv
+$ source venv/bin/activate
+$ git init
+$ git remote add origin https://github.com/csud-reservation/flask-backend.git
+$ git fetch
+$ git checkout -t origin/dev
+```

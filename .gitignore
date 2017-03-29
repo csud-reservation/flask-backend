@@ -47,7 +47,7 @@ erd_from_sqlite.pdf
 data-dev.sqlite
 edt.csv
 
-data
+data/src
 
 # schemas
 erd.png

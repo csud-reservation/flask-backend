@@ -5,7 +5,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 
-#from flask_debugtoolbar import DebugToolbarExtension
+from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_restless import APIManager
 
@@ -14,11 +14,9 @@ mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
 # api_manager = APIManager(flask_sqlalchemy_db=db)
-#toolbar = DebugToolbarExtension()
+toolbar = DebugToolbarExtension()
 lm = LoginManager()
 lm.login_view = 'main.login'
-
-
  
 
 def create_app(config_name, models={}):
@@ -54,6 +52,8 @@ def create_app(config_name, models={}):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
+    from .csudadmin import csudadmin as csudadmin_blueprint
+    app.register_blueprint(csudadmin_blueprint, url_prefix='/csudadmin')
     
     return app
     

@@ -30,7 +30,7 @@ def test_regex(regex, to_test):
 
 @main.route('/', methods=['GET'])
 def index():
-    return redirect(url_for('main.search_page'))
+    return redirect(url_for('main.profil'))
 
 
 @main.route('/timetable_ajax', methods=['POST'])

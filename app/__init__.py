@@ -5,7 +5,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 
-from flask_debugtoolbar import DebugToolbarExtension
+#from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_restless import APIManager
 
@@ -13,8 +13,8 @@ bootstrap = Bootstrap()
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
-api_manager = APIManager(flask_sqlalchemy_db=db)
-toolbar = DebugToolbarExtension()
+# api_manager = APIManager(flask_sqlalchemy_db=db)
+#toolbar = DebugToolbarExtension()
 lm = LoginManager()
 lm.login_view = 'main.login'
 
@@ -48,10 +48,12 @@ def create_app(config_name, models={}):
     # api_manager.init_app(app)
     
     # initialisation de la barre de déboguage
-    toolbar.init_app(app)
+    # toolbar.init_app(app)
 
+    # Blueprint main
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
     
     return app
     

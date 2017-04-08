@@ -18,21 +18,31 @@
       <div class="espace_dessous">
           <select class="form-control type_salle" id="room_select">
             {% for room in disponibilities | dictsort %}
-              
               <option value="{{room[0]}}">{{ room[0]}}</option>
             {% endfor %}
           </select>
         </div>
       
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Nom de la réservation</label>
+            <input type="text" class="form-control" id="res_name" value="RES">
+            <div class="help-block">Ce nom apparaît directement sur l'horaire des salles</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+            <label>Classe</label>
+            <input type="text" class="form-control" id="student_group">
+          </div>
+        </div>
+      </div>
       <div class="form-group">
-        <label>Raison de la réservation:</label>
+        <label>Raison de la réservation</label>
         <textarea class="form-control" rows="5" id="reason"></textarea>
       </div>
-      <div class="form-group">
-        <label>Groupe d'étudiants (optionnel)</label>
-        <input type="text" class="form-control" id="student_group">
-      </div>
-      
+
       <label>Résumé de la réservation</label>
       <table class="table table-striped">
         <tbody>
@@ -61,10 +71,6 @@
           </tr>
         </tbody>
       </table>
-      <!-- le formulaire invisible est créé en jQuery -->
-      <div id="invisible_form">
-        <div id="input_invisible_base"></div>
-      </div>
       <div class="form-group">
         <span class="pull-right btn btn-primary"
         onclick="submit_invisible_form();">Confirmer la réservation</span>

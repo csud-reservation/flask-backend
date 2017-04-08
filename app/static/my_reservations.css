@@ -9,3 +9,12 @@
 .disabled_res {
     color: grey;
 }
+
+.modal-body th {
+    min-width: 130px;
+}
+
+#modal_view_content .alert-info {
+	position: relative;
+		top: 4px;
+}

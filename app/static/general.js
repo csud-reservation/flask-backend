@@ -1,3 +1,11 @@
+function create_form() {
+    $('body').last().after('<div id="invisible_form"><div id="input_invisible_base"></div></div>')
+}
+
+function remove_form() {
+    $('#invisible_form').remove()
+}
+
 function input_format(name, value) {
     return '<input type="hidden" name="' + name + '" value="' + value + '" />';
 }
@@ -42,5 +50,5 @@ $(function() {
         var date_formated = convert_sql_dateString_to_Date(original_date);
         var date_string = convert_Date_to_dateString(date_formated);
         $(this).html(date_string);
-    });    
+    });  
 });

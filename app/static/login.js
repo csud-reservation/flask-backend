@@ -15,4 +15,5 @@ $(function() {
     $('input', this).wrap('<div class="col-sm-9 input_login"></div>');
     $(this).wrap('<div class="row"></div>');
   });
+  $('#hidden_block').show() 
 });

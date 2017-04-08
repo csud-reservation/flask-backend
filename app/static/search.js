@@ -27,12 +27,14 @@ function submit_invisible_form() {
         var selected = document.getElementsByClassName('selected');
         var firstID = selected[0].id.replace('periode_', '');
         var lastID = selected[selected.length-1].id.replace('periode_', '');
+
+        remove_form();
+        create_form();
         add_to_form('start_date', start_date);
         add_to_form('end_date', end_date);
         add_to_form('room_type', type_salle);
         add_to_form('firstID', firstID);
         add_to_form('lastID', lastID);
-        
         
         $('#invisible_form').wrap('<form id="full_invisible_form" action="search" method="post"></form>');
         $('#full_invisible_form').submit();

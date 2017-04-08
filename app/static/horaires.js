@@ -65,7 +65,7 @@ function submit_invisible_form_timetable() {
         "start_date": start_date,
         "end_date": end_date,
     }),
-        type: "POST",
+        type: "GET",
     })
     .done(function(data, textStatus, jqXHR) {
         $('#result').html(data);

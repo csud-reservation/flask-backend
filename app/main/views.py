@@ -33,7 +33,7 @@ def index():
     return redirect(url_for('main.profil'))
 
 
-@main.route('/timetable_ajax', methods=['POST'])
+@main.route('/timetable_ajax', methods=['GET'])
 def timetable():
     start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
     start_date = start_date_str.date()
@@ -118,13 +118,11 @@ def search_page():
 @main.route('/search_confirm', methods=['POST'])
 @login_required
 def search_confirm():
-    ''' 
-    Effectue la réservation pour de vrai
-    '''
     
     room_select = request.form.get('room_select')
     student_group = request.form.get('student_group')
     reason = request.form.get('reason')
+    res_name = request.form.get('res_name')
     
     duration = session['last_period'] - session['first_period'] + 1
     
@@ -142,7 +140,7 @@ def search_confirm():
         # dates du début et de fin d'année
         start_date=session['start_date'],
         end_date=session['end_date'],
-        reason_short="RES",
+        reason_short=res_name,
         reason_details=reason,
         duration=duration,
         student_group=student_group,
@@ -245,14 +243,20 @@ def horaire():
     rooms = Room.query.all()
     return render_template('horaire.html', rooms=rooms)
     
-@main.route('/my_reservations', methods=['GET', 'POST'])
+@main.route('/my_reservations', methods=['GET', 'PATCH', 'DELETE'])
 @login_required
 def my_reservations():
     
-    if (request.method == 'POST'):
-        db.engine.execute('DELETE FROM reservations WHERE reservations.id = ? ', request.args.get('id'))
-        db.engine.execute('DELETE FROM reservations_users WHERE reservation_id = ?', request.args.get('id'))
-        db.engine.execute('DELETE FROM reservations_timeslots WHERE reservation_id = ?', request.args.get('id'))
+    if (request.method == 'DELETE'):
+        db.engine.execute('DELETE FROM reservations WHERE reservations.id = ? ', request.form.get('id'))
+        db.engine.execute('DELETE FROM reservations_users WHERE reservation_id = ?', request.form.get('id'))
+        db.engine.execute('DELETE FROM reservations_timeslots WHERE reservation_id = ?', request.form.get('id'))
+
+        return 'success'
+
+    elif (request.method == 'PATCH'):
+        db.engine.execute('UPDATE reservations SET reason_short = ?, reason_details = ?, student_group = ? WHERE reservations.id = ?',
+            request.form.get('reason_short'), request.form.get('reason_details'), request.form.get('student_group'), request.form.get('id'))
 
         return 'success'
 

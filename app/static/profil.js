@@ -29,33 +29,38 @@ $(function() {
     if (is_empty('old_pw') || is_empty('new_pw') || is_empty('new_pw2')) {
       e.preventDefault();
     }
-  });
-  
+  }); 
 });
 
-function afficher_erreur(id) {
+function show_error(id, recursion) {
   $(function() {
-    if (id == 'old_pw'){
-      var contenu = $('#'+id).val();
+    var contenu = $('#'+id).val()
+    if (contenu.length === 0){
+      $('#'+id).parent().parent().removeClass('has-error').removeClass('has-error').removeClass('has-success')
+      return
+    }
+    if (id == 'new_pw'){
       if (/.{8,128}/.test(contenu)) {
         $('#'+id).parent().parent().removeClass('has-error').addClass('has-success');
       } else {
         $('#'+id).parent().parent().addClass('has-error');
       }
-    }
-    if (id == 'new_pw'){
-      var contenu = $('#'+id).val();
-      if (/.{8,128}/.test(contenu)) {
-        $('#'+id).parent().parent().removeClass('has-error').addClass('has-success');
-      } else {
-        $('#'+id).parent().parent().addClass('has-error');
+      if (recursion) {
+        show_error('new_pw2', false)
       }
     }
     if (id == 'new_pw2'){
-      if ($('#new_pw2').val() === $('#new_pw').val()) {
+      if (
+        (contenu === $('#new_pw').val()) 
+        && (contenu.length !== 0) 
+        && (/.{8,128}/.test(contenu))
+      ) {
         $('#'+id).parent().parent().removeClass('has-error').addClass('has-success');
       } else {
         $('#'+id).parent().parent().addClass('has-error');
+      }
+      if (recursion) {
+        show_error('new_pw', false)
       }
     }
   })
@@ -65,7 +70,8 @@ $(function() {
   var old_password = document.getElementById('old_pw');
   var new_password = document.getElementById('new_pw');
   var password_confirmation = document.getElementById('new_pw2');
-  old_password.setAttribute('onKeyUp', 'afficher_erreur("old_pw");');
-  new_password.setAttribute('onKeyUp', 'afficher_erreur("new_pw");');
-  password_confirmation.setAttribute('onKeyUp', 'afficher_erreur("new_pw2");');
+  old_password.setAttribute('onKeyUp', 'show_error("old_pw", true);');
+  new_password.setAttribute('onKeyUp', 'show_error("new_pw", true);');
+  password_confirmation.setAttribute('onKeyUp', 'show_error("new_pw2");');
+  $('#hidden_block').show() 
 });

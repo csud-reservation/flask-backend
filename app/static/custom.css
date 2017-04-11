@@ -38,6 +38,8 @@
 .bouton_recherche {
     margin-top: 2px;
     margin-right: 15px;
+    position: relative;
+        bottom: 2px;
 }
 
 #message_url {
@@ -128,6 +130,11 @@ tbody tr:first-child {
     .desktop {
         display: none;
     }
+    .bouton_recherche {
+        width: 98px; 
+        margin-left: 15px; 
+        margin-top: 15px;
+    }
     .ajustement_sm {
         margin-bottom: 15px;
     }
@@ -169,10 +176,6 @@ tbody tr:first-child {
     max-width:220px;
 }
 
-.bouton_recherche {
-    width: 200px;
-}
-
 table.room-timetable tbody td.reserved {
     background-color: lightgray;
 }
@@ -212,6 +215,10 @@ table.room-timetable div.timetable.cell-info {
 
 .following_week {
     width: 140px;
+}
+
+#no_hour_selected {
+    margin-bottom: 2px;
 }
 
 table.room-timetable tbody td.reserved.reserved_by_teacher {

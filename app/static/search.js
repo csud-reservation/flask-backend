@@ -39,7 +39,7 @@ function submit_invisible_form() {
         $('#invisible_form').wrap('<form id="full_invisible_form" action="search" method="post"></form>');
         $('#full_invisible_form').submit();
     } else {
-        alert('vous n\'avez sélectionné aucune période');
+        $('#no_hour_selected').removeClass('hidden')
     }
 }
  
@@ -93,7 +93,12 @@ function initialize_datepicker(element, listBanned='0,6') {
         });
 }
 
+$("#room_select").change(function() {
+  $("#room").text($("#room_select").val())
+});
+
 $(function() {
+    $("#room").text($("#room_select").val());
     $('.today').val(convert_Date_to_dateString(today2));
     
     $('#date_de').change(function() {

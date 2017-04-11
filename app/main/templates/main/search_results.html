@@ -48,26 +48,26 @@
         <tbody>
           <tr>
             <th>Date</th>
-            <td class="date_format">{{start_date}}</td>
             <td>
+              <span class="date_format">{{start_date}}</span>
               {% if end_date != start_date %}
-                jusqu'au <span class="date_format">{{end_date}}</span>
+                - <span class="date_format">{{end_date}}</span>
               {% endif %}
             </td>
           </tr>
           <tr>
             <th>Période</th>
-            <td >{{start_period_time[ first_period ] }}</td>
-            <td>
+            <td >{{start_period_time[ first_period ] }}
               {% if first_period != last_period %}
-                jusqu'à {{end_period_time[ last_period ] }}
+                - {{end_period_time[ last_period ] }}
+              {% else %}
+                - {{end_period_time[ first_period ] }}
               {% endif %}
             </td>
           </tr>
           <tr>
             <th>Salle</th>
             <td id="room"></td>
-            <td></td>
           </tr>
         </tbody>
       </table>
@@ -86,4 +86,12 @@
 <!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
 <script src="{{ url_for('static', filename='switch.js') }}"></script>
 <script src="{{ url_for('static', filename='search_results.js') }}"></script>
+<script>
+  $("#room_select").change(function() {
+    $("#room").text($("#room_select").val())
+  });
+  $(function() {
+    $("#room").text($("#room_select").val());
+  })
+</script>
 {% endblock %}

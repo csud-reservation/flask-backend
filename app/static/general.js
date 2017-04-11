@@ -44,6 +44,26 @@ function remove_days_to_date(date, days_to_remove) {
     (date.getDate()-parseInt(days_to_remove)), 0, 0, 0, 0);
 }
 
+function change_url(new_url) {
+    history.pushState(null, null, new_url);
+}
+
+// http://stackoverflow.com/questions/19491336/
+function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
 $(function() {
     $('.date_format').each(function() {
         var original_date = $(this).html();

@@ -24,16 +24,13 @@ from ..queries import *
 
 from datetime import timedelta, date, datetime
 
-def test_regex(regex, to_test):
-    pattern = re.compile("^.+$")
-    return pattern.match(to_test)
-
 @main.route('/', methods=['GET'])
 def index():
     return redirect(url_for('main.profil'))
 
 
 @main.route('/timetable_ajax', methods=['GET'])
+@login_required
 def timetable():
     start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
     start_date = start_date_str.date()

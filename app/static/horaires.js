@@ -14,8 +14,12 @@ function filter_select_rooms(value) {
 }
 
 function select_days_in_week() {
-    var days_in_week = document.getElementsByClassName('day active')[0]
-    .parentNode.getElementsByClassName('day');
+    try { 
+        var days_in_week = document.getElementsByClassName('day active')[0]
+        .parentNode.getElementsByClassName('day');
+    } catch(e) {
+        return;
+    }
     for (var i = 1; i < days_in_week.length-1; i++) {
         days_in_week[i].className = 'active day';
     }
@@ -51,7 +55,7 @@ function get_two_dates(two_dates_str) {
     return [matches[1], matches[2]];
 }
 
-function submit_invisible_form_timetable() {
+function ajax_timetable() {
     $('#titre').html('Salle ' + $('#rooms_numbers').val());
     $('#result').html('chargement des résultats');
     var dates = $('#weekly_datepicker').val();
@@ -69,6 +73,10 @@ function submit_invisible_form_timetable() {
     })
     .done(function(data, textStatus, jqXHR) {
         $('#result').html(data);
+        change_url('timetable?' + $.param({
+            "room": room_number,
+            "week": start_date,
+        }))
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue');
@@ -90,7 +98,7 @@ function change_week(is_previous_week) {
     $('.weekly_datepicker_replace').attr('id', 'weekly_datepicker');
     $('#weekly_datepicker').val(new_monday_str);
     
-    main_datepicker_creation();
+    main_datepicker_creation(false);
 }
 
 function initialize_weekly_datepicker() {
@@ -116,17 +124,23 @@ function initialize_weekly_datepicker() {
 function datepicker_change() {
     set_week_date();
     select_days_in_week();
-    submit_invisible_form_timetable();
+    ajax_timetable();
 }
 
-function main_datepicker_creation() {
+function main_datepicker_creation(first) {
+    if (first) {
+        var start_date = getUrlParameter('week')
+        var room_number = getUrlParameter('room')
+        $('#weekly_datepicker').val(start_date)
+        $('#rooms_numbers').val(room_number.replace('+', ' '))
+    }
     initialize_weekly_datepicker();
     $('#weekly_datepicker').change(datepicker_change);
-    submit_invisible_form_timetable();
+    ajax_timetable();
 }
 
 $(function() {
-    $('#rooms_numbers').change(submit_invisible_form_timetable);
+    $('#rooms_numbers').change(ajax_timetable);
     
     $('#rooms_type').change(function() {
         var value = $(this).val();
@@ -134,8 +148,8 @@ $(function() {
         if (value !== 'ALL') {
             filter_select_rooms(value);   
         }
-        submit_invisible_form_timetable();
+        ajax_timetable();
     });
     
-    main_datepicker_creation();
+    main_datepicker_creation(true);
 });

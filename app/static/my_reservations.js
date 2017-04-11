@@ -25,8 +25,8 @@ $('.infos_button').click(function() {
 $('#modify_button').click(function() {
     $('#modal_view_content').find('table').hide()
     $('.modify_form').removeClass('hidden')
-    $(this).before('<button type="button" class="btn btn-primary" id="cancel_mod_button" onclick="reset_mv()">Annuler les modifications</button>')
-    $(this).before('<button type="button" class="btn btn-success" id="update_mod_button" onclick="update_mod()">Enregistrer les modifications</button>')
+    $('#cancel_mod_button').removeClass('hidden')
+    $('#update_mod_button').removeClass('hidden')
     $(this).hide()
     $('#delete_button').hide()
     $('#reason_short_input').val($('#reason_short').text())
@@ -40,11 +40,13 @@ $('#modify_button').click(function() {
 
 });
 
+$('#cancel_mod_button').click(reset_mv);
+
 function reset_mv() {
     $('#modal_view_content').find('table').show()
     $('.modify_form').addClass('hidden')
-    $('#cancel_mod_button').remove()
-    $('#update_mod_button').remove()
+    $('#cancel_mod_button').addClass('hidden')
+    $('#update_mod_button').addClass('hidden')
     $('#modify_button').show()
     $('#delete_button').show()
     $('#reason_short_input').val()
@@ -79,7 +81,7 @@ function update_in_page(to_update) {
     $('#'+reservation_id).parent().find('.'+to_update+'_info').html(content_updated)
 }
 
-function update_mod() {
+$('#update_mod_button').click(function() {
     var reservation_id = $('#reservation_id').html()
     $.ajax({
         url: "my_reservations",
@@ -104,5 +106,4 @@ function update_mod() {
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue');
     })
-
-}
+});

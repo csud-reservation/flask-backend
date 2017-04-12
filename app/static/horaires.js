@@ -77,10 +77,21 @@ function ajax_timetable() {
             "room": room_number,
             "week": start_date,
         }))
+        format_empty_cells();
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue');
     })
+}
+
+function format_empty_cells() {
+    $('.empty').hover(
+        function() {
+            $(this).html('<span class="glyphicon glyphicon-plus"></span>')
+        }, function() {
+            $(this).html('')
+        }
+    );
 }
 
 function change_week(is_previous_week) {
@@ -139,6 +150,17 @@ function main_datepicker_creation(first) {
     ajax_timetable();
 }
 
+function add_id_to_modal_view(id) {
+    var matches = /row([0-9]+)_column([0-9]+)/.exec(id)
+    var row = matches[1]
+    var column = matches[2]
+    var start_monday = getUrlParameter('week')
+    var start_monday_DateObj = convert_dateString_to_Date(start_monday)
+    var start_date_DateObj = add_days_to_date(start_monday_DateObj, column)
+    var start_date = convert_Date_to_dateString(start_date_DateObj)
+    $('#modal_view_content').html('firstID = '+row+'<br>lastID = '+row+'<br><br>start_date = '+start_date+'<br>end_date = '+start_date)
+}
+
 $(function() {
     $('#rooms_numbers').change(ajax_timetable);
     
@@ -151,5 +173,6 @@ $(function() {
         ajax_timetable();
     });
     
-    main_datepicker_creation(true);
+    main_datepicker_creation(/\?/.test(window.location.href));
+
 });

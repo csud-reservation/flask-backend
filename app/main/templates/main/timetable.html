@@ -1,7 +1,18 @@
 <!--<h1>Horaire de la salle {{ room }} </h1>
 </div>-->
 
-<div class="table-responsive">
+<div class="hidden">
+    <div id="row_infos">
+        {% for row in range(timeslots|length) %}
+            <div id="row_{{row}}">{{timeslots[row].start_time}} {{timeslots[row].end_time}}</div>
+        {% endfor %}
+    </div>
+    <div id="column_infos">
+        {% for column in range(days|length) %}
+            <div id="column_{{column}}">{{days[column].name}}</div>
+        {% endfor %}
+    </div>
+</div>
 
 <table class="table table-bordered room-timetable">
     <thead class="thead-default">
@@ -12,18 +23,21 @@
         {% endfor %}
     </thead>
     <tbody>
-    {% for ts in timeslots %}
+    {% for row in range(timeslots|length) %}
     <tr>
         <td class="timeslot-time">
+            {% set ts = timeslots[row] %}
             {{ ts.start_time }} <br>
             {{ ts.end_time }}
         </td>
-        {% for day in days %}
+        {% for column in range(days|length) %}
+            {% set day = days[column] %}
             {% set cell = timetable[ts.order|int][day.id - 1] %}
             {% if cell %}
             <td class="reserved reserved_by_{{ cell['owner_role'] }}">
             {% else %}
-            <td>
+            <td class="empty" data-toggle="modal" data-target="#myModal" 
+            onclick="add_id_to_modal_view('row{{row}}_column{{column}}')" id="row{{row}}_column{{column}}">
             {% endif %}
             <div class="timetable cell-info reason-short">
                 {{ cell['reason'] }}
@@ -37,7 +51,6 @@
         </td>
         {% endfor %}
     </tr>
-    {% endfor %}
-        
+    {% endfor %} 
     </tbody>
 </table>

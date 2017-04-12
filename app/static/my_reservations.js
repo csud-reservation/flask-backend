@@ -19,6 +19,12 @@ $('.infos_button').click(function() {
         $('#reservation_id').parent().hide()
     })
     reset_mv()
+    $('#timetable').click(function() {
+        window.location.href = 'timetable?' + $.param({
+            room: $('#room').text(),
+            week: $('#start_date').text(),
+        })
+    })
     $('#myModal').modal()
 });
 
@@ -29,6 +35,7 @@ $('#modify_button').click(function() {
     $('#update_mod_button').removeClass('hidden')
     $(this).hide()
     $('#delete_button').hide()
+    $('#timetable').hide()
     $('#reason_short_input').val($('#reason_short').text())
     $('#student_group_input').val($('#student_group').text())
     $('#reason_details_input').val($('#reason_details').text())
@@ -49,9 +56,11 @@ function reset_mv() {
     $('#update_mod_button').addClass('hidden')
     $('#modify_button').show()
     $('#delete_button').show()
+    $('#timetable').show()
     $('#reason_short_input').val()
     $('#student_group_input').val()
     $('#reason_details_input').val()
+    $('#timetable').click(function() { return; })
 }
 
 $('#delete_button').click(function() {

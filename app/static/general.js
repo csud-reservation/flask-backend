@@ -64,11 +64,15 @@ function getUrlParameter(sParam) {
     }
 };
 
-$(function() {
+function format_dates() {
     $('.date_format').each(function() {
         var original_date = $(this).html();
         var date_formated = convert_sql_dateString_to_Date(original_date);
         var date_string = convert_Date_to_dateString(date_formated);
         $(this).html(date_string);
-    });  
+    }); 
+}
+
+$(function() {
+    format_dates()
 });

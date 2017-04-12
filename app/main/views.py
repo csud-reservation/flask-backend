@@ -15,7 +15,6 @@ import re
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
 from flask import copy_current_request_context
 
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -28,51 +27,30 @@ from datetime import timedelta, date, datetime
 def index():
     return redirect(url_for('main.profil'))
 
-
-@main.route('/timetable_ajax', methods=['GET'])
-@login_required
-def timetable():
-    start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
-    start_date = start_date_str.date()
-    end_date_str = datetime.strptime(request.args.get('end_date'), "%d.%m.%Y")
-    end_date = end_date_str.date()
-    
-    timetable = weekly_timetable(request.args.get('room_number'), start_date, end_date)
-    timeslots = Timeslot.query.all()
-    room = request.args.get('room_number')
-    days = Weekday.query.limit(5).all()
-    return render_template(
-        'timetable.html',
-        room=room, 
-        timetable=timetable, 
-        days=days, 
-        timeslots=timeslots
-    )
-
 @main.route('/search', methods=['GET', 'POST'])
 @login_required
 def search_page():
     if (request.method == 'POST'):
         
-        session['start_date'] = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
-        session['end_date'] = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
+        start_date = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
+        end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
         
-        session['weekday_id'] = session['start_date'].weekday()+1
-        session['first_period'] = int(request.form.get('firstID'))
-        session['last_period'] = int(request.form.get('lastID'))
-        session['room_type'] = request.form.get('room_type')
+        weekday_id = start_date.weekday()+1
+        first_period = int(request.form.get('firstID'))
+        last_period = int(request.form.get('lastID'))
+        room_type = request.form.get('room_type')
 
-        number_of_weeks = (session['end_date'] - session['start_date'])//7
+        number_of_weeks = (end_date - start_date)//7
         number_of_weeks = number_of_weeks.days+1
 
-        current_date = session['start_date']
+        current_date = start_date
         a_week = timedelta(weeks = 1)
         
         disponibilities = {}
         #print (number_of_weeks)
         for w in range(number_of_weeks):
 
-            result = search_query(session['weekday_id'], session['first_period']+1, session['last_period']+1, current_date.date(), session['room_type'])
+            result = search_query(weekday_id, first_period+1, last_period+1, current_date.date(), room_type)
             current_date = current_date + a_week
             
             for rooms in result:
@@ -97,14 +75,14 @@ def search_page():
         
         #Retourne une page spéciale si il n'y a pas de résultat satisfaisant
         if not bool(disponibilities) :
-            return render_template('search_empty.html')
+            return 'no room available'
             
         return render_template('search_results.html',
             disponibilities=disponibilities,
-            start_date=session['start_date'].date(),
-            end_date=session['end_date'].date(),
-            first_period = session['first_period'],
-            last_period = session['last_period']
+            start_date=start_date.date(),
+            end_date=end_date.date(),
+            first_period = first_period,
+            last_period = last_period
         )
 
     else:
@@ -112,31 +90,36 @@ def search_page():
         
 #===============================================================================
         
-@main.route('/search_confirm', methods=['POST'])
+@main.route('/new_reservation', methods=['POST'])
 @login_required
-def search_confirm():
+def new_reservation():
     
     room_select = request.form.get('room_select')
     student_group = request.form.get('student_group')
     reason = request.form.get('reason')
     res_name = request.form.get('res_name')
+    first_period = int(request.form.get('first_period'))
+    last_period = int(request.form.get('last_period'))
+
+    start_date = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
+    end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
     
-    duration = session['last_period'] - session['first_period'] + 1
+    duration = last_period - first_period + 1
     
     user = User.query.get(current_user.id)
     timeslots = Timeslot.query.filter(
         Timeslot.order.between(
-            session['first_period'],
-            session['last_period'],
+            first_period,
+            last_period,
         )
     ).all()
-    weekday = Weekday.query.get(session['weekday_id'])
+    weekday = Weekday.query.get(start_date.weekday()+1)
     room = Room.query.filter_by(name=room_select).first()
     
     reservation = Reservation(
         # dates du début et de fin d'année
-        start_date=session['start_date'],
-        end_date=session['end_date'],
+        start_date=start_date,
+        end_date=end_date,
         reason_short=res_name,
         reason_details=reason,
         duration=duration,
@@ -150,6 +133,8 @@ def search_confirm():
         
     db.session.add(reservation)
     db.session.commit()
+    
+    if request.headers['Redirection'] == 'False': return 'success'
     
     session['just_reserved'] = True
     return redirect(url_for('main.my_reservations'))
@@ -239,6 +224,26 @@ def profil():
 def horaire():
     rooms = Room.query.all()
     return render_template('horaire.html', rooms=rooms)
+
+@main.route('/timetable_ajax', methods=['GET'])
+@login_required
+def timetable():
+    start_date_str = datetime.strptime(request.args.get('start_date'), "%d.%m.%Y")
+    start_date = start_date_str.date()
+    end_date_str = datetime.strptime(request.args.get('end_date'), "%d.%m.%Y")
+    end_date = end_date_str.date()
+    
+    timetable = weekly_timetable(request.args.get('room_number'), start_date, end_date)
+    timeslots = Timeslot.query.all()
+    room = request.args.get('room_number')
+    days = Weekday.query.limit(5).all()
+    return render_template(
+        'timetable.html',
+        room=room, 
+        timetable=timetable, 
+        days=days, 
+        timeslots=timeslots
+    )
     
 @main.route('/my_reservations', methods=['GET', 'PATCH', 'DELETE'])
 @login_required

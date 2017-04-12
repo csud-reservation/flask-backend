@@ -1,91 +1,77 @@
 {% set start_period_time = ["8h10", "9h00", "9h45", "10h05", "10h55", "11h45", "12h35", "13h25", "14h15", "15h05", "15h55", "16h45", "17h35"] %}
 {% set end_period_time = ["8h55", "9h40", "10h00", "10h50", "11h40", "12h30", "13h20", "14h10", "15h00", "15h50", "16h40", "17h30", "18h20"] %}
-{% extends "base.html" %}
 
-{% block title %}Réservation{% endblock %}
-
-{% block head %}
-{{ super() }}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css">
-<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-{% endblock %}
-
-{% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-      <label>Salles disponibles</label>
-      <div class="espace_dessous">
-          <select class="form-control type_salle" id="room_select">
-            {% for room in disponibilities | dictsort %}
-              <option value="{{room[0]}}">{{ room[0]}}</option>
-            {% endfor %}
-          </select>
-        </div>
-      
-      <div class="row">
-        <div class="col-sm-6">
-          <div class="form-group">
-            <label>Nom de la réservation</label>
-            <input type="text" class="form-control" id="res_name" value="RES">
-            <div class="help-block">Ce nom apparaît directement sur l'horaire des salles</div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="form-group">
-            <label>Classe</label>
-            <input type="text" class="form-control" id="student_group">
-          </div>
+<div class="row">
+  <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+    <label>Salles disponibles</label>
+    <div class="espace_dessous">
+        <select class="form-control type_salle" id="room_select">
+          {% for room in disponibilities | dictsort %}
+            <option value="{{room[0]}}">{{ room[0]}}</option>
+          {% endfor %}
+        </select>
+      </div>
+    
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label>Nom de la réservation</label>
+          <input type="text" class="form-control" id="res_name" value="RES">
+          <div class="help-block">Ce nom apparaît directement sur l'horaire des salles</div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Raison de la réservation</label>
-        <textarea class="form-control" rows="5" id="reason"></textarea>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label>Classe</label>
+          <input type="text" class="form-control" id="student_group">
+        </div>
       </div>
-
-      <label>Résumé de la réservation</label>
-      <table class="table table-striped">
-        <tbody>
-          <tr>
-            <th>Date</th>
-            <td>
-              <span class="date_format">{{start_date}}</span>
-              {% if end_date != start_date %}
-                - <span class="date_format">{{end_date}}</span>
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <th>Période</th>
-            <td >{{start_period_time[ first_period ] }}
-              {% if first_period != last_period %}
-                - {{end_period_time[ last_period ] }}
-              {% else %}
-                - {{end_period_time[ first_period ] }}
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <th>Salle</th>
-            <td id="room"></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="form-group">
-        <span class="pull-right btn btn-primary"
-        onclick="submit_invisible_form();">Confirmer la réservation</span>
     </div>
+    <div class="form-group">
+      <label>Raison de la réservation</label>
+      <textarea class="form-control" rows="5" id="reason"></textarea>
+    </div>
+
+    <label>Résumé de la réservation</label>
+    <div class="hidden">
+      <span id="start_date" class="date_format">{{start_date}}</span>
+      <span id="end_date" class="date_format">{{end_date}}</span>
+      <span id="first_period">{{first_period}}</span>
+      <span id="last_period">{{last_period}}</span>
+    </div>
+    <table class="table table-striped">
+      <tbody>
+        <tr>
+          <th>Date</th>
+          <td>
+            <span class="date_format">{{start_date}}</span>
+            {% if end_date != start_date %}
+              - <span class="date_format">{{end_date}}</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Période</th>
+          <td >{{start_period_time[ first_period ] }}
+            {% if first_period != last_period %}
+              - {{end_period_time[ last_period ] }}
+            {% else %}
+              - {{end_period_time[ first_period ] }}
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Salle</th>
+          <td id="room"></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="form-group">
+      <span class="pull-right btn btn-primary"
+      onclick="new_reservation();">Confirmer la réservation</span>
   </div>
+</div>
 
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>-->
-<script src="{{ url_for('static', filename='datepicker.js') }}"></script>
-<!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
-<script src="{{ url_for('static', filename='switch.js') }}"></script>
-<script src="{{ url_for('static', filename='search_results.js') }}"></script>
 <script>
   $("#room_select").change(function() {
     $("#room").text($("#room_select").val())
@@ -94,4 +80,3 @@
     $("#room").text($("#room_select").val());
   })
 </script>
-{% endblock %}

@@ -98,10 +98,54 @@
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                   <h3 class="modal-title" id="myModalLabel">Nouvelle réservation</h3>
                 <div class="modal-body">
-                  <div id="modal_view_content"></div>
+                  <div class="modify_form">
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label>Nom de la réservation</label>
+                          <input type="text" class="form-control" id="newRes_res_name" value="RES">
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label>Classe</label>
+                          <input type="text" class="form-control" id="newRes_student_group">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Raison de la réservation</label>
+                      <textarea class="form-control" rows="5" id="newRes_reason"></textarea>
+                    </div>
+                    <label>Résumé de la réservation</label>
+                    <div class="hidden">
+                      <span id="newRes_first_period"></span>
+                      <span id="newRes_last_period"></span>
+                      <span id="newRes_end_date"></span>
+                    </div>
+                    <table class="table table-striped">
+                      <tbody>
+                        <tr>
+                          <th>Date</th>
+                          <td>
+                            <span id="newRes_start_date"></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Période</th>
+                          <td id="newRes_period"></td>
+                        </tr>
+                        <tr>
+                          <th>Salle</th>
+                          <td id="newRes_room_select"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="modal" id="newRes_button">Réserver</button>
                 </div>
               </div>
             </div>

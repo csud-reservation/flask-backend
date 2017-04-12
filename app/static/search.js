@@ -5,7 +5,7 @@ switch(nowDate.getDay()) {
     default: var today2 = add_days_to_date(nowDate, 0); break;
 }
 
-function submit_invisible_form() {
+function get_available_rooms() {
     if ($('.selected').length) {
         if (!is_checked('switch')) { // pas de récurrence
             if ($('#date_non_ponctuelle').val() === '') {
@@ -28,19 +28,53 @@ function submit_invisible_form() {
         var firstID = selected[0].id.replace('periode_', '');
         var lastID = selected[selected.length-1].id.replace('periode_', '');
 
-        remove_form();
-        create_form();
-        add_to_form('start_date', start_date);
-        add_to_form('end_date', end_date);
-        add_to_form('room_type', type_salle);
-        add_to_form('firstID', firstID);
-        add_to_form('lastID', lastID);
-        
-        $('#invisible_form').wrap('<form id="full_invisible_form" action="search" method="post"></form>');
-        $('#full_invisible_form').submit();
+        $.ajax({
+            url: "search",
+            type: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            contentType: "application/x-www-form-urlencoded",
+            data: {
+                "start_date": start_date,
+                "end_date": end_date,
+                "room_type": type_salle,
+                "firstID": firstID,
+                "lastID": lastID,
+            },
+        })
+        .done(function(data, textStatus, jqXHR) {
+            if (data === 'no room available') {
+                $('#no_available_room').removeClass('hidden')
+                return;
+            }
+            $('#main_container').html(data)
+            format_dates()
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            alert('une erreur est survenue')
+        });
+
     } else {
         $('#no_hour_selected').removeClass('hidden')
     }
+}
+
+function new_reservation() {
+    remove_form()
+    create_form()
+    var data = ['room_select','student_group','reason','res_name','first_period','last_period','start_date','end_date']
+
+    for (var i = 0; i < data.length; i++) {
+        if ($('#'+data[i]).is('span')) {
+            add_to_form(data[i], $('#'+data[i]).html())    
+        } else { 
+            add_to_form(data[i], $('#'+data[i]).val())
+        }
+    }
+    
+    $('#invisible_form').wrap('<form id="full_invisible_form" action="new_reservation" method="post"></form>');
+    $('#full_invisible_form').submit();
 }
  
 function select(element, index) {
@@ -86,7 +120,7 @@ function reset_modal_view() {
 }
 
 function initialize_datepicker(element, listBanned='0,6') {
-    $('input').prop("readonly", true);
+    $('input:not(.modal-body input)').prop("readonly", true);
     $(element).datepicker({language: "fr", daysOfWeekDisabled: listBanned, autoclose: true})
         .on('hide', function(e) {
             return;

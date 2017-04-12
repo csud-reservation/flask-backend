@@ -40,12 +40,15 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container" id="main_container">
   <div class="row">
     <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
       <center>
         <div class="alert alert-danger hidden " id="no_hour_selected">
           Vous n'avez sélectionné aucune plage horaire.
+        </div>
+        <div class="alert alert-danger hidden " id="no_available_room">
+          Toutes les salles sont occupées aux dates et périodes souhaitées. Veuillez modifier votre recherche.
         </div>
       </center>
       <form class="form-horizontal">
@@ -107,9 +110,9 @@
             </div>
             <div class="form-group col-sm-3">
               <span class="pull-right btn btn-primary bouton_recherche desktop"
-                onclick="submit_invisible_form();">Rechercher</span>
+                onclick="get_available_rooms();">Rechercher</span>
               <span class="btn btn-primary bouton_recherche mobile"
-                onclick="submit_invisible_form();">Rechercher</span>
+                onclick="get_available_rooms();">Rechercher</span>
             </div>
           </div>
           <!-- Modal -->

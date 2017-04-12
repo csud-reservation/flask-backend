@@ -57,7 +57,7 @@ function get_two_dates(two_dates_str) {
 
 function ajax_timetable() {
     $('#titre').html('Salle ' + $('#rooms_numbers').val());
-    $('#result').html('chargement des résultats');
+    //$('#result').html('chargement des résultats');
     var dates = $('#weekly_datepicker').val();
     var room_number = $('#rooms_numbers').val();
     var start_date = get_two_dates(dates)[0];
@@ -113,7 +113,7 @@ function change_week(is_previous_week) {
 }
 
 function initialize_weekly_datepicker() {
-    $('input').prop("readonly", true);
+    $('input:not(.modal-body input)').prop("readonly", true);
     $('#weekly_datepicker').datepicker({language: "fr", daysOfWeekDisabled: '0,6'})
     .on('show', function(e) {
         select_days_in_week();
@@ -158,11 +158,50 @@ function add_id_to_modal_view(id) {
     var start_monday_DateObj = convert_dateString_to_Date(start_monday)
     var start_date_DateObj = add_days_to_date(start_monday_DateObj, column)
     var start_date = convert_Date_to_dateString(start_date_DateObj)
-    $('#modal_view_content').html('firstID = '+row+'<br>lastID = '+row+'<br><br>start_date = '+start_date+'<br>end_date = '+start_date)
+    
+    $('#newRes_first_period').html(row)
+    $('#newRes_last_period').html(row)
+    $('#newRes_end_date').html(start_date)
+    $('#newRes_start_date').html(start_date)
+    $('#newRes_period').html($('#row_'+row).html().replace(' ', ' - '))
+    $('#newRes_room_select').html(getUrlParameter('room'))
+}
+
+function new_reservation() {
+    var data = ['room_select','student_group','reason','res_name','first_period','last_period','start_date','end_date']
+    var post_data = {}
+
+    for (var i = 0; i < data.length; i++) {
+        if ($('#newRes_'+data[i]).is('span') || $('#newRes_'+data[i]).is('td')) {
+            post_data[data[i]] = $('#newRes_'+data[i]).html()
+        } else { 
+            post_data[data[i]] = $('#newRes_'+data[i]).val()
+        }
+    }
+
+    $.ajax({
+        url: "new_reservation",
+        type: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Redirection": "False",
+        },
+        contentType: "application/x-www-form-urlencoded",
+        data: post_data,
+    })
+    .done(function(data, textStatus, jqXHR) {
+        if (data === 'success') {
+            ajax_timetable()
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        alert('une erreur est survenue')
+    })
 }
 
 $(function() {
     $('#rooms_numbers').change(ajax_timetable);
+    $('#newRes_button').click(new_reservation)
     
     $('#rooms_type').change(function() {
         var value = $(this).val();

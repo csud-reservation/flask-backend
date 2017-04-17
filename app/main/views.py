@@ -134,10 +134,9 @@ def new_reservation():
     db.session.add(reservation)
     db.session.commit()
     
-    if request.headers['Redirection'] == 'False': return 'success'
-    
-    session['just_reserved'] = True
-    return redirect(url_for('main.my_reservations'))
+    return 'success'
+    # session['just_reserved'] = True
+    # return redirect(url_for('main.my_reservations'))
    
    
 #======================================================================================
@@ -195,7 +194,6 @@ def profil():
     
     if changePWForm.validate_on_submit():
         
-        
         if not current_user.verify_password(changePWForm.old_pw.data):
             session["CombinationPP"] = 2
             
@@ -206,6 +204,7 @@ def profil():
             session["CombinationPP"] = 1
             current_user.password_hash = generate_password_hash(changePWForm.new_pw2.data)
             db.session.commit()
+
         return render_template('profil.html',
             infos=result,
             form=changePWForm,
@@ -223,7 +222,9 @@ def profil():
 @login_required
 def horaire():
     rooms = Room.query.all()
-    return render_template('horaire.html', rooms=rooms)
+    user = db.session.execute(select(['*']).where(User.id == current_user.id)).first()
+    print(user)
+    return render_template('horaire.html', rooms=rooms, user=user)
 
 @main.route('/timetable_ajax', methods=['GET'])
 @login_required
@@ -237,6 +238,7 @@ def timetable():
     timeslots = Timeslot.query.all()
     room = request.args.get('room_number')
     days = Weekday.query.limit(5).all()
+
     return render_template(
         'timetable.html',
         room=room, 

@@ -41,119 +41,123 @@
 
 {% block content %}
 <div class="container" id="main_container">
-  <div class="row">
-    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-      <center>
-        <div class="alert alert-danger hidden " id="no_hour_selected">
-          Vous n'avez sélectionné aucune plage horaire.
-        </div>
-        <div class="alert alert-danger hidden " id="no_available_room">
-          Toutes les salles sont occupées aux dates et périodes souhaitées. Veuillez modifier votre recherche.
-        </div>
-      </center>
-      <form class="form-horizontal">
-        <div class="form-group">
-          <h1 class="gros_titre">Réservation</h1>
-        </div>
-        <div class="row">
-          <div style="position: relative; bottom: 7px;">
-            <label class="col-sm-3 control-label rec_ajustement" rel="tooltip" title="Activez ce paramètre si vous souhaitez effectuer une réservation qui se répète sur plusieurs semaines">Réservation récurrente</label> 
-            <div class="col-sm-1">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" data-toggle="toggle" id="switch">
-                </label>
+  <div id="full_first_form">
+    <div class="row">
+      <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+        <center>
+          <div class="alert alert-danger hidden " id="no_hour_selected">
+            Vous n'avez sélectionné aucune plage horaire.
+          </div>
+          <div class="alert alert-danger hidden " id="no_available_room">
+            Toutes les salles sont occupées aux dates et périodes souhaitées. Veuillez modifier votre recherche.
+          </div>
+        </center>
+        <form class="form-horizontal">
+          <div class="form-group">
+            <h1 class="gros_titre">Réservation</h1>
+          </div>
+          <div class="row">
+            <div style="position: relative; bottom: 7px;">
+              <label class="col-sm-3 control-label rec_ajustement" rel="tooltip" title="Activez ce paramètre si vous souhaitez effectuer une réservation qui se répète sur plusieurs semaines">Réservation récurrente</label> 
+              <div class="col-sm-1">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" data-toggle="toggle" id="switch">
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="form-group">
-            <div class="marges">
-              <label class="col-sm-2 control-label">Date</label>
-              <div class="col-sm-5 date_input_form ajustement_sm">
-                <div id="recurrence_on">
-                  <div class="input-group input-daterange" style="width: 250px;">
-                    <input type="text" id="date_de" class="form-control today">
-                    <div class="input-group-addon">à</div>
-                    <input type="text" id="date_a" class="form-control">
+            <div class="form-group">
+              <div class="marges">
+                <label class="col-sm-2 control-label">Date</label>
+                <div class="col-sm-5 date_input_form ajustement_sm">
+                  <div id="recurrence_on">
+                    <div class="input-group input-daterange" style="width: 250px;">
+                      <input type="text" id="date_de" class="form-control today">
+                      <div class="input-group-addon">à</div>
+                      <input type="text" id="date_a" class="form-control">
+                    </div>
+                  </div>
+                  <div id="recurrence_off" style="width: 120px;">
+                    <input type="text" id="date_non_ponctuelle" class="form-control date today">
                   </div>
                 </div>
-                <div id="recurrence_off" style="width: 120px;">
-                  <input type="text" id="date_non_ponctuelle" class="form-control date today">
+              </div>
+            </div>
+          </div>
+          <div class="row marges">
+            <!-- Button trigger modal -->
+            <div class="row">
+              <label class="col-sm-2 control-label">Plage horaire</label>
+              <div class="col-sm-2">
+                <button type="button" class="btn btn-default btn-md ajustement_sm" data-toggle="modal" data-target="#myModal">
+                  Choisir...
+                </button>
+              </div>  
+              <div>
+                <label class="col-sm-2 control-label">Type de salle</label>
+                <div class="col-sm-3">
+                  <select class="form-control type_salle" id="type_salle_hidden" style="display: none;">
+                    {% for room_type in rooms_types %}
+                      <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+                    {% endfor %}
+                  </select>
+                  <select class="form-control type_salle" id="type_salle">
+                    {% for room_type in rooms_types %}
+                      <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group col-sm-3">
+                <span class="pull-right btn btn-primary bouton_recherche desktop"
+                  onclick="get_available_rooms();">Rechercher</span>
+                <span class="btn btn-primary bouton_recherche mobile"
+                  onclick="get_available_rooms();">Rechercher</span>
+              </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h3 class="modal-title" id="myModalLabel">Plage Horaire
+                      <a class="btn btn-xs btn-primary" onclick="$('#hour_select_info').toggleClass('hidden');" href="#">
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                      </a>
+                    </h3>
+                  <div class="modal-body">
+                    <center>
+                      <div class="alert alert-info hidden" id="hour_select_info">
+                        Cliquez sur la première heure, puis sur la deuxième heure que vous voulez réserver. Les heures comprises entre sont automatiquement sélectionnées. Si vous voulez sélectionner une seule heure que plusieurs sont déjà sélectionnées, double-cliquez sur l'heure correspondante.
+                      </div>
+                    </center>
+                    <table class="table table-striped horaire">
+                      <tbody>
+                        {% for i in range(13) %}
+                          <tr id="periode_{{ i }}" onclick="select(this, {{ i }});">
+                            <td>{{ periods[i][0] }}</td>
+                            <td>{{ periods[i][1] }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="reset_modal_view();">Réinitialiser</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </form>
         </div>
-        <div class="row marges">
-          <!-- Button trigger modal -->
-          <div class="row">
-            <label class="col-sm-2 control-label">Plage horaire</label>
-            <div class="col-sm-2">
-              <button type="button" class="btn btn-default btn-md ajustement_sm" data-toggle="modal" data-target="#myModal">
-                Choisir...
-              </button>
-            </div>  
-            <div>
-              <label class="col-sm-2 control-label">Type de salle</label>
-              <div class="col-sm-3">
-                <select class="form-control type_salle" id="type_salle_hidden" style="display: none;">
-                  {% for room_type in rooms_types %}
-                    <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
-                  {% endfor %}
-                </select>
-                <select class="form-control type_salle" id="type_salle">
-                  {% for room_type in rooms_types %}
-                    <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <div class="form-group col-sm-3">
-              <span class="pull-right btn btn-primary bouton_recherche desktop"
-                onclick="get_available_rooms();">Rechercher</span>
-              <span class="btn btn-primary bouton_recherche mobile"
-                onclick="get_available_rooms();">Rechercher</span>
-            </div>
-          </div>
-          <!-- Modal -->
-          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h3 class="modal-title" id="myModalLabel">Plage Horaire
-                    <a class="btn btn-xs btn-primary" onclick="$('#hour_select_info').toggleClass('hidden');" href="#">
-                      <span class="glyphicon glyphicon-info-sign"></span>
-                    </a>
-                  </h3>
-                <div class="modal-body">
-                  <center>
-                    <div class="alert alert-info hidden" id="hour_select_info">
-                      Cliquez sur la première heure, puis sur la deuxième heure que vous voulez réserver. Les heures comprises entre sont automatiquement sélectionnées. Si vous voulez sélectionner une seule heure que plusieurs sont déjà sélectionnées, double-cliquez sur l'heure correspondante.
-                    </div>
-                  </center>
-                  <table class="table table-striped horaire">
-                    <tbody>
-                      {% for i in range(13) %}
-                        <tr id="periode_{{ i }}" onclick="select(this, {{ i }});">
-                          <td>{{ periods[i][0] }}</td>
-                          <td>{{ periods[i][1] }}</td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" onclick="reset_modal_view();">Réinitialiser</button>
-                  <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
+  <div id="full_second_form"></div>
 </div>
 {% endblock %}
 

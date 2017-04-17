@@ -44,9 +44,14 @@ def weekly_timetable(room_number, week_start_date, week_end_date):
         SELECT
             timeslots.id AS [timeslot_id],
             roles.name AS [owner_role],
-            weekdays.id as [weekday_id],
-            weekdays.name as [day],
-            reservations.reason_short [reason],
+            weekdays.id AS [weekday_id],
+            weekdays.name AS [day],
+            reservations.id AS [res_id],
+            reservations.start_date AS [start_date],
+            reservations.end_date AS [end_date],
+            ? AS [room_number],
+            reservations.reason_short AS [reason],
+            reservations.reason_details AS [reason_details],
             reservations.student_group,
             group_concat(users.sigle, ' - ') AS [users]
         FROM timeslots
@@ -76,7 +81,7 @@ def weekly_timetable(room_number, week_start_date, week_end_date):
         '''
         
     week_reservation = db.engine.execute(query, [
-        room_number,
+        room_number, room_number,
         week_end_date, week_start_date
     ])
     

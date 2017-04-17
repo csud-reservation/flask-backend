@@ -74,5 +74,6 @@ function format_dates() {
 }
 
 $(function() {
+    $('th:not(.modal-body th)').css('background-color', 'rgb(249,249,249)');
     format_dates()
 });

@@ -30,7 +30,6 @@
     margin-bottom: -20px;
 }
 
-
 .espace_dessous {
     padding-bottom: 15px;
 }
@@ -63,8 +62,7 @@ tbody tr:first-child {
 }
 
 .horaire td { 
-    text-align: center;
-    
+    text-align: center; 
 }
 
 #recurrence_on { 
@@ -223,6 +221,10 @@ table.room-timetable div.timetable.cell-info {
 
 table.room-timetable tbody td.reserved.reserved_by_teacher {
     background-color: #d4f7c9;
+}
+
+.timetable_alert_format {
+    margin-bottom: 5px;
 }
 
 .empty {

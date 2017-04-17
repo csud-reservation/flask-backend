@@ -48,7 +48,8 @@ function get_available_rooms() {
                 $('#no_available_room').removeClass('hidden')
                 return;
             }
-            $('#main_container').html(data)
+            $('#full_second_form').html(data)
+            $('#full_first_form').hide()
             format_dates()
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -58,6 +59,11 @@ function get_available_rooms() {
     } else {
         $('#no_hour_selected').removeClass('hidden')
     }
+}
+
+function cancel_reservation() {
+    $('#full_second_form').html('')
+    $('#full_first_form').show()
 }
 
 function new_reservation() {

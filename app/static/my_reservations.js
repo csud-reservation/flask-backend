@@ -1,7 +1,3 @@
-$(function() {
-    $('th:not(.modal-body th)').css('background-color', 'rgb(249,249,249)');
-});
-
 $('.infos_button').click(function() {
     var reservation_id = $(this).parent().attr("id")
     var detailed_infos_block = $('#'+reservation_id).find('.detailed_infos')
@@ -16,7 +12,6 @@ $('.infos_button').click(function() {
             text_to_export = '-'
         }
         $('#'+element_class).html(text_to_export)
-        $('#reservation_id').parent().hide()
     })
     reset_mv()
     $('#timetable').click(function() {

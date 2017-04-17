@@ -77,7 +77,8 @@ function ajax_timetable() {
             "room": room_number,
             "week": start_date,
         }))
-        format_empty_cells();
+        format_empty_cells()
+        format_owner_cells()
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue');
@@ -92,6 +93,20 @@ function format_empty_cells() {
             $(this).html('')
         }
     );
+}
+
+function format_owner_cells() {
+    $('.reserved_by_teacher .cell-info.users').each(function() {
+        var regex = new RegExp($('#user_sigle').text(), 'i');
+        if (regex.test($(this).html())) {
+            $(this).parent().addClass('reserved_by_logged_user')
+            $(this).parent().hover(function() {
+                $(this).css('background-color', '#e6faff')
+            }, function() {
+                $(this).css('background-color', '#d4f7c9')
+            })
+        }
+    })
 }
 
 function change_week(is_previous_week) {
@@ -150,7 +165,10 @@ function main_datepicker_creation(first) {
     ajax_timetable();
 }
 
-function add_id_to_modal_view(id) {
+function display_new_res_modal(id) {
+    $('#infos_modal').hide()
+    $('#new_res_modal').show()
+
     var matches = /row([0-9]+)_column([0-9]+)/.exec(id)
     var row = matches[1]
     var column = matches[2]
@@ -165,6 +183,40 @@ function add_id_to_modal_view(id) {
     $('#newRes_start_date').html(start_date)
     $('#newRes_period').html($('#row_'+row).html().replace(' ', ' - '))
     $('#newRes_room_select').html(getUrlParameter('room'))
+}
+
+function display_modal_buttons(id) {
+    if ($('#'+id).hasClass('reserved_by_logged_user')) {
+        $('#modify_button').show()
+        $('#delete_button').show()
+        $('#mod_alert').show()
+    } else {
+        $('#modify_button').hide()
+        $('#delete_button').hide()
+        $('#mod_alert').hide()
+    }
+}
+
+function display_infos_modal(id) {
+    reset_mv()
+    display_modal_buttons(id)
+
+    $('#new_res_modal').hide()
+    $('#infos_modal').show()
+
+    var detailed_infos_block = $('#'+id).find('.detailed_infos')
+    $(detailed_infos_block.children()).each(function() {
+        var element_class = $(this).attr('class')
+        if (element_class === 'start_date' || element_class === 'end_date') {
+            var text_to_export = convert_Date_to_dateString(convert_sql_dateString_to_Date($(this).text()))
+        } else {
+            var text_to_export = $(this).text()
+        }
+        if (text_to_export === '') {
+            text_to_export = '-'
+        }
+        $('#'+element_class).html(text_to_export)
+    })
 }
 
 function new_reservation() {
@@ -184,7 +236,6 @@ function new_reservation() {
         type: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Redirection": "False",
         },
         contentType: "application/x-www-form-urlencoded",
         data: post_data,
@@ -192,12 +243,94 @@ function new_reservation() {
     .done(function(data, textStatus, jqXHR) {
         if (data === 'success') {
             ajax_timetable()
+
+            $('#res_deleted_message').addClass('hidden')
+            $('#res_updated_message').addClass('hidden')
+            $('#just_reserved').removeClass('hidden')
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue')
     })
 }
+
+$('#modify_button').click(function() {
+    $('#modal_view_content').find('table').hide()
+    $('.modify_form').removeClass('hidden')
+    $('#cancel_mod_button').removeClass('hidden')
+    $('#update_mod_button').removeClass('hidden')
+    $(this).hide()
+    $('#delete_button').hide()
+    $('#reason_short_input').val($('#reason_short').text())
+    $('#student_group_input').val($('#student_group').text())
+    $('#reason_details_input').val($('#reason_details').text())
+    $('#modal_view_content').find('.modify_form').find('.form-control').each(function() {
+        if ($(this).val() === '-') {
+            $(this).val('')
+        }
+    })
+
+});
+
+$('#update_mod_button').click(function() {
+    var reservation_id = $('#reservation_id').html()
+    $.ajax({
+        url: "my_reservations",
+        type: "PATCH",
+        data: {
+            "id": reservation_id,
+            "reason_short": $('#reason_short_input').val(),
+            "reason_details": $('#reason_details_input').val(),
+            "student_group": $('#student_group_input').val(),
+        },
+    })
+    .done(function(data, textStatus, jqXHR) {
+        $('#myModal').modal('hide')
+        $('#res_updated_message').removeClass('hidden')
+        $('#res_deleted_message').addClass('hidden')
+        $('#just_reserved').addClass('hidden')
+        
+        ajax_timetable()
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        alert('une erreur est survenue');
+    })
+});
+
+$('#cancel_mod_button').click(reset_mv);
+
+function reset_mv() {
+    $('#modal_view_content').find('table').show()
+    $('.modify_form').addClass('hidden')
+    $('#cancel_mod_button').addClass('hidden')
+    $('#update_mod_button').addClass('hidden')
+    $('#modify_button').show()
+    $('#delete_button').show()
+    $('#reason_short_input').val()
+    $('#student_group_input').val()
+    $('#reason_details_input').val()
+}
+
+$('#delete_button').click(function() {
+    var reservation_id = $('#reservation_id').html()
+    $.ajax({
+        url: "my_reservations",
+        type: "DELETE",
+        data: {
+            "id": reservation_id,
+        },
+    })
+    .done(function() {
+        $('#res_deleted_message').removeClass('hidden')
+        $('#res_updated_message').addClass('hidden')
+        $('#just_reserved').addClass('hidden')
+
+        ajax_timetable()
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        alert('une erreur est survenue');
+    })
+});
 
 $(function() {
     $('#rooms_numbers').change(ajax_timetable);
@@ -211,7 +344,6 @@ $(function() {
         }
         ajax_timetable();
     });
-    
-    main_datepicker_creation(/\?/.test(window.location.href));
 
+    main_datepicker_creation(/\?/.test(window.location.href));
 });

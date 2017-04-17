@@ -34,10 +34,22 @@
             {% set day = days[column] %}
             {% set cell = timetable[ts.order|int][day.id - 1] %}
             {% if cell %}
-            <td class="reserved reserved_by_{{ cell['owner_role'] }}">
+            <td class="reserved reserved_by_{{cell['owner_role']}}" data-toggle="modal" data-target="#myModal" 
+            onclick="display_infos_modal('row{{row}}_column{{column}}')" id="row{{row}}_column{{column}}">
+                <div class="detailed_infos hidden">
+                    <span class="reservation_id">{{cell['res_id']}}</span>
+                    <span class="start_date">{{cell['start_date']}}</span>
+                    <span class="end_date">{{cell['end_date']}}</span>
+                    <span class="room">{{cell['room_number']}}</span>
+                    <span class="start_time">{{timeslots[row].start_time}}</span>
+                    <span class="end_time">{{timeslots[row].end_time}}</span>
+                    <span class="reason_short">{{cell['reason']}}</span>
+                    <span class="student_group">{{cell['student_group']}}</span>
+                    <span class="reason_details">{{cell['reason_details']}}</span>
+                </div>
             {% else %}
             <td class="empty" data-toggle="modal" data-target="#myModal" 
-            onclick="add_id_to_modal_view('row{{row}}_column{{column}}')" id="row{{row}}_column{{column}}">
+            onclick="display_new_res_modal('row{{row}}_column{{column}}')" id="row{{row}}_column{{column}}">
             {% endif %}
             <div class="timetable cell-info reason-short">
                 {{ cell['reason'] }}

@@ -46,10 +46,6 @@
   text-align: center;
 }
 
-.infos_profil {
-  text-align: center;
-}
-
 .selected { background: #CEE0EC !important; }
 
 tbody tr:first-child {
@@ -97,8 +93,8 @@ tbody tr:first-child {
 }
 
 .mod_pw_title {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 7px;
 }
 
 .corps_page {
@@ -246,4 +242,43 @@ table.room-timetable tbody td.reserved.reserved_by_teacher {
 
 span.glyphicon-plus {
     font-size: 1.2em;
+}
+
+#profil_modify_button {
+    position: relative; 
+        bottom: 4px;
+}
+
+#res_confirm {
+    margin-left: 6px;
+}
+
+.label_mod_profil {
+    text-align: right;
+    position: relative;
+        top: 5px;
+}
+
+.input_mod_profil {
+    margin-bottom: 15px;
+}
+
+#profil_alerts {
+    padding-top: 5px; 
+    position: relative; 
+        bottom: 5px;
+    text-align: center;
+}
+
+.wrong_password {
+    margin-bottom: -5px;
+}
+
+.login_error_message {
+    position: relative;
+        top: 2px;
+}
+
+.login_submit_button {
+    margin-top: 6px;
 }

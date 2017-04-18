@@ -1,41 +1,112 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block title %}Login{% endblock %}
+{% block title %}Profil{% endblock %}
 
 {% block content %}
-<div class="container" style="display: none" id="hidden_block">
+<div class="container">
   <div class="row">
     <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc corps_page">
-      <h1 class="gros_titre">Profil</h1>
+      <div id="profil_alerts">
+        <div class="alert alert-success hidden" id="mod_profil_message">
+          Votre profil a bien été modifié.
+        </div>
+      </div>
+      <h1 class="gros_titre">Profil
+        {% if combination is defined %}
+          <button type="button" class="btn btn-default" id="profil_modify_button" data-toggle="modal" data-target="#myModal">
+            <span class="glyphicon glyphicon-pencil"></span>
+          </button>
+        {% endif %}
+      </h1>
       <div class="infos_profil">
-        Prénom : {{ infos['first_name'] }}<br>
-        Nom : {{ infos['last_name'] }}<br>
-        Email : <a href="mailto:{{ infos['email'] }}">{{ infos['email'] }}</a><br>
-        Sigle : {{ infos['sigle'] }}<br>
+        <div class="row">
+          <div class="col-sm-offset-3 col-sm-6">
+            <table class="table">
+              <tr><th>Prénom</th><td id="first_name">{{ infos['first_name'] }}</td></tr>
+              <tr><th>Nom</th><td id="last_name">{{ infos['last_name'] }}</td></tr>
+              <tr><th>Email</th><td id="email"><a href="mailto:{{ infos['email'] }}">{{ infos['email'] }}</a></td></tr>
+              <tr><th>Sigle</th><td id="sigle">{{ infos['sigle'] }}</td></tr>
+              <tr class="hidden"><th>Identifiant</th><td id="user_id">{{ infos['id'] }}</td></tr>
+            </table>
+          </div>
+          <div class="col-sm-offset-3"></div>
+        </div>
       </div>
       
-      <div class="changePW">
-        <h1 class="gros_titre mod_pw_title">Modifier le mot de passe</h1>
-              
-         {% if combination == 2 %}
-              <div class="error">Mot de passe actuel erroné</div>
-        {%endif%}
-        
-        {% if combination == 3 %}
-              <div class="error">La confirmation du nouveau mot de passe a échoué</div>
-        {%endif%}
-        
-        {% if combination == 1 %}
-              <div class="success">Le mot de passe a bien été modifié</div>
-        {%endif%}
-        
-          {{ wtf.quick_form(form) }}
-        {% if combination > 0 %}
+      {% if combination is defined %}
+        <div class="changePW hidden" id="modify_password_block">
+          <h1 class="gros_titre mod_pw_title">Modifier le mot de passe</h1>
+                
+           {% if combination == 2 %}
+                <div id="wrong_actual_password"></div>
+                <div class="hidden" id="last_new_password">{{new_password}}</div>
+          {%endif%}
+          
+          {% if combination == 1 %}
+                <div>
+                  <div class="alert alert-success hidden mod_password_alert" id="mod_password_message">
+                    Votre mot de passe a bien été modifié.
+                  </div>
+                </div>
+          {%endif%}
+          
+            {{ wtf.quick_form(form) }}
+          {% if combination > 0 %}
+              </div>
+          {%endif%}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h3 class="modal-title">Modification du profil</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="form-group has-success">
+              <label class="control-label col-sm-3 label_mod_profil">Prénom</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_first_name" 
+                onkeyup="verify('mod_first_name');" type="text" value="{{ infos['first_name'] }}">
+              </div>
             </div>
-        {%endif%}
+            <div class="form-group has-success">
+              <label class="control-label col-sm-3 label_mod_profil">Nom</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_last_name" 
+                onkeyup="verify('mod_last_name');" type="text" value="{{ infos['last_name'] }}">
+              </div>
+            </div>
+            <div class="form-group has-success">
+              <label class="control-label col-sm-3 label_mod_profil">Email</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_email" 
+                onkeyup="verify('mod_email');" type="text" value="{{ infos['email'] }}">
+              </div>
+            </div>
+            <div class="form-group has-success">
+              <label class="control-label col-sm-3 label_mod_profil">Sigle</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_sigle" 
+                onkeyup="verify('mod_sigle');" type="text" value="{{ infos['sigle'] }}">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+          <button type="button" class="btn btn-primary" id="mod_profil_button">Modifier le profil</button>
+        </div>
       </div>
     </div>
   </div>
+
 </div>
 {% endblock %}
 

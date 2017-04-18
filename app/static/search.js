@@ -8,22 +8,16 @@ switch(nowDate.getDay()) {
 function get_available_rooms() {
     if ($('.selected').length) {
         if (!is_checked('switch')) { // pas de récurrence
-            if ($('#date_non_ponctuelle').val() === '') {
-                alert('vous devez choisir une date');
-                return;
-            }
             var start_date = $('#date_non_ponctuelle').val();
             var end_date = $('#date_non_ponctuelle').val();
         } else { // si c'est récurrent
-            if ($('#date_de').val() === '' || $('#date_a').val() === '') {
-                alert('vous devez choisir une date');
-                return;
-            }
             var start_date = $('#date_de').val();
             var end_date = $('#date_a').val();
         }
         var type_salle = '%('+$('#type_salle').val()+')';
-        if (/ALL/.test(type_salle)) { type_salle = '%'; }
+        if (/ALL/.test(type_salle)) { 
+            type_salle = '%'; 
+        }
         var selected = document.getElementsByClassName('selected');
         var firstID = selected[0].id.replace('periode_', '');
         var lastID = selected[selected.length-1].id.replace('periode_', '');
@@ -106,6 +100,9 @@ function select(element, index) {
             $(element).addClass('pivot selected');
         }
     });
+    if ($('.selected').length) {
+        $('#no_hour_selected').addClass('hidden')
+    }
 }
 
 function is_checked(id) {
@@ -119,10 +116,8 @@ function is_checked(id) {
 }
 
 function reset_modal_view() {
-    $(function() {
-        $('.selected').removeClass('selected');
-        $('.pivot').removeClass('pivot');
-    });
+    $('.selected').removeClass('selected');
+    $('.pivot').removeClass('pivot');
 }
 
 function initialize_datepicker(element, listBanned='0,6') {
@@ -170,6 +165,12 @@ $(function() {
             $('#recurrence_on').hide() 
             $('#recurrence_off').show()
             $(".date_input_form").first().removeClass('col-sm-5').addClass('col-sm-3')
+        }
+    });
+
+    $('#myModal').on('hidden.bs.modal', function(e) { 
+        if (!$('.selected').length) {
+            $('#no_hour_selected').removeClass('hidden')
         }
     });
 });

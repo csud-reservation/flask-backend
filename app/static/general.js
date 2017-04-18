@@ -73,7 +73,10 @@ function format_dates() {
     }); 
 }
 
+function format_help_block(text) {
+    return '<div class="help-block wrong_password">'+text+'</div>'
+}
+
 $(function() {
-    $('th:not(.modal-body th)').css('background-color', 'rgb(249,249,249)');
     format_dates()
 });

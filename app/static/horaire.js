@@ -27,7 +27,6 @@ function select_days_in_week() {
 }
 
 function format_week_dates(original_date) {
-    // NB : ce code est un peu chaotique, mais j'étais fatigué au moment de l'écrire
     var date_formatted = convert_dateString_to_Date(original_date);
     switch(date_formatted.getDay()) {
         case 0: var lundi = add_days_to_date(date_formatted, 1); break;
@@ -79,6 +78,17 @@ function ajax_timetable() {
         }))
         format_empty_cells()
         format_owner_cells()
+
+        $('.reserved_by_teacher').hover(function() {
+            $(this).css('background-color', '#e6faff')
+        }, function() {
+            $(this).css('background-color', '#d4f7c9')
+        })
+        $('.reserved_by_admin').hover(function() {
+            $(this).css('background-color', 'rgb(240,240,240)')
+        }, function() {
+            $(this).css('background-color', 'rgb(211,211,211)')
+        })
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue');
@@ -100,11 +110,6 @@ function format_owner_cells() {
         var regex = new RegExp($('#user_sigle').text(), 'i');
         if (regex.test($(this).html())) {
             $(this).parent().addClass('reserved_by_logged_user')
-            $(this).parent().hover(function() {
-                $(this).css('background-color', '#e6faff')
-            }, function() {
-                $(this).css('background-color', '#d4f7c9')
-            })
         }
     })
 }
@@ -215,7 +220,21 @@ function display_infos_modal(id) {
         if (text_to_export === '') {
             text_to_export = '-'
         }
-        $('#'+element_class).html(text_to_export)
+        if (element_class === 'teachers') {
+            if (text_to_export.length > 4) {
+                $('#teachers_header').html('Professeurs')
+            } else {
+                $('#teachers_header').html('Professeur')
+            }
+            var teachers_list = text_to_export.split(' - ')
+            for (var i = 0; i < teachers_list.length; i++) {
+                var sigle = teachers_list[i]
+                teachers_list[i] = '<a href="user?sigle='+sigle+'">'+sigle+'</a>'
+            }
+            $('#teachers_cell').html(teachers_list.join(' - '))
+        } else {
+            $('#'+element_class).html(text_to_export)
+        }
     })
 }
 
@@ -233,11 +252,7 @@ function new_reservation() {
 
     $.ajax({
         url: "new_reservation",
-        type: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-        contentType: "application/x-www-form-urlencoded",
+        type: "PUT",
         data: post_data,
     })
     .done(function(data, textStatus, jqXHR) {
@@ -333,7 +348,7 @@ $('#delete_button').click(function() {
 });
 
 $(function() {
-    $('#rooms_numbers').change(ajax_timetable);
+    $('#rooms_numbers').change(ajax_timetable)
     $('#newRes_button').click(new_reservation)
     
     $('#rooms_type').change(function() {

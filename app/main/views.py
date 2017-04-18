@@ -85,12 +85,11 @@ def search_page():
             last_period = last_period
         )
 
-    else:
-        return render_template('search.html')
+    return render_template('search.html')
         
 #===============================================================================
         
-@main.route('/new_reservation', methods=['POST'])
+@main.route('/new_reservation', methods=['PUT', 'POST'])
 @login_required
 def new_reservation():
     
@@ -134,9 +133,11 @@ def new_reservation():
     db.session.add(reservation)
     db.session.commit()
     
-    return 'success'
-    # session['just_reserved'] = True
-    # return redirect(url_for('main.my_reservations'))
+    if (request.method == 'PUT'):
+        return 'success'
+
+    session['just_reserved'] = True
+    return redirect(url_for('main.my_reservations'))
    
    
 #======================================================================================
@@ -182,10 +183,30 @@ def logout():
     return redirect(url_for('main.index'))
 
 #============================================================================
-@main.route('/user', methods=['GET', 'POST'])
+@main.route('/user', methods=['GET', 'PATCH', 'POST'])
 @login_required
 def profil():
-    
+
+    if (request.method == 'PATCH'):
+        db.engine.execute('UPDATE users SET first_name = ?, last_name = ?, email = ?, sigle = ? WHERE users.id = ?',
+            request.form.get('first_name'), request.form.get('last_name'), 
+            request.form.get('email'), request.form.get('sigle'), request.form.get('id'))
+
+        return 'success'
+
+    if (request.args.get('sigle') is not None):
+        user_id = db.session.execute(select(['id']).where(User.sigle == request.args.get('sigle').upper())).first().id
+
+        if (user_id == current_user.id):
+            return redirect(url_for('main.profil'))
+
+        query = select(['*']).where(User.id == user_id)
+        result = db.session.execute(query).first()
+
+        return render_template('profil.html',
+            infos=result
+        )
+
     # CombinationPP (pour Combinaison Password-Password) permet d'envoyer au client le type d'erreur dans le changement de mot de passe
     session['CombinationPP'] = 0
     changePWForm = ChangePasswordForm()
@@ -193,37 +214,32 @@ def profil():
     result = db.session.execute(query).first()
     
     if changePWForm.validate_on_submit():
-        
         if not current_user.verify_password(changePWForm.old_pw.data):
             session["CombinationPP"] = 2
-            
-        elif not changePWForm.new_pw.data == changePWForm.new_pw2.data:
-            session["CombinationPP"] = 3
-            
+
+            return render_template('profil.html',
+                infos=result,
+                form=changePWForm,
+                combination=session['CombinationPP'],
+                new_password=changePWForm.new_pw2.data)   
         else:
             session["CombinationPP"] = 1
-            current_user.password_hash = generate_password_hash(changePWForm.new_pw2.data)
+            current_user.password_hash = generate_password_hash(changePWForm.new_pw.data)
             db.session.commit()
 
-        return render_template('profil.html',
-            infos=result,
-            form=changePWForm,
-            combination=session['CombinationPP']
-        )
+    else:
+        session['CombinationPP'] = 0 
 
-    session['CombinationPP'] = 0 
     return render_template('profil.html',
         infos=result,
         form=changePWForm,
-        combination=session['CombinationPP']
-    )
+        combination=session['CombinationPP'])
     
 @main.route('/timetable')
 @login_required
 def horaire():
     rooms = Room.query.all()
     user = db.session.execute(select(['*']).where(User.id == current_user.id)).first()
-    print(user)
     return render_template('horaire.html', rooms=rooms, user=user)
 
 @main.route('/timetable_ajax', methods=['GET'])
@@ -258,24 +274,23 @@ def my_reservations():
 
         return 'success'
 
-    elif (request.method == 'PATCH'):
+    if (request.method == 'PATCH'):
         db.engine.execute('UPDATE reservations SET reason_short = ?, reason_details = ?, student_group = ? WHERE reservations.id = ?',
             request.form.get('reason_short'), request.form.get('reason_details'), request.form.get('student_group'), request.form.get('id'))
 
         return 'success'
 
-    else:
-        today = datetime.today().date()
-        reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date))
+    today = datetime.today().date()
+    reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date))
+    
+    if not 'just_reserved' in session:
+        session['just_reserved'] = False
         
-        if not 'just_reserved' in session:
-            session['just_reserved'] = False
-            
-        if (session['just_reserved']):
-            just_reserved = True
-            session['just_reserved'] = False
-        else:
-            just_reserved = False
-            
-        return render_template('my_reservations.html',
-            reservations=reservations, today=today, just_reserved=just_reserved)
+    if (session['just_reserved']):
+        just_reserved = True
+        session['just_reserved'] = False
+    else:
+        just_reserved = False
+        
+    return render_template('my_reservations.html',
+        reservations=reservations, today=today, just_reserved=just_reserved)

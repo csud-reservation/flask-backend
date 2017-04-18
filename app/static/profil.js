@@ -15,7 +15,7 @@ function show_error(id, recursion) {
 	} 
 	function to_do(bool, message, id) {
 		if (bool) {
-			$('#'+id).parent().parent().removeClass('has-error').addClass('has-success');
+			$('#'+id).parent().parent().removeClass('has-error')
 			$('#'+id).parent().find('.wrong_password').each(function() { 
 				$(this).remove() 
 			})
@@ -59,7 +59,7 @@ function verify(id) {
 		return false
 	}
 	if (get_regex(id).test($('#'+id).val())) {
-		input_form.removeClass('has-error').addClass('has-success')
+		input_form.removeClass('has-error')
 		return true
 	} // else
 	input_form.removeClass('has-success').addClass('has-error')

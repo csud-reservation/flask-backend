@@ -23,6 +23,28 @@ from ..queries import *
 
 from datetime import timedelta, date, datetime
 
+def get_roles_list():
+    roles = Role.query.all()
+    roles_list = ['']
+    for role in roles:
+        roles_list.append(role.description)
+    return roles_list
+
+#Chargement des groupes d'étudiants depuis le fichier CSV
+csv_file = open("student_groups.csv","r")
+student_groups = csv_file.read().split(";")
+
+for i in range(len(student_groups)):
+    
+    student_groups[i] = student_groups[i].strip("[]")
+
+student_groups = sorted(student_groups)
+csv_file.close()
+
+#Groupes généraux. Ils ne devraient jamais changer à priori
+
+general_student_groups = ["1GY", "1ECG", "1EC", "2GY", "2ECG", "2EC", "3GY", "3ECG", "3EC", "4GY", "4MSPE"]
+
 @main.route('/', methods=['GET'])
 def index():
     return redirect(url_for('main.profil'))
@@ -85,7 +107,8 @@ def search_page():
             last_period = last_period
         )
 
-    return render_template('search.html')
+    user_role = Role.query.get(current_user.role_id).name
+    return render_template('search.html', role=user_role, student_groups = student_groups)
         
 #===============================================================================
         
@@ -183,15 +206,53 @@ def logout():
     return redirect(url_for('main.index'))
 
 #============================================================================
-@main.route('/user', methods=['GET', 'PATCH', 'POST'])
+@main.route('/user', methods=['GET', 'PATCH', 'POST', 'PUT', 'DELETE'])
 @login_required
 def profil():
+    user_role = Role.query.get(current_user.role_id).name
 
     if (request.method == 'PATCH'):
-        db.engine.execute('UPDATE users SET first_name = ?, last_name = ?, email = ?, sigle = ? WHERE users.id = ?',
-            request.form.get('first_name'), request.form.get('last_name'), 
-            request.form.get('email'), request.form.get('sigle'), request.form.get('id'))
+        if (request.form.get('role') is None):
+            role_id = current_user.role_id
+            
+            if (request.form.get('id') != current_user.role_id):
+                return 'operation interdite'
+        else:
+            role_id = request.form.get('role')
+            
+            if (user_role != 'admin'):
+                return 'operation interdite'
+            
+        db.engine.execute('UPDATE users SET first_name = ?, last_name = ?, email = ?, sigle = ?, role_id = ? WHERE users.id = ?',
+            request.form.get('first_name'), request.form.get('last_name'), request.form.get('email'), 
+            request.form.get('sigle').upper(), role_id, request.form.get('id'))
 
+        return 'success'
+    
+    if (request.method == 'PUT'):
+            
+        if (user_role != 'admin'):
+            return 'operation interdite'
+            
+        password = password_generator()
+        password_hash = generate_password_hash(password)
+            
+        db.engine.execute('INSERT INTO users(first_name, last_name, email, sigle, role_id, password_hash) VALUES (?,?,?,?,?,?)',
+            request.form.get('first_name'), request.form.get('last_name'), request.form.get('email'), 
+            request.form.get('sigle').upper(), request.form.get('role'), password_hash)
+
+        return password
+
+    if (request.method == 'DELETE'):
+            
+        if (user_role != 'admin'):
+            return 'operation interdite'
+            
+        password = password_generator()
+        print('mdp : '+password)
+        password_hash = generate_password_hash(password)
+            
+        db.engine.execute('DELETE FROM users WHERE id = ?', request.form.get('user_id'))
         return 'success'
 
     if (request.args.get('sigle') is not None):
@@ -203,9 +264,7 @@ def profil():
         query = select(['*']).where(User.id == user_id)
         result = db.session.execute(query).first()
 
-        return render_template('profil.html',
-            infos=result
-        )
+        return render_template('profil.html', infos=result, role=user_role, roles_list=get_roles_list())
 
     # CombinationPP (pour Combinaison Password-Password) permet d'envoyer au client le type d'erreur dans le changement de mot de passe
     session['CombinationPP'] = 0
@@ -218,6 +277,7 @@ def profil():
             session["CombinationPP"] = 2
 
             return render_template('profil.html',
+                role=user_role,
                 infos=result,
                 form=changePWForm,
                 combination=session['CombinationPP'],
@@ -231,16 +291,19 @@ def profil():
         session['CombinationPP'] = 0 
 
     return render_template('profil.html',
+        role=user_role,
         infos=result,
         form=changePWForm,
+        roles_list=get_roles_list(),
         combination=session['CombinationPP'])
     
 @main.route('/timetable')
 @login_required
 def horaire():
+    user_role = Role.query.get(current_user.role_id).name
     rooms = Room.query.all()
     user = db.session.execute(select(['*']).where(User.id == current_user.id)).first()
-    return render_template('horaire.html', rooms=rooms, user=user)
+    return render_template('horaire.html', rooms=rooms, user=user, role=user_role)
 
 @main.route('/timetable_ajax', methods=['GET'])
 @login_required
@@ -282,6 +345,7 @@ def my_reservations():
 
     today = datetime.today().date()
     reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date))
+    user_role = Role.query.get(current_user.role_id).name
     
     if not 'just_reserved' in session:
         session['just_reserved'] = False
@@ -293,4 +357,35 @@ def my_reservations():
         just_reserved = False
         
     return render_template('my_reservations.html',
-        reservations=reservations, today=today, just_reserved=just_reserved)
+        reservations=reservations, today=today, just_reserved=just_reserved, role=user_role)
+        
+@main.route('/users_admin', methods=['GET'])
+@login_required
+def users_admin():
+    user_role = Role.query.get(current_user.role_id).name
+    if user_role != 'admin':
+        return 'acces interdit'
+    
+    users = User.query.order_by('sigle').all()
+    return render_template('users_admin.html', users=users, roles=get_roles_list(), role=user_role)
+    
+@main.route('/last_user', methods=['GET'])
+@login_required
+def last_user():
+    user = User.query.order_by('-id').first()
+    return render_template('last_user.html', user=user, roles=get_roles_list())
+    
+@main.route('/reset_password', methods=['POST'])
+@login_required
+def reset_password():
+    user_role = Role.query.get(current_user.role_id).name
+    if user_role != 'admin':
+        return 'acces interdit'
+    
+    password = password_generator()
+    password_hash = generate_password_hash(password)
+    
+    db.engine.execute('UPDATE users SET password_hash = ? WHERE users.id = ?',
+    password_hash, request.form.get('user_id'))
+    
+    return password

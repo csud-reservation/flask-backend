@@ -1,0 +1,18 @@
+<tr class="user_row">
+  <td class="{{ user['id'] }}_sigle">
+    <a href="user?sigle={{ user['sigle'] }}">{{ user['sigle'] }}</a>
+  </td>
+  <td class="first_name {{ user['id'] }}_first_name">{{ user['first_name'] }}</td>
+  <td class="last_name {{ user['id'] }}_last_name">{{ user['last_name'] }}</td>
+  <td class="{{ user['id'] }}_email">
+    <a href="mailto:{{ user['email'] }}">{{ user['email'] }}</a>
+  </td>
+  <td class="{{ user['id'] }}_role role_id_{{ user['role_id'] }}">
+    {{ roles[user['role_id']] }}
+  </td>
+  <td id="{{ user['id'] }}">
+    <button class="btn btn-xs btn-primary infos_button">
+      <span class="glyphicon glyphicon-info-sign"></span>
+    </button>
+  </td>
+</tr>

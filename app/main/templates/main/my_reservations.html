@@ -33,6 +33,7 @@
               <th>Classe</th>
               <th></th>
             <tbody>
+              <tr class="hidden"></tr>
               {% for res in reservations %}
               {% set timeslots = res.timeslots.all() %}
               
@@ -91,6 +92,7 @@
                       </div>
                     </center>
                     <table class="table table-striped">
+                      <tr class="hidden"></tr>
                       <tr class="hidden"><th>Identifiant de la réservation</th><td id="reservation_id"></td></tr>
                       <tr><th>Date de début</th><td id="start_date"></td></tr>
                       <tr><th>Date de fin</th><td id="end_date"></td></tr>

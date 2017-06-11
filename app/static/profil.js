@@ -19,7 +19,7 @@ function show_error(id, recursion) {
 			$('#'+id).parent().find('.wrong_password').each(function() { 
 				$(this).remove() 
 			})
-		} else {
+		} else {
 			$('#'+id).parent().parent().addClass('has-error');
 			if (!$('#'+id).next().hasClass('wrong_password')) {
 				$('#'+id).after(format_help_block(message))
@@ -42,11 +42,11 @@ function show_error(id, recursion) {
 
 function get_regex(data) {
   	switch(data) {
-	    case 'mod_first_name': case 'mod_last_name':
+	    case 'mod_first_name': case 'mod_last_name': case 'new_first_name': case 'new_last_name':
 	    	return /(^$)|(^([^\!#\$%&\(\)\*,\./:;\?@\[\\\]_\{\|\}¨ˇ“”€\+<=>§°\d\s¤®™©]| )+$)/
-	    case 'mod_email':
+	    case 'mod_email': case 'new_email':
 	    	return /^[a-z0-9\.-_]+\@[a-z0-9\.-_]+\.[a-z]{2,10}$/i
-	    case 'mod_sigle':
+	    case 'mod_sigle': case 'new_sigle':
 	    	return /^[a-zA-Z]{4}$/
 	}
 }
@@ -94,6 +94,9 @@ $('#mod_profil_button').click(function() {
             $('#mod_password_message').addClass('hidden')
             $('#mod_profil_message').removeClass('hidden')
         }
+        else {
+        	alert(data)
+        }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         alert('une erreur est survenue:' + JSON.stringify(jqXHR))
@@ -101,7 +104,7 @@ $('#mod_profil_button').click(function() {
 })
 
 $(function() {
-	if (!/\?/.test(window.location.href)) {
+	if (!/\?/.test(window.location.href) && !/users_admin/.test(window.location.href)) {
 		$('.required').each(function() {
 			$('label', this).addClass('col-sm-3 label_login'); 
 			$('input', this).wrap('<div class="col-sm-9 input_login"></div>');

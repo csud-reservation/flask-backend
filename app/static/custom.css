@@ -20,7 +20,7 @@
   top: 8px;
 }
 
-.hidden {
+.hidden, .hidden_row {
   display: none;
 }
 
@@ -211,7 +211,7 @@ table.room-timetable div.timetable.cell-info {
     width: 140px;
 }
 
-#no_hour_selected {
+#no_hour_selected, #no_available_room {
     margin-bottom: 2px;
 }
 
@@ -244,7 +244,7 @@ span.glyphicon-plus {
     font-size: 1.2em;
 }
 
-#profil_modify_button {
+#profil_modify_button, .new_user_button {
     position: relative; 
         bottom: 4px;
 }
@@ -253,13 +253,13 @@ span.glyphicon-plus {
     margin-left: 6px;
 }
 
-.label_mod_profil {
+.label_mod_profil, .label_new_profil {
     text-align: right;
     position: relative;
         top: 5px;
 }
 
-.input_mod_profil {
+.input_mod_profil, .input_new_profil {
     margin-bottom: 15px;
 }
 
@@ -281,4 +281,14 @@ span.glyphicon-plus {
 
 .login_submit_button {
     margin-top: 6px;
+}
+
+.stripe {
+    background-color: rgb(249,249,249)
+}
+
+#search_input {
+    margin-bottom: 12px;
+    position: relative;
+    top: 2px;
 }

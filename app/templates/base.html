@@ -22,10 +22,12 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('main.search_page') }}">Réservation</a></li>
                     <li><a href="{{ url_for('main.horaire') }}">Horaire</a></li>
+                    {% if role == "admin" %}
+                        <li><a href="{{ url_for('main.users_admin') }}">Utilisateurs</a></li>
+                    {% endif %}
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">

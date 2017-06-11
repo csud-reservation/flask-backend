@@ -89,6 +89,13 @@ def insert_reservation(db, row, start_date, end_date):
             print("Erreur salle : ", room)
             print(row)
             
+        csv_file = open('student_groups.csv','r+')
+        groups = csv_file.read().split(";")
+        if row["CLASSE"] not in groups:
+            csv_file.write(row['CLASSE']+";")
+        csv_file.close()
+        
+            
         reservation = Reservation(
             # dates du début et de fin d'année
             start_date=start_date,

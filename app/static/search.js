@@ -133,6 +133,8 @@ $("#room_select").change(function() {
 });
 
 $(function() {
+    
+    $("#particular").hide()
     $("#room").text($("#room_select").val());
     $('.today').val(convert_Date_to_dateString(today2));
     
@@ -171,6 +173,17 @@ $(function() {
     $('#myModal').on('hidden.bs.modal', function(e) { 
         if (!$('.selected').length) {
             $('#no_hour_selected').removeClass('hidden')
+        }
+    });
+    
+        $("#group").change(function() {
+        if(this.checked) {
+            $('#general').hide()
+            $('#particular').show()
+        }
+        else{
+            $('#particular').hide() 
+            $('#general').show()
         }
     });
 });

@@ -1,8 +1,12 @@
 from . import db
-
+import string
+import random
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 db.verbosity = 2
+
+def password_generator(length=8) :
+    return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
 
 
 class User(UserMixin, db.Model):
@@ -39,12 +43,20 @@ class User(UserMixin, db.Model):
         admin_role = Role.query.filter_by(name='admin').first()
         admin = User.query.filter_by(role=admin_role).first()
         
+        
+        password = password_generator()
+        
+        csv_file = open('account_password.csv','a')
+        csv_file.write("morisodi@edufr.ch;"+password+"\n")
+        csv_file.close()
+        
+        
         if admin is None:
             admin = User(
                 first_name="Administrateur",
                 last_name="Système réservation CSUD",
                 email="morisodi@edufr.ch",
-                password_hash="super_secret_passwd",
+                password_hash=generate_password_hash(password),
                 role=admin_role
             )
             
@@ -73,6 +85,13 @@ class User(UserMixin, db.Model):
             role = Role.query.filter_by(
                 name=roles[teacher_admin['Fonction Identifiant FR']]
             ).one()
+            
+
+            password = password_generator()
+            
+            csv_file = open('account_password.csv','a')
+            csv_file.write(teacher_admin['Email Ecole']+";"+password+"\n")
+            csv_file.close()
 
             if teacher is None:
                 teacher = User(
@@ -80,7 +99,7 @@ class User(UserMixin, db.Model):
                     last_name=t['NOM'],
                     sigle=t['ABREV'],
                     email=teacher_admin['Email Ecole'],
-                    password_hash=generate_password_hash('unsecure'),
+                    password_hash=generate_password_hash(password),
                     role=role
                 )
                 db.session.add(teacher)

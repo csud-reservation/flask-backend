@@ -26,6 +26,7 @@
               <tr><th>Nom</th><td id="last_name">{{ infos['last_name'] }}</td></tr>
               <tr><th>Email</th><td id="email"><a href="mailto:{{ infos['email'] }}">{{ infos['email'] }}</a></td></tr>
               <tr><th>Sigle</th><td id="sigle">{{ infos['sigle'] }}</td></tr>
+              <tr><th>Rôle</th><td id="role">{{ roles_list[infos['role_id']] }}</td></tr>
               <tr class="hidden"><th>Identifiant</th><td id="user_id">{{ infos['id'] }}</td></tr>
             </table>
           </div>

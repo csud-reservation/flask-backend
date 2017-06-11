@@ -29,6 +29,7 @@
 ['Période 12', '17h35 - 18h20']
 ] %}
 
+{% set general_student_groups = ["1GY", "1ECG", "1EC", "2GY", "2ECG", "2EC", "3GY", "3ECG", "3EC", "4GY", "4MSPE"] %}
 {% extends "base.html" %}
 
 {% block title %}Réservation{% endblock %}
@@ -159,6 +160,8 @@
   </div>
   <div id="full_second_form"></div>
 </div>
+
+
 {% endblock %}
 
 {% block scripts %}

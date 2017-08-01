@@ -6,9 +6,23 @@
     <label>Salles disponibles</label>
     <div class="espace_dessous">
         <select class="form-control type_salle" id="room_select">
-          {% for room in disponibilities | dictsort %}
-            <option value="{{room[0]}}">{{ room[0]}}</option>
-          {% endfor %}
+          {% if admin_rights %}
+            {% for room in disponibilities %}
+              <option value="{{room[0]}}">{{ room[0] }}
+                {% if room[1] > 1 %}
+                 &emsp;&emsp;&emsp;{{room[1]}} conflits
+                 
+                {% elif room[1] == 1 %}
+                &emsp;&emsp;&emsp;{{room[1]}} conflit
+                
+                {% endif %}
+              </option>
+            {% endfor %}
+          {% else %}
+            {% for room in disponibilities | dictsort %}
+              <option value="{{room[0]}}">{{ room[0]}}</option>
+            {% endfor %}
+          {% endif %}
         </select>
       </div>
     

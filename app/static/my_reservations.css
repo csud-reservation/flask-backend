@@ -10,3 +10,8 @@
 	position: relative;
 		top: 4px;
 }
+
+ul {
+
+    list-style-position: inside;
+}

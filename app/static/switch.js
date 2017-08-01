@@ -5,7 +5,12 @@
  * Copyright 2014 Min Hur, The New York Times Company
  * Licensed under MIT
  * ======================================================================== */
-
+$(function() {
+    $('#group').bootstrapToggle({
+      on: 'Particulier',
+      off: 'Général'
+    });
+  })
 
  +function ($) {
  	'use strict';

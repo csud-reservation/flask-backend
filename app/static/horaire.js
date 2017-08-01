@@ -106,7 +106,7 @@ function format_empty_cells() {
 }
 
 function format_owner_cells() {
-    $('.reserved_by_teacher .cell-info.users').each(function() {
+    $('.reserved .cell-info.users').each(function() {
         var regex = new RegExp($('#user_sigle').text(), 'i');
         if (regex.test($(this).html())) {
             $(this).parent().addClass('reserved_by_logged_user')
@@ -191,7 +191,7 @@ function display_new_res_modal(id) {
 }
 
 function display_modal_buttons(id) {
-    if ($('#'+id).hasClass('reserved_by_logged_user')) {
+    if ($('#'+id).hasClass('reserved_by_logged_user') || $('#user_role').text() === 'admin') {
         $('#modify_button').show()
         $('#delete_button').show()
         $('#mod_alert').show()
@@ -328,11 +328,18 @@ function reset_mv() {
 
 $('#delete_button').click(function() {
     var reservation_id = $('#reservation_id').html()
+    var monday_str = get_two_dates($('#weekly_datepicker').val())[0]
+    var days_to_add = $('#day_id').html()
+    var monday_Date = convert_dateString_to_Date(monday_str)
+    var start_Date = add_days_to_date(monday_Date, days_to_add)
+    var start_date = convert_Date_to_dateString(start_Date)
+    
     $.ajax({
         url: "my_reservations",
         type: "DELETE",
         data: {
             "id": reservation_id,
+            "start_date": start_date,
         },
     })
     .done(function() {

@@ -16,10 +16,12 @@ import re
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask import copy_current_request_context
+from flask_mail import Message
 
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from ..forms import LoginForm, ChangePasswordForm
 from ..queries import *
+from ..split_reservation import *
 
 from datetime import timedelta, date, datetime
 
@@ -30,20 +32,55 @@ def get_roles_list():
         roles_list.append(role.description)
     return roles_list
 
-#Chargement des groupes d'étudiants depuis le fichier CSV
-csv_file = open("student_groups.csv","r")
-student_groups = csv_file.read().split(";")
-
-for i in range(len(student_groups)):
+def get_student_groups_list():
+    s = db.session.query(Reservation.student_group).distinct()
+    student_groups_list = []
+    for sg in s :
+        if sg[0].strip("[]"):
+            student_groups_list.append(sg[0].strip("[]"))
+    return sorted(student_groups_list)
     
-    student_groups[i] = student_groups[i].strip("[]")
+def get_rooms_list():
+    all_rooms = db.engine.execute("SELECT rooms.name FROM rooms")
+    room_list = []
+    for r in all_rooms :
+        room_list.append(r[0])
+    return sorted(room_list)
+    
+    
+def get_all_rooms_with_conflicts(start_date, end_date, first_period, last_period, room_type):
+    
+    weekday_id = start_date.weekday()+1
+    number_of_weeks = (end_date - start_date)//7
+    number_of_weeks = number_of_weeks.days+1
 
-student_groups = sorted(student_groups)
-csv_file.close()
+    current_date = start_date
+    one_week = timedelta(weeks = 1)
 
-#Groupes généraux. Ils ne devraient jamais changer à priori
+    all_rooms = db.engine.execute("SELECT rooms.name FROM rooms")
+    all_rooms_with_conflicts = {}
+    possible_conflicts = (last_period+1-first_period)*number_of_weeks
+    
+    for rooms in all_rooms:
+        all_rooms_with_conflicts[rooms[0]] = possible_conflicts
+        
+     
+    all_rooms_free_at_least_once = []  
+    for w in range(number_of_weeks):
+        for i in range(last_period-first_period+1):
+            free_rooms = search_query(weekday_id, first_period+i+1, first_period+i+1, current_date.date(), room_type)
+            for r in free_rooms:
+                all_rooms_free_at_least_once.append(r[0])
+        current_date = current_date + one_week
 
-general_student_groups = ["1GY", "1ECG", "1EC", "2GY", "2ECG", "2EC", "3GY", "3ECG", "3EC", "4GY", "4MSPE"]
+    
+    for r in all_rooms_free_at_least_once:
+        all_rooms_with_conflicts[r] = all_rooms_with_conflicts[r]-1
+        
+    return all_rooms_with_conflicts
+    
+    
+
 
 @main.route('/', methods=['GET'])
 def index():
@@ -52,66 +89,67 @@ def index():
 @main.route('/search', methods=['GET', 'POST'])
 @login_required
 def search_page():
+    
     if (request.method == 'POST'):
         
         start_date = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
         end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
         
-        weekday_id = start_date.weekday()+1
         first_period = int(request.form.get('firstID'))
         last_period = int(request.form.get('lastID'))
         room_type = request.form.get('room_type')
 
-        number_of_weeks = (end_date - start_date)//7
-        number_of_weeks = number_of_weeks.days+1
 
-        current_date = start_date
-        a_week = timedelta(weeks = 1)
-        
-        disponibilities = {}
-        #print (number_of_weeks)
-        for w in range(number_of_weeks):
-
-            result = search_query(weekday_id, first_period+1, last_period+1, current_date.date(), room_type)
-            current_date = current_date + a_week
-            
-            for rooms in result:
-                #print("rooms", rooms)
-                if not rooms['name'] in disponibilities.keys() :
-                    disponibilities[rooms['name']] = 1
-                else :
-                    disponibilities[rooms[0]] = disponibilities[rooms[0]] + 1
-            #print (disponibilities)
-            
-        #Supprimer les salles qui ne sont pas disponibles toutes les semaines
-        #TODO : modifier pour que l'admin puisse y accéder aux salles avec conflit et les écraser
-        keys_with_conflict = []
-        for key, value in disponibilities.items():
-    
-            if value < number_of_weeks :
-                print ("key : ",key)
-                keys_with_conflict.append(key)
+        all_rooms_with_conflicts = get_all_rooms_with_conflicts(start_date, end_date, first_period, last_period, room_type)
                 
-        for e in keys_with_conflict:
-            del disponibilities[e]
+        admin_rights = request.form.get('adminRights') == 'true'
+        session["admin_rights"] = admin_rights
         
-        #Retourne une page spéciale si il n'y a pas de résultat satisfaisant
-        if not bool(disponibilities) :
-            return 'no room available'
+        user_role = Role.query.get(current_user.role_id).name
+        
+        if admin_rights and user_role == 'admin':
             
-        return render_template('search_results.html',
-            disponibilities=disponibilities,
-            start_date=start_date.date(),
-            end_date=end_date.date(),
-            first_period = first_period,
-            last_period = last_period
-        )
+            sorted_all_rooms_with_conflicts = sorted(all_rooms_with_conflicts.items(), key=lambda x: (x[1],x[0]))
+            
+            return render_template('search_results.html',
+                disponibilities=sorted_all_rooms_with_conflicts,
+                start_date=start_date.date(),
+                end_date=end_date.date(),
+                first_period = first_period,
+                last_period = last_period,
+                admin_rights = 1
+            )    
+        
+        else :
+            keys_with_conflict = []
+            for key, value in all_rooms_with_conflicts.items():
+        
+                if value > 0 :
+                    print ("key : ",key)
+                    keys_with_conflict.append(key)
+                    
+            for e in keys_with_conflict:
+                del all_rooms_with_conflicts[e]
+            
+            #Retourne une page spéciale si il n'y a pas de résultat satisfaisant
+            if not bool(all_rooms_with_conflicts) :
+                return 'no room available'
+                
+            return render_template('search_results.html',
+                disponibilities=all_rooms_with_conflicts,
+                start_date=start_date.date(),
+                end_date=end_date.date(),
+                first_period = first_period,
+                last_period = last_period,
+                admin_rights = 0
+            )
 
     user_role = Role.query.get(current_user.role_id).name
-    return render_template('search.html', role=user_role, student_groups = student_groups)
+    return render_template('search.html', role=user_role)
         
 #===============================================================================
-        
+     
+
 @main.route('/new_reservation', methods=['PUT', 'POST'])
 @login_required
 def new_reservation():
@@ -122,9 +160,87 @@ def new_reservation():
     res_name = request.form.get('res_name')
     first_period = int(request.form.get('first_period'))
     last_period = int(request.form.get('last_period'))
-
     start_date = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
     end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
+    weekday_id = start_date.weekday()+1
+    
+    
+    all_rooms_with_conflicts = get_all_rooms_with_conflicts(start_date, end_date, first_period, last_period, "%%")
+    
+    session["modifications"] = []
+    session["modifications_dates"] = []
+    session["old_room"] = room_select
+
+    print(all_rooms_with_conflicts)
+    
+    user_role = Role.query.get(current_user.role_id).name
+    
+    if user_role == 'admin' and session["admin_rights"]:
+        if all_rooms_with_conflicts[room_select]:
+            
+            print(all_rooms_with_conflicts[room_select])
+            res_to_replace = get_reservation_by_room(start_date, end_date, first_period+1, last_period+1, room_select)
+
+            for res in res_to_replace:
+
+                first_free_room = search_query(weekday_id, res.timeslot_id, res.timeslot_id, start_date.date(), "%%").first()
+                
+                user_id = db.engine.execute("SELECT reservations_users.user_id  from reservations  LEFT JOIN reservations_users ON reservations.id = reservations_users.reservation_id  WHERE id=?", [res.reservation_id])
+            
+                user_id_tuple=()
+                for u in user_id:
+                    user_id_tuple = user_id_tuple + (u[0],)
+                
+                user = User.query.filter(User.id.in_(user_id_tuple))
+                
+                timeslots = Timeslot.query.filter(
+                Timeslot.order.between(
+                    res.timeslot_id-1,
+                    res.timeslot_id-1,
+                )
+                ).all()
+                
+                room = Room.query.filter_by(name=first_free_room[0]).first()
+                
+            
+                reservation = Reservation(
+                start_date=start_date,
+                end_date=end_date,
+                reason_short=res.reason_short,
+                reason_details=res.reason_details,
+                duration=res.duration,
+                student_group=res.student_group,
+                users=user,
+                room_id=room.id,
+                timeslots=timeslots,
+                weekday_id=weekday_id,
+                owner_id=current_user.id
+
+                )
+                db.session.add(reservation)
+                
+
+                session["modifications"].append([res.reason_details, user[0].first_name, user[0].last_name, first_free_room[0]])
+                print("new room : ", first_free_room)
+                
+                old_room_name = Room.query.filter_by(id=res.room_id).first().name
+                
+                
+            db.session.commit()
+
+            res_to_replace.close()
+            split_reservation_by_room(start_date, end_date, first_period+1, last_period+1, room_select)
+            
+    elif not session["admin_rights"]:
+        
+        print("debug")
+        
+        if all_rooms_with_conflicts[room_select] > 0:
+            
+            return "La salle demandée n'est plus disponible"
+    
+    
+    session["modifications_dates"] = [start_date.strftime('%d.%m.%Y'), end_date.strftime('%d.%m.%Y')]
     
     duration = last_period - first_period + 1
     
@@ -139,7 +255,6 @@ def new_reservation():
     room = Room.query.filter_by(name=room_select).first()
     
     reservation = Reservation(
-        # dates du début et de fin d'année
         start_date=start_date,
         end_date=end_date,
         reason_short=res_name,
@@ -156,10 +271,12 @@ def new_reservation():
     db.session.add(reservation)
     db.session.commit()
     
+    # réservation en ajax
     if (request.method == 'PUT'):
         return 'success'
 
     session['just_reserved'] = True
+    # réservation par une requête POST
     return redirect(url_for('main.my_reservations'))
    
    
@@ -212,10 +329,11 @@ def profil():
     user_role = Role.query.get(current_user.role_id).name
 
     if (request.method == 'PATCH'):
+        # s'il n'y pas de rôle dans la requête, ça veut dire qu'elle est faite depuis la page de profil
         if (request.form.get('role') is None):
             role_id = current_user.role_id
             
-            if (request.form.get('id') != current_user.role_id):
+            if (int(request.form.get('id')) != current_user.id):
                 return 'operation interdite'
         else:
             role_id = request.form.get('role')
@@ -247,10 +365,6 @@ def profil():
             
         if (user_role != 'admin'):
             return 'operation interdite'
-            
-        password = password_generator()
-        print('mdp : '+password)
-        password_hash = generate_password_hash(password)
             
         db.engine.execute('DELETE FROM users WHERE id = ?', request.form.get('user_id'))
         return 'success'
@@ -344,7 +458,7 @@ def my_reservations():
         return 'success'
 
     today = datetime.today().date()
-    reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date))
+    reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date)).limit(50) # à gérer : mettre sur plusieurs pages
     user_role = Role.query.get(current_user.role_id).name
     
     if not 'just_reserved' in session:
@@ -356,8 +470,13 @@ def my_reservations():
     else:
         just_reserved = False
         
+    if not 'modifications' in session:
+        session["modifications"] = []
+        session["modifications_dates"] = []
+        session["old_room"] = ""
+        
     return render_template('my_reservations.html',
-        reservations=reservations, today=today, just_reserved=just_reserved, role=user_role)
+        reservations=reservations, today=today, just_reserved=just_reserved, role=user_role, modifications = session["modifications"], modifications_dates = session["modifications_dates"], old_room = session["old_room"])
         
 @main.route('/users_admin', methods=['GET'])
 @login_required
@@ -389,3 +508,33 @@ def reset_password():
     password_hash, request.form.get('user_id'))
     
     return password
+    
+    
+@main.route('/freegroup', methods=['GET',"POST", "PATCH"])
+@login_required
+def freegroup():
+    user_role = Role.query.get(current_user.role_id).name
+    if user_role != 'admin':
+        return 'acces interdit'
+        
+        
+    if request.method == 'PATCH':
+        
+
+        start_date = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
+        end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
+        first_period = int(request.form.get('firstID'))+1
+        last_period = int(request.form.get('lastID'))+1
+        weekday_id = start_date.weekday()+1
+        
+        if request.form.get("type") == "student_group":
+            split_reservation_by_student_group(start_date, end_date, first_period, last_period, request.form.get("group"))
+        
+        else:
+            split_reservation_by_room(start_date, end_date, first_period, last_period, request.form.get("group"))
+
+
+
+    user_role = Role.query.get(current_user.role_id).name
+    return render_template('freeGroup.html', role = user_role, student_groups = get_student_groups_list(), rooms = get_rooms_list())
+    

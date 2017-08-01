@@ -29,7 +29,7 @@
 ['Période 12', '17h35 - 18h20']
 ] %}
 
-{% set general_student_groups = ["1GY", "1ECG", "1EC", "2GY", "2ECG", "2EC", "3GY", "3ECG", "3EC", "4GY", "4MSPE"] %}
+
 {% extends "base.html" %}
 
 {% block title %}Réservation{% endblock %}
@@ -153,8 +153,26 @@
               </div>
             </div>
           </div>
+          
+          {% if role == 'admin' %}
+          <div class="row">
+          <label class="col-sm-3 control-label rec_ajustement" rel="tooltip" title="">Utiliser les droits d'administrateur</label> 
+          <div class="col-sm-1">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" data-toggle="toggle" id="admin_rights">
+              </label>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        
         </form>
         </div>
+        
+        
+        
+        
       </div>
     </div>
   </div>

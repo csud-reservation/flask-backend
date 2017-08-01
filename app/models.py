@@ -47,6 +47,8 @@ class User(UserMixin, db.Model):
         password = password_generator()
         
         csv_file = open('account_password.csv','a')
+        csv_file.seek(0)
+        csv_file.truncate()
         csv_file.write("morisodi@edufr.ch;"+password+"\n")
         csv_file.close()
         
@@ -65,6 +67,10 @@ class User(UserMixin, db.Model):
     
     @staticmethod
     def insert_teachers(teachers_edt, teachers_admin):
+        
+        csv_file = open('account_password.csv','a')       
+        
+        
         for t in teachers_edt:
             teacher = User.query.filter_by(sigle=t['ABREV']).first()
             
@@ -89,9 +95,8 @@ class User(UserMixin, db.Model):
 
             password = password_generator()
             
-            csv_file = open('account_password.csv','a')
             csv_file.write(teacher_admin['Email Ecole']+";"+password+"\n")
-            csv_file.close()
+            
 
             if teacher is None:
                 teacher = User(
@@ -103,7 +108,7 @@ class User(UserMixin, db.Model):
                     role=role
                 )
                 db.session.add(teacher)
-                
+        csv_file.close()
         db.session.commit()
         
         
@@ -188,6 +193,19 @@ class Room(db.Model):
                 db.session.add(room)
 
         db.session.commit()
+        
+        
+class Item(db.Model):
+    __tablename__="items"
+        
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(70))
+    
+    # link to reservations
+    reservations = db.relationship('Reservation', backref='item')
+    
+    def __repr__(self):
+        return '<Item %r>' % self.name
 
 
 class Timeslot(db.Model):
@@ -251,7 +269,6 @@ class Weekday(db.Model):
         
         db.session.commit()
         
-        
 
     
 
@@ -306,6 +323,10 @@ class Reservation(db.Model):
     
     # link to rooms
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    
+    
+    # link to items
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
 
 
     def __repr__(self):

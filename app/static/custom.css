@@ -292,3 +292,26 @@ span.glyphicon-plus {
     position: relative;
     top: 2px;
 }
+
+#radioBtn .notActive {
+    color: #3276b1;
+    background-color: #fff;
+}
+
+.free-group-form {
+    margin-top: 35px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #result, #result * {
+    visibility: visible;
+  }
+  #result {
+    position: center;
+    left: 0;
+    top: 0;
+  }
+}

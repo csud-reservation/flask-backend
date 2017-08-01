@@ -21,7 +21,9 @@ function get_available_rooms() {
         var selected = document.getElementsByClassName('selected');
         var firstID = selected[0].id.replace('periode_', '');
         var lastID = selected[selected.length-1].id.replace('periode_', '');
-
+        
+        var adminRights = is_checked('admin_rights')
+        console.log(adminRights)
         $.ajax({
             url: "search",
             type: "POST",
@@ -35,6 +37,7 @@ function get_available_rooms() {
                 "room_type": type_salle,
                 "firstID": firstID,
                 "lastID": lastID,
+                "adminRights": adminRights
             },
         })
         .done(function(data, textStatus, jqXHR) {
@@ -133,8 +136,7 @@ $("#room_select").change(function() {
 });
 
 $(function() {
-    
-    $("#particular").hide()
+
     $("#room").text($("#room_select").val());
     $('.today').val(convert_Date_to_dateString(today2));
     
@@ -173,17 +175,6 @@ $(function() {
     $('#myModal').on('hidden.bs.modal', function(e) { 
         if (!$('.selected').length) {
             $('#no_hour_selected').removeClass('hidden')
-        }
-    });
-    
-        $("#group").change(function() {
-        if(this.checked) {
-            $('#general').hide()
-            $('#particular').show()
-        }
-        else{
-            $('#particular').hide() 
-            $('#general').show()
         }
     });
 });

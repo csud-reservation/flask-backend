@@ -54,6 +54,8 @@ def create_app(config_name, models={}):
 
     from .csudadmin import csudadmin as csudadmin_blueprint
     app.register_blueprint(csudadmin_blueprint, url_prefix='/csudadmin')
+    from .sendmail import sendmail as sendmail_blueprint
+    app.register_blueprint(sendmail_blueprint, url_prefix='/sendmail')
     
     return app
     

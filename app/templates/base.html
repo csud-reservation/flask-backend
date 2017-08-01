@@ -21,9 +21,13 @@
             <a class="navbar-brand" href="{{ url_for('main.index') }}">CSUD Réservation</a>
         </div>
         <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav"> 
                 {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('main.search_page') }}">Réservation</a></li>
+                    <li><a href="{{ url_for('main.search_page') }}">Réserver</a></li>
+                    {% if role == "admin" %}
+                        <li><a href="{{ url_for('main.freegroup') }}">Libérer un groupe</a></li>
+                    {% endif %}
+                    
                     <li><a href="{{ url_for('main.horaire') }}">Horaire</a></li>
                     {% if role == "admin" %}
                         <li><a href="{{ url_for('main.users_admin') }}">Utilisateurs</a></li>
@@ -38,6 +42,10 @@
                 {% else %}
                     <li><a href="{{ url_for('main.login') }}">Login</a></li>
                 {% endif %}
+                
+
+                
+                
             </ul>
         </div>
     </div>

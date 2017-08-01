@@ -1,0 +1,16 @@
+{% extends "mail_base.html" %}
+
+{% block mail_subject %}
+{{ subject }}
+{% endblock %}
+
+{% block mail_content %}
+<p>
+Ceci est un test du système d'envoi de courriels automatique.
+</p>
+
+<p>
+    Vous pouvez consulter vos réservations dans leur état actuel à l'adresse <a href="{{my_reservations_url}}">{{my_reservations_url}}</a>
+</p>
+{% endblock %}
+

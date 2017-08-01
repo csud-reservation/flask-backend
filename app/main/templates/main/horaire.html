@@ -28,6 +28,7 @@
   <div class="row">
     <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
       <div class="hidden" id="user_sigle">{{user.sigle}}</div>
+      <div class="hidden" id="user_role">{{role}}</div>
         <form class="form-horizontal marges">
           <div class="row">
             <div class="form-group">
@@ -103,6 +104,9 @@
             </div>
           </div>
         </form>
+        <!--
+        <a href="#" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-print" onclick="PrintElem()"></span>  </a>
+        -->
         <div id="result"></div>
         
         <!-- Modal nouvelle réservation -->
@@ -170,6 +174,7 @@
               </div>
             </div>
 
+            <!-- Modal infos -->
             <div id="infos_modal">
               <div class="modal-content">
                 <div class="modal-header">
@@ -184,6 +189,9 @@
                     </center>
                     <table class="table table-striped">
                       <tr class="hidden"><th>Identifiant de la réservation</th><td id="reservation_id"></td></tr>
+                      <tr class="hidden"><th>Identifiant du jour</th><td id="day_id"></td></tr>
+                      <tr class="hidden"><th>Cellule vide</th><td></td></tr>
+                      
                       <tr><th>Date de début</th><td id="start_date"></td></tr>
                       <tr><th>Date de fin</th><td id="end_date"></td></tr>
                       <tr><th>Salle</th><td id="room"></td></tr>
@@ -240,4 +248,5 @@
 <script src="{{ url_for('static', filename='datepicker.js') }}"></script>
 <script src="{{ url_for('static', filename='search.js') }}"></script>
 <script src="{{ url_for('static', filename='horaire.js') }}"></script>
+<script src="{{ url_for('static', filename='print.js') }}"></script>
 {% endblock %}

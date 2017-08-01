@@ -1,0 +1,15 @@
+
+Système de réservation du CSUD
+==============================
+
+{% block mail_header %} 
+Default Email Subject
+{% endblock %}
+--------------------------
+
+
+
+{% block mail_content %}
+Default email content ...
+{% endblock %}
+

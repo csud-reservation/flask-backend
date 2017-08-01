@@ -8,7 +8,22 @@
         {% if just_reserved %}
           <center>
             <div class="alert alert-success" id="just_reserved">
-              Votre réservation a bien été effectuée.
+              {% if modifications_dates[0] == modifications_dates[1] %}
+                Votre réservation du {{modifications_dates[0]}} en salle {{old_room}} bien été effectuée.
+              {% else %}
+                Votre réservation du {{modifications_dates[0]}} au {{modifications_dates[1]}} en salle {{old_room}} bien été effectuée.
+              {% endif %}
+
+              {% if modifications %}
+                </br></br>
+                <p>De plus, les cours suivants ont été déplacés : </p></br>
+                
+                <ul>
+                {% for modification in modifications %}
+                  <li>Le cours «{{modification[0]}}» de {{modification[1]}} {{modification[2]}} a été déplacé en salle {{modification[3]}}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
             </div>
           </center>
         {% endif %}
@@ -58,7 +73,7 @@
                   <td class="student_group_info">{{res.student_group}}</td>
                   <td id={{res.id}}>
                     <button class="btn btn-xs btn-primary infos_button">
-                      <span class="glyphicon glyphicon-info-sign"></span>
+                      <span class="glyphicon glyphicon-cog"></span>
                     </button>
                     <div class="detailed_infos hidden">
                       <span class="reservation_id">{{res.id}}</span>

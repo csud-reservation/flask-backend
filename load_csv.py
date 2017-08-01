@@ -88,12 +88,6 @@ def insert_reservation(db, row, start_date, end_date):
         if room is None:
             print("Erreur salle : ", room)
             print(row)
-            
-        csv_file = open('student_groups.csv','r+')
-        groups = csv_file.read().split(";")
-        if row["CLASSE"] not in groups:
-            csv_file.write(row['CLASSE']+";")
-        csv_file.close()
         
             
         reservation = Reservation(
@@ -112,7 +106,6 @@ def insert_reservation(db, row, start_date, end_date):
         )
         
         db.session.add(reservation)
-        
     db.session.commit()
     
     

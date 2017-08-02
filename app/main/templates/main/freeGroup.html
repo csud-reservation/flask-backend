@@ -14,8 +14,10 @@
 ['Période 11', '16h45 - 17h30'],
 ['Période 12', '17h35 - 18h20']
 ] %}
+
 {% extends "base.html" %}
 {% block title %}Libérer un groupe d'étudiants{% endblock %}
+
 {% block head %}
   {{ super() }}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css">
@@ -58,7 +60,7 @@
               </div>
             </div>
           </div>
-          <div class="row espace_dessous">
+          <div class="row type_groupes">
             <label class="col-sm-4 control-label">Type de groupes</label>
             <div class="col-sm-8">
               <div class="input-group">

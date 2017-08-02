@@ -88,7 +88,7 @@
           </div>
           <div class="row marges">
             <!-- Button trigger modal -->
-            <div class="row">
+            <div class="row espace_dessous">
               <label class="col-sm-2 control-label">Plage horaire</label>
               <div class="col-sm-2">
                 <button type="button" class="btn btn-default btn-md ajustement_sm" data-toggle="modal" data-target="#myModal">
@@ -110,12 +110,16 @@
                   </select>
                 </div>
               </div>
-              <div class="form-group col-sm-3">
-                <span class="pull-right btn btn-primary bouton_recherche desktop"
-                  onclick="get_available_rooms();">Rechercher</span>
-                <span class="btn btn-primary bouton_recherche mobile"
-                  onclick="get_available_rooms();">Rechercher</span>
-              </div>
+              {% if role != 'admin' %}
+                <div class="form-group col-sm-3">
+                  <span class="pull-right btn btn-primary bouton_recherche desktop"
+                    onclick="get_available_rooms();">Rechercher</span>
+                  <span class="btn btn-primary bouton_recherche mobile"
+                    onclick="get_available_rooms();">Rechercher</span>
+                </div>
+              {% elif role == 'admin' %}
+                <div class="col-sm-offset-3"></div>
+              {% endif %}
             </div>
             <!-- Modal -->
             <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -156,7 +160,7 @@
           
           {% if role == 'admin' %}
           <div class="row">
-          <label class="col-sm-3 control-label rec_ajustement" rel="tooltip" title="">Utiliser les droits d'administrateur</label> 
+          <label class="col-sm-5 control-label rec_ajustement" rel="tooltip" title="">Utiliser les droits d'administrateur</label> 
           <div class="col-sm-1">
             <div class="checkbox">
               <label>
@@ -164,6 +168,13 @@
               </label>
             </div>
           </div>
+          <div class="form-group col-sm-4" style="margin-top: 6.5px;">
+            <span class="pull-right btn btn-primary bouton_recherche desktop"
+              onclick="get_available_rooms();">Rechercher</span>
+            <span class="btn btn-primary bouton_recherche mobile"
+              onclick="get_available_rooms();">Rechercher</span>
+          </div>
+          <div class="col-sm-offset-2"></div>
         </div>
         {% endif %}
         

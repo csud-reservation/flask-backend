@@ -12,6 +12,7 @@ from . import main
 from sqlalchemy.sql import select
 from sqlalchemy import func, text, desc
 import re
+from math import ceil
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -182,6 +183,7 @@ def new_reservation():
             res_to_replace = get_reservation_by_room(start_date, end_date, first_period+1, last_period+1, room_select)
 
             for res in res_to_replace:
+                
 
                 first_free_room = search_query(weekday_id, res.timeslot_id, res.timeslot_id, start_date.date(), "%%").first()
                 
@@ -444,21 +446,47 @@ def timetable():
 @login_required
 def my_reservations():
     
+    user_role = Role.query.get(current_user.role_id).name
+    
     if (request.method == 'DELETE'):
-        db.engine.execute('DELETE FROM reservations WHERE reservations.id = ? ', request.form.get('id'))
-        db.engine.execute('DELETE FROM reservations_users WHERE reservation_id = ?', request.form.get('id'))
-        db.engine.execute('DELETE FROM reservations_timeslots WHERE reservation_id = ?', request.form.get('id'))
-
-        return 'success'
+        owner_id = Reservation.query.filter_by(id=int(request.form.get('id'))).first().owner_id
+        
+        if (owner_id == current_user.id or user_role == 'admin'):
+            
+            split_reservation_by_id(request.form.get('start_date'), request.form.get('id'))
+            
+    
+            return 'success'
+        
+        else:
+            return 'operation interdite'
 
     if (request.method == 'PATCH'):
-        db.engine.execute('UPDATE reservations SET reason_short = ?, reason_details = ?, student_group = ? WHERE reservations.id = ?',
-            request.form.get('reason_short'), request.form.get('reason_details'), request.form.get('student_group'), request.form.get('id'))
+        owner_id = Reservation.query.filter_by(id=int(request.form.get('id'))).first().owner_id
+        
+        if (owner_id == current_user.id or user_role == 'admin'):
+            db.engine.execute('UPDATE reservations SET reason_short = ?, reason_details = ?, student_group = ? WHERE reservations.id = ?',
+                request.form.get('reason_short'), request.form.get('reason_details'), request.form.get('student_group'), request.form.get('id'))
 
-        return 'success'
+            return 'success'
+        
+        else:
+            return 'operation interdite'
 
+    page_number = request.args.get('page')
+    if page_number is None:
+        page_number = 1
+    else:
+        page_number = int(page_number)
+    
     today = datetime.today().date()
-    reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date)).limit(50) # à gérer : mettre sur plusieurs pages
+    
+    reservations_per_page = 100
+    reservations_total = Reservation.query.filter_by(owner_id=current_user.id).count()
+    number_of_pages = ceil(reservations_total/reservations_per_page)
+    
+    reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date)).slice(
+        (page_number-1)*reservations_per_page, ((page_number-1)*reservations_per_page)+(reservations_per_page))
     user_role = Role.query.get(current_user.role_id).name
     
     if not 'just_reserved' in session:
@@ -476,7 +504,12 @@ def my_reservations():
         session["old_room"] = ""
         
     return render_template('my_reservations.html',
-        reservations=reservations, today=today, just_reserved=just_reserved, role=user_role, modifications = session["modifications"], modifications_dates = session["modifications_dates"], old_room = session["old_room"])
+        reservations=reservations, today=today, just_reserved=just_reserved, 
+        role=user_role, modifications = session["modifications"], 
+        modifications_dates = session["modifications_dates"], 
+        old_room = session["old_room"], reservations_total=reservations_total,
+        reservations_per_page=reservations_per_page, page_number=page_number,
+        number_of_pages = number_of_pages)
         
 @main.route('/users_admin', methods=['GET'])
 @login_required
@@ -516,10 +549,8 @@ def freegroup():
     user_role = Role.query.get(current_user.role_id).name
     if user_role != 'admin':
         return 'acces interdit'
-        
-        
+
     if request.method == 'PATCH':
-        
 
         start_date = datetime.strptime(request.form.get('start_date'), "%d.%m.%Y")
         end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
@@ -529,12 +560,13 @@ def freegroup():
         
         if request.form.get("type") == "student_group":
             split_reservation_by_student_group(start_date, end_date, first_period, last_period, request.form.get("group"))
+            return 'Le groupe '+request.form.get("group")+' a bien été libéré'
         
         else:
             split_reservation_by_room(start_date, end_date, first_period, last_period, request.form.get("group"))
-
-
+            return 'La salle '+request.form.get("group")+' a bien été libérée'
 
     user_role = Role.query.get(current_user.role_id).name
+    
     return render_template('freeGroup.html', role = user_role, student_groups = get_student_groups_list(), rooms = get_rooms_list())
     

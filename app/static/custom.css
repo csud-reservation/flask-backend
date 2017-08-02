@@ -115,6 +115,9 @@ tbody tr:first-child {
     .desktop {
         display: block;
     }
+    .type_groupes {
+        margin-bottom: 23px;
+    }
 }
 
 @media(max-width:767px) {
@@ -139,6 +142,9 @@ tbody tr:first-child {
     #modify {
         position: relative;
             top: 8px;
+    }
+    .type_groupes {
+        margin-bottom: 15px;
     }
 }
 
@@ -300,6 +306,14 @@ span.glyphicon-plus {
 
 .free-group-form {
     margin-top: 35px;
+}
+
+ul.pagination {
+    margin-top: 5px;
+}
+
+.table-reservations {
+    margin-top: 34px;
 }
 
 @media print {

@@ -45,7 +45,8 @@ def search_reservations_by_student_group(start_date, end_date, student_group, we
                                             AND end_date >= ?
                                             AND student_group LIKE ?
                                             AND weekday_id = ?
-                                            AND reservations_timeslots.timeslot_id BETWEEN ? AND ?''', data)
+                                            AND reservations_timeslots.timeslot_id BETWEEN ? AND ?
+                                            AND item_id IS NULL''', data)
                                             
     return result
     
@@ -59,6 +60,7 @@ def update_reservations_by_student_group(start_date, end_date, student_group, we
                                 AND end_date >= ?
                                 AND student_group LIKE ?
                                 AND weekday_id = ?
+                                AND item_id IS NULL
                                 AND reservations.id IN
                                     (SELECT reservation_id
                                     FROM reservations_timeslots
@@ -77,6 +79,7 @@ def search_reservations_by_room(start_date, end_date, room, weekday_id, first_pe
                                             AND end_date >= ?
                                             AND rooms.name = ?
                                             AND weekday_id = ?
+                                            AND item_id IS NULL
                                             AND reservations_timeslots.timeslot_id BETWEEN ? AND ?''', data)
                                             
     return result
@@ -93,6 +96,7 @@ def update_reservations_by_room(start_date, end_date, room, weekday_id, first_pe
                                 AND end_date >= ?
                                 AND room_id = ?
                                 AND weekday_id = ?
+                                AND item_id IS NULL
                                 AND reservations.id IN
                                     (SELECT reservation_id
                                     FROM reservations_timeslots

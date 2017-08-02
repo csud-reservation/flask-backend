@@ -90,7 +90,7 @@ function free_group() {
         })
         
         .done(function(data, textStatus, jqXHR) {
-            //$('#free_group').text(
+            $('#free_group').text(data)
             $('#free_success').removeClass('hidden')
         })
 

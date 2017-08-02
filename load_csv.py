@@ -7,6 +7,15 @@ def load_teachers(filename):
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         
         return list(reader)
+        
+        
+def load_items():
+    
+    file = open("items.csv").read().strip().split(";")
+    
+    print(file)
+        
+    return file
 
 def print_row(row):
     for code, value in row.items():
@@ -108,8 +117,6 @@ def insert_reservation(db, row, start_date, end_date):
         db.session.add(reservation)
     db.session.commit()
     
-    
-        
 
 def load_reservations(db, start_date, end_date, filename='data/edt.csv'):
     with open(filename, 'r') as csvfile:
@@ -123,10 +130,6 @@ def load_reservations(db, start_date, end_date, filename='data/edt.csv'):
                 db.session.rollback()
 
 
-
-            
-            
-        
 if __name__ == '__main__':
     db = None
     load_csv(db, 'data/edt.csv')

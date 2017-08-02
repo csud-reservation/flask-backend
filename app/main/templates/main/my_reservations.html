@@ -4,7 +4,7 @@
 {% block content %}
   <div class="container">
     <div class="row">
-      <div class="col-lg-offset-1 col-md-offset-1 col-md-10 col-lg-10 blanc espace_dessous col-lg-offset-1">
+      <div class="col-lg-offset-1 col-md-offset-1 col-md-10 col-lg-10 blanc espace_dessous">
         {% if just_reserved %}
           <center>
             <div class="alert alert-success" id="just_reserved">
@@ -38,9 +38,7 @@
           </div>
         </center>
         <h1 class="gros_titre">Mes réservations</h1>
-        
-          
-          <table class="table table-striped">
+          <table class="table table-striped table-reservations">
               <th>Dates</th>
               <th>Salle</th>
               <th>Période</th>
@@ -91,6 +89,20 @@
               {% endfor %}
             </tbody>
           </table>
+          
+          {% if reservations_total > reservations_per_page %}
+            <center>
+              <ul class="pagination">
+                {% for i in range(1,number_of_pages+1) %}
+                  {% if i == page_number %}
+                    <li class="active"><a href="?page={{i}}">{{ i }}</a></li>
+                  {% else %}
+                    <li><a href="?page={{i}}">{{ i }}</a></li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </center>
+          {% endif %}
             
           <!-- Modal -->
           <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -152,7 +164,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div class="col-lg-2 col-md-1"></div>
   </div>

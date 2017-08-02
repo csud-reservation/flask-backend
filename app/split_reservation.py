@@ -19,7 +19,6 @@ def split_reservation_by_student_group(start_date, end_date, first_period, last_
         one_week = timedelta(weeks=1)
 
         for res in res_to_split:
-            print(res)
 
             user_id = db.engine.execute("SELECT reservations_users.user_id  from reservations  LEFT JOIN reservations_users ON reservations.id = reservations_users.reservation_id  WHERE id=?", [res.reservation_id])
             
@@ -120,7 +119,7 @@ def split_reservation_by_room(start_date, end_date, first_period, last_period, r
                 room_id=res.room_id,
                 timeslots=timeslots,
                 weekday_id=weekday_id,
-                owner_id=current_user.id
+                owner_id=res.owner_id
 
             )
             db.session.add(reservation)
@@ -133,6 +132,67 @@ def split_reservation_by_room(start_date, end_date, first_period, last_period, r
         db.session.commit()
         
         return res_to_split
+        
+        
+        
+def split_reservation_by_id(date, reservation_id):
+    
+        res = Reservation.query.filter_by(id=reservation_id).first()
+        one_week = timedelta(weeks=1)
+
+        user_id = db.engine.execute("SELECT reservations_users.user_id  from reservations  LEFT JOIN reservations_users ON reservations.id = reservations_users.reservation_id  WHERE id=?", [reservation_id])
+        
+        user_id_tuple=()
+        for u in user_id:
+            user_id_tuple = user_id_tuple + (u[0],)
+        print(user_id_tuple)
+        
+        user = User.query.filter(User.id.in_(user_id_tuple))
+        print(user.all())
+        
+        
+        # timeslots = Timeslot.query.filter(
+        # Timeslot.order.between(
+        #     res.timeslot_id-1,
+        #     res.timeslot_id-1,
+        # )
+        # ).all()
+        
+        try:
+            old_end_date = datetime.strptime(str(res.end_date), "%Y-%m-%d")
+        except:
+            old_end_date = datetime.strptime(str(res.end_date), "%Y-%m-%d %H:%M:%S")
+            
+        date = datetime.strptime(date, "%d.%m.%Y")
+        
+        weekday_id = date.weekday()+1
+        
+        #Création de la nouvelle réservation avec une date de début correspondant à la date de fin de la suppression
+        reservation = Reservation(
+            start_date=date+one_week,
+            end_date=old_end_date,
+            reason_short=res.reason_short,
+            reason_details=res.reason_details,
+            duration=res.duration,
+            student_group=res.student_group,
+            users=user,
+            room_id=res.room_id,
+            timeslots=res.timeslots,
+            weekday_id=weekday_id,
+            owner_id=current_user.id
+
+        )
+        db.session.add(reservation)
+        
+        db.session.commit()
+            
+        #Modification de l'ancienne réservation pour que la date de fin corresponde à la date du début de la suppression
+        
+        print(reservation_id)
+        db.engine.execute('UPDATE reservations SET end_date = ? WHERE id = ?', [date-one_week, reservation_id])
+        
+        db.session.commit()
+    
         
 def get_reservation_by_room(start_date, end_date, first_period, last_period, room):
     

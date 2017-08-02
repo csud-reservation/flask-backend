@@ -204,6 +204,15 @@ class Item(db.Model):
     # link to reservations
     reservations = db.relationship('Reservation', backref='item')
     
+    
+    @staticmethod
+    def insert_items(items):
+        for i in items:
+            item = Item(name=i)
+            db.session.add(item)
+
+        db.session.commit()
+    
     def __repr__(self):
         return '<Item %r>' % self.name
 

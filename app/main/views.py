@@ -452,10 +452,14 @@ def my_reservations():
         owner_id = Reservation.query.filter_by(id=int(request.form.get('id'))).first().owner_id
         
         if (owner_id == current_user.id or user_role == 'admin'):
+            if (request.form.get('from_my_reservations') is None):
+                split_reservation_by_id(request.form.get('start_date'), request.form.get('id'))
             
-            split_reservation_by_id(request.form.get('start_date'), request.form.get('id'))
-            
-    
+            else:
+                db.engine.execute('DELETE FROM reservations WHERE reservations.id = ? ', request.form.get('id'))
+                db.engine.execute('DELETE FROM reservations_users WHERE reservation_id = ?', request.form.get('id'))
+                db.engine.execute('DELETE FROM reservations_timeslots WHERE reservation_id = ?', request.form.get('id'))
+        
             return 'success'
         
         else:
@@ -485,9 +489,19 @@ def my_reservations():
     reservations_total = Reservation.query.filter_by(owner_id=current_user.id).count()
     number_of_pages = ceil(reservations_total/reservations_per_page)
     
+    # res = Reservation.query.filter_by(owner_id=27)
+    # res.first().users.all()
     reservations = Reservation.query.filter_by(owner_id=current_user.id).order_by(desc(Reservation.start_date)).slice(
         (page_number-1)*reservations_per_page, ((page_number-1)*reservations_per_page)+(reservations_per_page))
     user_role = Role.query.get(current_user.role_id).name
+    
+    reservations_to_send = []
+    
+    for res in reservations.all():
+        for user in res.users.all():
+            if user.id == res.owner_id:
+                reservations_to_send.append(res)
+            
     
     if not 'just_reserved' in session:
         session['just_reserved'] = False
@@ -504,7 +518,7 @@ def my_reservations():
         session["old_room"] = ""
         
     return render_template('my_reservations.html',
-        reservations=reservations, today=today, just_reserved=just_reserved, 
+        reservations=reservations_to_send, today=today, just_reserved=just_reserved, 
         role=user_role, modifications = session["modifications"], 
         modifications_dates = session["modifications_dates"], 
         old_room = session["old_room"], reservations_total=reservations_total,
@@ -569,4 +583,3 @@ def freegroup():
     user_role = Role.query.get(current_user.role_id).name
     
     return render_template('freeGroup.html', role = user_role, student_groups = get_student_groups_list(), rooms = get_rooms_list())
-    

@@ -168,30 +168,37 @@ def split_reservation_by_id(date, reservation_id):
         weekday_id = date.weekday()+1
         
         #Création de la nouvelle réservation avec une date de début correspondant à la date de fin de la suppression
-        reservation = Reservation(
-            start_date=date+one_week,
-            end_date=old_end_date,
-            reason_short=res.reason_short,
-            reason_details=res.reason_details,
-            duration=res.duration,
-            student_group=res.student_group,
-            users=user,
-            room_id=res.room_id,
-            timeslots=res.timeslots,
-            weekday_id=weekday_id,
-            owner_id=current_user.id
 
-        )
-        db.session.add(reservation)
-        
-        db.session.commit()
+        if date+one_week < old_end_date:
+            reservation = Reservation(
+                start_date=date+one_week,
+                end_date=old_end_date,
+                reason_short=res.reason_short,
+                reason_details=res.reason_details,
+                duration=res.duration,
+                student_group=res.student_group,
+                users=user,
+                room_id=res.room_id,
+                timeslots=res.timeslots,
+                weekday_id=weekday_id,
+                owner_id=res.owner_id
+    
+            )
+            db.session.add(reservation)
             
+            db.session.commit()
+                
         #Modification de l'ancienne réservation pour que la date de fin corresponde à la date du début de la suppression
         
-        print(reservation_id)
-        db.engine.execute('UPDATE reservations SET end_date = ? WHERE id = ?', [date-one_week, reservation_id])
-        
-        db.session.commit()
+            print(reservation_id)
+            db.engine.execute('UPDATE reservations SET end_date = ? WHERE id = ?', [date-one_week, reservation_id])
+            
+            db.session.commit()
+            
+        else:
+            db.engine.execute('DELETE FROM reservations WHERE reservations.id = ? ', reservation_id)
+            db.engine.execute('DELETE FROM reservations_users WHERE reservation_id = ?', reservation_id)
+            db.engine.execute('DELETE FROM reservations_timeslots WHERE reservation_id = ?', reservation_id)
     
         
 def get_reservation_by_room(start_date, end_date, first_period, last_period, room):

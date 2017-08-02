@@ -65,6 +65,7 @@ $('#delete_button').click(function() {
         type: "DELETE",
         data: {
             "id": reservation_id,
+            "from_my_reservations": 'yes',
         },
     })
     .done(function(data, textStatus, jqXHR) {

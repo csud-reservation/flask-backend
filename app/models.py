@@ -37,6 +37,7 @@ class User(UserMixin, db.Model):
         admin.email = 'morisodi@edufr.ch'
         admin.first_name = 'Admin'
         admin.last_name = 'Admin'
+        admin.sigle="MORI"
         
     @staticmethod
     def insert_admin():

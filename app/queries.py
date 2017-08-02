@@ -107,8 +107,6 @@ def update_reservations_by_room(start_date, end_date, room, weekday_id, first_pe
 
 
 
-
-
 def weekly_timetable(room_number, week_start_date, week_end_date):
     '''
     Retourne la liste de tous les timeslots possédant une réservation pour la

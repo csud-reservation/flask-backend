@@ -79,15 +79,18 @@ function ajax_timetable() {
         format_empty_cells()
         format_owner_cells()
 
-        $('.reserved_by_teacher').hover(function() {
-            $(this).css('background-color', '#e6faff')
+        $('.reserved').hover(function() {
+            if (!/reserved_by_admin/.test(this.className)) {
+                $(this).css('background-color', '#e6faff')   
+            } else {
+                $(this).css('background-color', 'rgb(240,240,240)')
+            }
         }, function() {
-            $(this).css('background-color', '#d4f7c9')
-        })
-        $('.reserved_by_admin').hover(function() {
-            $(this).css('background-color', 'rgb(240,240,240)')
-        }, function() {
-            $(this).css('background-color', 'rgb(211,211,211)')
+            if (!/reserved_by_admin/.test(this.className)) {
+                $(this).css('background-color', '#d4f7c9')
+            } else {
+                $(this).css('background-color', 'rgb(211,211,211)')
+            }
         })
     })
     .fail(function(jqXHR, textStatus, errorThrown) {

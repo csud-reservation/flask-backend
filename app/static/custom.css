@@ -176,10 +176,6 @@ tbody tr:first-child {
     max-width:220px;
 }
 
-table.room-timetable tbody td.reserved {
-    background-color: lightgray;
-}
-
 table.room-timetable div.timetable.cell-info {
     margin: auto;
 }
@@ -221,8 +217,12 @@ table.room-timetable div.timetable.cell-info {
     margin-bottom: 2px;
 }
 
-table.room-timetable tbody td.reserved.reserved_by_teacher {
+table.room-timetable tbody td.reserved {
     background-color: #d4f7c9;
+}
+
+table.room-timetable tbody td.reserved_by_admin {
+    background-color: lightgray;
 }
 
 .timetable_alert_format {

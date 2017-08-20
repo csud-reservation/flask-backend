@@ -14,16 +14,24 @@ function get_available_rooms() {
             var start_date = $('#date_de').val();
             var end_date = $('#date_a').val();
         }
-        var type_salle = '%('+$('#type_salle').val()+')';
-        if (/ALL/.test(type_salle)) { 
-            type_salle = '%'; 
-        }
+        
         var selected = document.getElementsByClassName('selected');
         var firstID = selected[0].id.replace('periode_', '');
         var lastID = selected[selected.length-1].id.replace('periode_', '');
         
         var adminRights = is_checked('admin_rights')
-        console.log(adminRights)
+        if (is_checked('room_object_selector')) {
+            var reservation_type = 'item'
+            var type_salle = $('#type_objet').val()
+        } else {
+            var reservation_type = 'room'
+            
+            var type_salle = '%('+$('#type_salle').val()+')';
+            if (/ALL/.test(type_salle)) { 
+                type_salle = '%'; 
+            }
+        }
+        
         $.ajax({
             url: "search",
             type: "POST",
@@ -34,10 +42,12 @@ function get_available_rooms() {
             data: {
                 "start_date": start_date,
                 "end_date": end_date,
+                // room_type est aussi item_type quand on veut réserver un objet
                 "room_type": type_salle,
                 "firstID": firstID,
                 "lastID": lastID,
-                "adminRights": adminRights
+                "adminRights": adminRights,
+                "reservation_type": reservation_type,
             },
         })
         .done(function(data, textStatus, jqXHR) {
@@ -160,7 +170,7 @@ $(function() {
     initialize_datepicker($('.date'));
     
     $("#switch").change(function() {
-        if(this.checked) {
+        if (this.checked) {
             $('#recurrence_off').hide()
             $('#recurrence_on').show()
             $(".date_input_form").first().removeClass('col-sm-3').addClass('col-sm-5')
@@ -171,10 +181,36 @@ $(function() {
             $(".date_input_form").first().removeClass('col-sm-5').addClass('col-sm-3')
         }
     });
+    
+    $('#room_object_selector').change(function() {
+        if (this.checked) {
+            // réservation d'objet
+            $('.label_type_objet').first().removeClass('hidden');
+            $('.label_type_salle').first().addClass('hidden');
+            $('#type_objet').removeClass('hidden');
+            $('#type_salle').addClass('hidden');
+        } else {
+            // réservation de salle
+            $('.label_type_objet').first().addClass('hidden');
+            $('.label_type_salle').first().removeClass('hidden');
+            $('#type_objet').addClass('hidden');
+            $('#type_salle').removeClass('hidden');
+        }
+    });
 
     $('#myModal').on('hidden.bs.modal', function(e) { 
         if (!$('.selected').length) {
             $('#no_hour_selected').removeClass('hidden')
         }
     });
+    
+    $('.toggle-on, .toggle-off').each(function() {
+        if ($(this).parent().parent().parent().hasClass('room_object_selector')) {
+            if ($(this).hasClass('toggle-on')) {
+                $(this).html('Objet')
+            } else if ($(this).hasClass('toggle-off')) {
+                $(this).html('Salle')
+            }
+        }
+    })
 });

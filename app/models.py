@@ -202,20 +202,48 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(70))
     
+    item_type_id = db.Column(db.Integer, db.ForeignKey('item_types.id'))
+    
     # link to reservations
     reservations = db.relationship('Reservation', backref='item')
+    
+    
     
     
     @staticmethod
     def insert_items(items):
         for i in items:
-            item = Item(name=i)
+            print(i)
+            i_t = Item_Type.query.filter_by(name=i[1]).first()
+            item = Item(name=i[0], item_type_id =i_t.id)
             db.session.add(item)
 
         db.session.commit()
     
     def __repr__(self):
         return '<Item %r>' % self.name
+        
+class Item_Type(db.Model):
+    __tablename__ ="item_types"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    name = db.Column(db.String(10))
+    
+    item = db.relationship('Item', backref='item_type')
+    
+    
+    
+    @staticmethod
+    def insert_item_types():
+        item_types = ["Caméra", "Trépied", "Appareil photo", "Visualiseur", "Ordinateur", "Autre"]
+        
+        for i in item_types:
+            item_type = Item_Type(name=i)
+            db.session.add(item_type)
+        db.session.commit()
+    
+    
 
 
 class Timeslot(db.Model):
@@ -337,6 +365,8 @@ class Reservation(db.Model):
     
     # link to items
     item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    
+
 
 
     def __repr__(self):

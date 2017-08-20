@@ -55,7 +55,11 @@
         </center>
         <form class="form-horizontal">
           <div class="form-group">
-            <h1 class="gros_titre">Réservation</h1>
+            <h1 class="gros_titre">Réservation
+              <span class="room_object_selector">
+                <input type="checkbox" data-toggle="toggle" id="room_object_selector">
+              </span>
+            </h1>
           </div>
           <div class="row">
             <div style="position: relative; bottom: 7px;">
@@ -96,16 +100,17 @@
                 </button>
               </div>  
               <div>
-                <label class="col-sm-2 control-label">Type de salle</label>
+                <label class="col-sm-2 control-label label_type_salle">Type de salle</label>
+                <label class="col-sm-2 control-label label_type_objet hidden">Type d'objet</label>
                 <div class="col-sm-3">
-                  <select class="form-control type_salle" id="type_salle_hidden" style="display: none;">
+                  <select class="form-control type_salle" id="type_salle">
                     {% for room_type in rooms_types %}
                       <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
                     {% endfor %}
                   </select>
-                  <select class="form-control type_salle" id="type_salle">
-                    {% for room_type in rooms_types %}
-                      <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+                  <select class="form-control type_objet hidden" id="type_objet">
+                    {% for item_type in item_types %}
+                      <option value={{ item_type[0] }}>{{ item_type[1] }}</option>
                     {% endfor %}
                   </select>
                 </div>

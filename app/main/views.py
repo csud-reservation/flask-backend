@@ -93,8 +93,35 @@ def get_all_available_items(start_date, end_date, first_period, last_period, ite
     
     
     concerned_items = Item.query.filter_by(item_type_id=item_type).all()
+    items_with_res = {}
+    for item in concerned_items:
+        items_with_res[item.name] = Reservation.query.filter_by(item_id = item.id).all()
+        
+    item_to_del = []
+    for item, reservations in items_with_res.items():
+        for res in reservations:
+            
+            timeslots = res.timeslots.all()
+            
+            res_first_period = timeslots[0].id-1
+            res_last_period = timeslots[len(timeslots)-1].id-1
+
+            
+            if (start_date.date() <= res.end_date and start_date.date() >= res.start_date) or (end_date.date() <= res.end_date and end_date.date() >= res.start_date):
+                if (first_period >= res_first_period and first_period <= res_last_period) or (last_period >= res_first_period and last_period <= res_last_period):
+                    item_to_del.append(item)
+                    
     
-    print(concerned_items)
+                
+                
+    print(item_to_del)
+                
+    for item in item_to_del:
+        del items_with_res[item]
+        
+        
+        
+    return items_with_res
     
 
 
@@ -115,7 +142,10 @@ def search_page():
         last_period = int(request.form.get('lastID'))
         
         room_type = request.form.get('room_type')
+        admin_rights = request.form.get('adminRights') == 'true'
+        session["admin_rights"] = admin_rights
         
+        session["reservation_type"] = request.form.get("reservation_type")
         
         if request.form.get("reservation_type") == "room":
         
@@ -123,9 +153,7 @@ def search_page():
     
     
             all_rooms_with_conflicts = get_all_rooms_with_conflicts(start_date, end_date, first_period, last_period, room_type)
-                    
-            admin_rights = request.form.get('adminRights') == 'true'
-            session["admin_rights"] = admin_rights
+
             
             user_role = Role.query.get(current_user.role_id).name
             
@@ -139,7 +167,8 @@ def search_page():
                     end_date=end_date.date(),
                     first_period = first_period,
                     last_period = last_period,
-                    admin_rights = 1
+                    admin_rights = 1,
+                    reservation_type = session["reservation_type"]
                 )    
             
             else :
@@ -163,16 +192,23 @@ def search_page():
                     end_date=end_date.date(),
                     first_period = first_period,
                     last_period = last_period,
-                    admin_rights = 0
+                    admin_rights = 0,
+                    reservation_type = session["reservation_type"]
                 )
                 
         elif request.form.get("reservation_type") == "item":
-            
-            get_all_available_items(start_date, end_date, first_period, last_period, room_type)
+            return render_template('search_results.html',
+                    disponibilities=get_all_available_items(start_date, end_date, first_period, last_period, room_type),
+                    start_date=start_date.date(),
+                    end_date=end_date.date(),
+                    first_period = first_period,
+                    last_period = last_period,
+                    admin_rights = 0,
+                    reservation_type = session["reservation_type"]
+                )
 
     user_role = Role.query.get(current_user.role_id).name
     
-    print(get_item_types())
     return render_template('search.html', role=user_role, item_types = get_item_types())
         
 #===============================================================================
@@ -181,6 +217,11 @@ def search_page():
 @main.route('/new_reservation', methods=['PUT', 'POST'])
 @login_required
 def new_reservation():
+    
+    if (request.method == 'PUT'): 
+        session["reservation_type"] = 'room'
+        session["admin_rights"] = 0
+        print('test')
     
     room_select = request.form.get('room_select')
     student_group = request.form.get('student_group')
@@ -192,7 +233,6 @@ def new_reservation():
     end_date = datetime.strptime(request.form.get('end_date'), "%d.%m.%Y")
     weekday_id = start_date.weekday()+1
     
-    
     all_rooms_with_conflicts = get_all_rooms_with_conflicts(start_date, end_date, first_period, last_period, "%%")
     
     session["modifications"] = []
@@ -203,7 +243,20 @@ def new_reservation():
     
     user_role = Role.query.get(current_user.role_id).name
     
-    if user_role == 'admin' and session["admin_rights"]:
+    session["modifications_dates"] = [start_date.strftime('%d.%m.%Y'), end_date.strftime('%d.%m.%Y')]
+        
+    duration = last_period - first_period + 1
+        
+    user = User.query.get(current_user.id)
+    timeslots = Timeslot.query.filter(
+        Timeslot.order.between(
+            first_period,
+            last_period,
+            )
+        ).all()
+    weekday = Weekday.query.get(start_date.weekday()+1)
+    
+    if user_role == 'admin' and session["admin_rights"] and session["reservation_type"] == "room":
         if all_rooms_with_conflicts[room_select]:
             
             print(all_rooms_with_conflicts[room_select])
@@ -260,46 +313,51 @@ def new_reservation():
             res_to_replace.close()
             split_reservation_by_room(start_date, end_date, first_period+1, last_period+1, room_select)
             
-    elif not session["admin_rights"]:
-        
-        print("debug")
+    elif not session["admin_rights"] and session["reservation_type"] == "room":
         
         if all_rooms_with_conflicts[room_select] > 0:
             
             return "La salle demandée n'est plus disponible"
     
-    
-    session["modifications_dates"] = [start_date.strftime('%d.%m.%Y'), end_date.strftime('%d.%m.%Y')]
-    
-    duration = last_period - first_period + 1
-    
-    user = User.query.get(current_user.id)
-    timeslots = Timeslot.query.filter(
-        Timeslot.order.between(
-            first_period,
-            last_period,
-        )
-    ).all()
-    weekday = Weekday.query.get(start_date.weekday()+1)
-    room = Room.query.filter_by(name=room_select).first()
-    
-    reservation = Reservation(
-        start_date=start_date,
-        end_date=end_date,
-        reason_short=res_name,
-        reason_details=reason,
-        duration=duration,
-        student_group=student_group,
-        users=[user],
-        room=room,
-        timeslots=timeslots,
-        weekday=weekday,
-        owner=user
-    )
+        room = Room.query.filter_by(name=room_select).first()
         
-    db.session.add(reservation)
-    db.session.commit()
-    
+        reservation = Reservation(
+            start_date=start_date,
+            end_date=end_date,
+            reason_short=res_name,
+            reason_details=reason,
+            duration=duration,
+            student_group=student_group,
+            users=[user],
+            room=room,
+            timeslots=timeslots,
+            weekday=weekday,
+            owner=user
+        )
+            
+        db.session.add(reservation)
+        db.session.commit()
+        
+    elif session["reservation_type"] =="item":
+        item = Item.query.filter_by(name=room_select).first()
+        
+        reservation = Reservation(
+            start_date=start_date,
+            end_date=end_date,
+            reason_short=res_name,
+            reason_details=reason,
+            duration=duration,
+            student_group=student_group,
+            users=[user],
+            item=item,
+            timeslots=timeslots,
+            weekday=weekday,
+            owner=user
+        )
+            
+        db.session.add(reservation)
+        db.session.commit()
+
     # réservation en ajax
     if (request.method == 'PUT'):
         return 'success'
@@ -548,6 +606,7 @@ def my_reservations():
         
     return render_template('my_reservations.html',
         reservations=reservations_to_send_final, today=today, just_reserved=just_reserved, 
+        reservation_type = session['reservation_type'],
         role=user_role, modifications = session["modifications"], 
         modifications_dates = session["modifications_dates"], 
         old_room = session["old_room"], reservations_total=reservations_total,

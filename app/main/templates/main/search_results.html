@@ -3,9 +3,17 @@
 
 <div class="row">
   <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-    <label>Salles disponibles</label>
+    {% if reservation_type == 'room' %}
+      <label>Salles disponibles</label>
+    {% elif reservation_type == 'item' %}
+      <label>Objets disponibles</label>
+    {% endif %}
     <div class="espace_dessous">
-      <select class="form-control type_salle" id="room_select">
+      {% if reservation_type == 'room' %}
+        <select class="form-control type_salle" id="room_select">
+      {% elif reservation_type == 'item' %}
+        <select class="form-control type_salle" style="max-width: 300px;" id="room_select">
+      {% endif %}
         {% if admin_rights %}
           {% for room in disponibilities %}
             <option value="{{room[0]}}">{{ room[0] }}
@@ -75,7 +83,11 @@
           </td>
         </tr>
         <tr>
-          <th>Salle</th>
+          {% if reservation_type == 'room' %}
+            <th>Salle</th>
+          {% elif reservation_type == 'item' %}
+            <th>Objet</th>
+          {% endif %}
           <td id="room"></td>
         </tr>
       </tbody>

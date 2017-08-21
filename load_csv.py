@@ -11,11 +11,20 @@ def load_teachers(filename):
         
 def load_items():
     
-    file = open("items.csv").read().strip().split(";")
+    file = open("items.csv").readlines()
     
-    print(file)
+    item_list = []
+    
+    for line in file:
+        item_list.append(line.strip().split(";"))
         
-    return file
+    
+    print(item_list)
+        
+    return item_list
+
+
+
 
 def print_row(row):
     for code, value in row.items():

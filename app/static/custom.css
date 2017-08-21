@@ -172,8 +172,8 @@ tbody tr:first-child {
         bottom: 7px;
 }
 
-#date_non_ponctuelle, .type_salle {
-    max-width:220px;
+#date_non_ponctuelle, .type_salle, .type_objet {
+    max-width: 220px;
 }
 
 table.room-timetable div.timetable.cell-info {
@@ -314,6 +314,12 @@ ul.pagination {
 
 .table-reservations {
     margin-top: 34px;
+}
+
+.room_object_selector {
+    margin-left: 10px;
+    position: relative;
+    bottom: 4px;
 }
 
 @media print {

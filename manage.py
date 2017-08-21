@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from app import create_app, db
-from app.models import User, Role, Reservation, Room, Timeslot, Weekday, reservations_users, reservations_timeslots, Item
+from app.models import User, Role, Reservation, Room, Timeslot, Weekday, reservations_users, reservations_timeslots, Item, Item_Type
 from flask_script import Manager, Shell, Server
 from flask_migrate import Migrate, MigrateCommand
 
@@ -97,6 +97,8 @@ def initdb():
     User.insert_admin()
     User.insert_teachers(teachers_edt, teachers_admin)
     Room.insert_rooms(rooms)
+    
+    Item_Type.insert_item_types()
     
     Item.insert_items(items)
     

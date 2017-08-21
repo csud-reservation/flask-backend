@@ -1,8 +1,12 @@
 from . import db
-
+import string
+import random
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 db.verbosity = 2
+
+def password_generator(length=8) :
+    return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
 
 
 class User(UserMixin, db.Model):
@@ -33,18 +37,29 @@ class User(UserMixin, db.Model):
         admin.email = 'morisodi@edufr.ch'
         admin.first_name = 'Admin'
         admin.last_name = 'Admin'
+        admin.sigle="MORI"
         
     @staticmethod
     def insert_admin():
         admin_role = Role.query.filter_by(name='admin').first()
         admin = User.query.filter_by(role=admin_role).first()
         
+        
+        password = password_generator()
+        
+        csv_file = open('account_password.csv','a')
+        csv_file.seek(0)
+        csv_file.truncate()
+        csv_file.write("morisodi@edufr.ch;"+password+"\n")
+        csv_file.close()
+        
+        
         if admin is None:
             admin = User(
                 first_name="Administrateur",
                 last_name="Système réservation CSUD",
                 email="morisodi@edufr.ch",
-                password_hash="super_secret_passwd",
+                password_hash=generate_password_hash(password),
                 role=admin_role
             )
             
@@ -53,6 +68,10 @@ class User(UserMixin, db.Model):
     
     @staticmethod
     def insert_teachers(teachers_edt, teachers_admin):
+        
+        csv_file = open('account_password.csv','a')       
+        
+        
         for t in teachers_edt:
             teacher = User.query.filter_by(sigle=t['ABREV']).first()
             
@@ -73,6 +92,12 @@ class User(UserMixin, db.Model):
             role = Role.query.filter_by(
                 name=roles[teacher_admin['Fonction Identifiant FR']]
             ).one()
+            
+
+            password = password_generator()
+            
+            csv_file.write(teacher_admin['Email Ecole']+";"+password+"\n")
+            
 
             if teacher is None:
                 teacher = User(
@@ -80,11 +105,11 @@ class User(UserMixin, db.Model):
                     last_name=t['NOM'],
                     sigle=t['ABREV'],
                     email=teacher_admin['Email Ecole'],
-                    password_hash=generate_password_hash('unsecure'),
+                    password_hash=generate_password_hash(password),
                     role=role
                 )
                 db.session.add(teacher)
-                
+        csv_file.close()
         db.session.commit()
         
         
@@ -169,6 +194,56 @@ class Room(db.Model):
                 db.session.add(room)
 
         db.session.commit()
+        
+        
+class Item(db.Model):
+    __tablename__="items"
+        
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(70))
+    
+    item_type_id = db.Column(db.Integer, db.ForeignKey('item_types.id'))
+    
+    # link to reservations
+    reservations = db.relationship('Reservation', backref='item')
+    
+    
+    
+    
+    @staticmethod
+    def insert_items(items):
+        for i in items:
+            print(i)
+            i_t = Item_Type.query.filter_by(name=i[1]).first()
+            item = Item(name=i[0], item_type_id =i_t.id)
+            db.session.add(item)
+
+        db.session.commit()
+    
+    def __repr__(self):
+        return '<Item %r>' % self.name
+        
+class Item_Type(db.Model):
+    __tablename__ ="item_types"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    name = db.Column(db.String(10))
+    
+    item = db.relationship('Item', backref='item_type')
+    
+    
+    
+    @staticmethod
+    def insert_item_types():
+        item_types = ["Caméra", "Trépied", "Appareil photo", "Visualiseur", "Ordinateur", "Autre"]
+        
+        for i in item_types:
+            item_type = Item_Type(name=i)
+            db.session.add(item_type)
+        db.session.commit()
+    
+    
 
 
 class Timeslot(db.Model):
@@ -232,7 +307,6 @@ class Weekday(db.Model):
         
         db.session.commit()
         
-        
 
     
 
@@ -287,6 +361,12 @@ class Reservation(db.Model):
     
     # link to rooms
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
+    
+    
+    # link to items
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    
+
 
 
     def __repr__(self):

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-1 col-md-offset-1 col-md-10 col-lg-10 blanc espace_dessous">
+      <div id="profil_alerts">
+        <div class="alert alert-success hidden" id="mod_profil_message"></div>
+        <div class="alert alert-success hidden" id="new_user_message"></div>
+        <div class="alert alert-success hidden" id="delete_user_message"></div>
+        <div class="alert alert-success hidden" id="reset_password_message"></div>
+      </div>
+      <h1 class="gros_titre">Utilisateurs
+        <button class="btn btn-default new_user_button">
+          <span class="glyphicon glyphicon-plus"></span>
+        </button>
+      </h1>
+      <input
+        id="search_input"
+        placeholder="Rechercher un utilisateur"
+        onkeyup="search_engine();"
+        class="form-control">
+      </input>
+      
+      <table class="table table-striped" id="users_table">
+        <tbody class="stripe">
+          <th>Sigle</th>
+          <th>Prénom</th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th></th>
+        </tbody>
+        <tbody>
+          <tr class="hidden" id="first_row"></tr>
+          {% for user in users %}
+            <tr class="user_row">
+              <td class="{{ user['id'] }}_sigle">
+                <a href="user?sigle={{ user['sigle'] }}">{{ user['sigle'] }}</a>
+              </td>
+              <td class="first_name {{ user['id'] }}_first_name">{{ user['first_name'] }}</td>
+              <td class="last_name {{ user['id'] }}_last_name">{{ user['last_name'] }}</td>
+              <td class="{{ user['id'] }}_email">
+                <a href="mailto:{{ user['email'] }}">{{ user['email'] }}</a>
+              </td>
+              <td class="{{ user['id'] }}_role role_id_{{ user['role_id'] }}">
+                {{ roles[user['role_id']] }}
+              </td>
+              <td id="{{ user['id'] }}">
+                <button class="btn btn-xs btn-primary infos_button">
+                  <span class="glyphicon glyphicon-info-sign"></span>
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    </div class="col-lg-2 col-md-1"></div>
+  </div>
+  
+  <!-- Modal modification -->
+  <div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h3 class="modal-title">Modification du profil</h4>
+        </div>
+        <div class="modal-body">
+          <div class="hidden" id="user_id"></div>
+          <div class="row">
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_mod_profil">Prénom</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_first_name" 
+                onkeyup="verify('mod_first_name');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_mod_profil">Nom</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_last_name" 
+                onkeyup="verify('mod_last_name');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_mod_profil">Email</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_email" 
+                onkeyup="verify('mod_email');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_mod_profil">Sigle</label>
+              <div class="col-sm-9">
+                <input class="form-control input_mod_profil" id="mod_sigle" 
+                onkeyup="verify('mod_sigle');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_mod_profil">Role</label>
+              <div class="col-sm-9">
+                <select class="form-control input_mod_profil" id="mod_role">
+                  {% for i in range(1,7) %}
+                    <option value={{ i }}>{{ roles[i] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+          <button type="button" class="btn btn-success" id="reset_password_button">Réinitialiser le mot de passe</button>
+          <button type="button" class="btn btn-danger" id="delete_user_button">Supprimer</button>
+          <button type="button" class="btn btn-primary" id="mod_user_button">Modifier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal nouvel utilisateur -->
+  <div id="new_user_modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h3 class="modal-title">Nouvel utilisateur</h4>
+        </div>
+        <div class="modal-body">
+          <div class="hidden" id="user_id"></div>
+          <div class="row">
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_new_profil">Prénom</label>
+              <div class="col-sm-9">
+                <input class="form-control input_new_profil" id="new_first_name" 
+                onkeyup="verify('new_first_name');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_new_profil">Nom</label>
+              <div class="col-sm-9">
+                <input class="form-control input_new_profil" id="new_last_name" 
+                onkeyup="verify('new_last_name');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_new_profil">Email</label>
+              <div class="col-sm-9">
+                <input class="form-control input_new_profil" id="new_email" 
+                onkeyup="verify('new_email');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_new_profil">Sigle</label>
+              <div class="col-sm-9">
+                <input class="form-control input_new_profil" id="new_sigle" 
+                onkeyup="verify('new_sigle');" type="text">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3 label_new_profil">Role</label>
+              <div class="col-sm-9">
+                <select class="form-control input_new_profil" id="new_role">
+                  {% for i in range(1,7) %}
+                    <option value={{ i }}>{{ roles[i] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+          <button type="button" class="btn btn-primary" id="new_user_button">Nouvel utilisateur</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='my_reservations.css') }}">
+{{ super() }}
+<script src="{{ url_for('static', filename='profil.js') }}"></script>
+<script src="{{ url_for('static', filename='users_admin.js') }}"></script>
+{% endblock %}

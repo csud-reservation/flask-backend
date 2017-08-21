@@ -25,82 +25,220 @@
 
 {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
-            <form class="form-horizontal marges">
-              <div class="row">
-                <div class="form-group">
-                  <div class="col-sm-2">
-                    <span class="btn btn-default nav_week previous_week desktop"
-                    onclick="change_week(true);">Semaine précédente</span>
-                  </div>
-                  <div class="col-sm-8">
-                    <h1 class="gros_titre" id="titre">Horaire</h1>
-                  </div>
-                  <div class="col-sm-2">
-                    <span class="pull-right btn btn-default nav_week following_week desktop"
-                    onclick="change_week(false);">Semaine suivante</span>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="form-group">
-                  <div class="ajustement_sm">
-                    <label class="col-sm-1 control-label">Date</label>
-                    <div class="col-sm-4">
-                      <input type="text" id="weekly_datepicker" class="form-control today">
-                    </div>
-                  </div>
-                  <div class="ajustement_sm">
-                    <label class="col-sm-1 control-label">Salle</label>
-                    <div class="col-sm-3">
-                      <select class="form-control" id="rooms_type">
-                        {% for room_type in rooms_types %}
-                          <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-sm-1">
-                    <label class="control-label">Numéro</label>
-                  </div>
-                  <div class="col-sm-2">
-                    <select class="form-control" id="rooms_numbers_hidden">
-                      {% for room in rooms %}
-                        <option class="rooms_choice_hidden" value="{{ room.name }}">{{ room.name }}</option>
-                      {% endfor %}
-                    </select>
-                    <select class="form-control" id="rooms_numbers">
-                      {% for room in rooms %}
-                        <option class="rooms_choice" value="{{ room.name }}">{{ room.name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                  <div class="col-xs-6">
-                    <span class="btn btn-default nav_week previous_week mobile"
-                      onclick="change_week(true);">Semaine précédente</span>
-                  </div>
-                  <div class="col-xs-6">
-                    <span class="btn btn-default nav_week following_week pull-right mobile"
-                      onclick="change_week(false);">Semaine suivante</span>
-                  </div>
-                </div>
-              </div>
-              <!-- le formulaire invisible est créé en jQuery -->
-              <div id="invisible_form">
-                <div id="input_invisible_base"></div>
-              </div>
-              <div class="form-group">
-                <!--<input value="Rechercher horaire" class="pull-right btn btn-primary btn_recherche_horaires"
-                  onclick="submit_invisible_form_timetable();">-->
-              </div>
-            </form>
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+      <div class="hidden" id="user_sigle">{{user.sigle}}</div>
+      <div class="hidden" id="user_role">{{role}}</div>
+        <form class="form-horizontal marges">
+          <div class="row">
             <div class="form-group">
+              <center>
+                <div class="alert alert-success hidden timetable_alert_format" id="just_reserved">
+                  Votre réservation a bien été effectuée.
+                </div>
+              </center>
+              <center>
+                <div class="alert alert-success hidden timetable_alert_format" id="res_deleted_message">
+                  Votre réservation a bien été supprimée.
+                </div>
+              </center>
+              <center>
+                <div class="alert alert-success hidden timetable_alert_format" id="res_updated_message">
+                  Votre réservation a bien été modifiée.
+                </div>
+              </center>
+              <div class="col-sm-2">
+                <span class="btn btn-default nav_week previous_week desktop"
+                onclick="change_week(true);">Semaine précédente</span>
+              </div>
+              <div class="col-sm-8">
+                <h1 class="gros_titre" id="titre">Horaire</h1>
+              </div>
+              <div class="col-sm-2">
+                <span class="pull-right btn btn-default nav_week following_week desktop"
+                onclick="change_week(false);">Semaine suivante</span>
+              </div>
             </div>
-            <div id="result"></div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <div class="ajustement_sm">
+                <label class="col-sm-1 control-label">Date</label>
+                <div class="col-sm-4">
+                  <input type="text" id="weekly_datepicker" class="form-control today">
+                </div>
+              </div>
+              <div class="ajustement_sm">
+                <label class="col-sm-1 control-label">Salle</label>
+                <div class="col-sm-3">
+                  <select class="form-control" id="rooms_type">
+                    {% for room_type in rooms_types %}
+                      <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-1">
+                <label class="control-label">Numéro</label>
+              </div>
+              <div class="col-sm-2">
+                <select class="form-control" id="rooms_numbers_hidden">
+                  {% for room in rooms %}
+                    <option class="rooms_choice_hidden" value="{{ room.name }}">{{ room.name }}</option>
+                  {% endfor %}
+                </select>
+                <select class="form-control" id="rooms_numbers">
+                  {% for room in rooms %}
+                    <option class="rooms_choice" value="{{ room.name }}">{{ room.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-xs-6">
+                <span class="btn btn-default nav_week previous_week mobile"
+                  onclick="change_week(true);">Semaine précédente</span>
+              </div>
+              <div class="col-xs-6">
+                <span class="btn btn-default nav_week following_week pull-right mobile"
+                  onclick="change_week(false);">Semaine suivante</span>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!--
+        <a href="#" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-print" onclick="PrintElem()"></span>  </a>
+        -->
+        <div id="result"></div>
+        
+        <!-- Modal nouvelle réservation -->
+          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+
+              <div id="new_res_modal">
+                <div class="modal-content" id="new_res_modal">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h3 class="modal-title" id="myModalLabel">Nouvelle réservation</h3>
+                    <div class="modal-body">
+                      <div class="modal-body">
+                    <div class="newRes_form">
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label>Nom de la réservation</label>
+                            <input type="text" class="form-control" id="newRes_res_name" value="RES">
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label>Classe</label>
+                            <input type="text" class="form-control" id="newRes_student_group">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>Raison de la réservation</label>
+                        <textarea class="form-control" rows="5" id="newRes_reason"></textarea>
+                      </div>
+                      <label>Résumé de la réservation</label>
+                      <div class="hidden">
+                        <span id="newRes_first_period"></span>
+                        <span id="newRes_last_period"></span>
+                        <span id="newRes_end_date"></span>
+                      </div>
+                      <table class="table table-striped">
+                        <tbody>
+                          <tr>
+                            <th>Date</th>
+                            <td>
+                              <span id="newRes_start_date"></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th>Période</th>
+                            <td id="newRes_period"></td>
+                          </tr>
+                          <tr>
+                            <th>Salle</th>
+                            <td id="newRes_room_select"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" id="newRes_button">Réserver</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal infos -->
+            <div id="infos_modal">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h3 class="modal-title" id="myModalLabel">Informations sur la réservation</h3>
+                <div class="modal-body">
+                  <div id="modal_view_content">
+                    <center>
+                      <div class="alert alert-info" id="mod_alert">
+                        Il n'est possible de modifier que le nom, la classe et les détails de la réservation.
+                      </div>
+                    </center>
+                    <table class="table table-striped">
+                      <tr class="hidden"><th>Identifiant de la réservation</th><td id="reservation_id"></td></tr>
+                      <tr class="hidden"><th>Identifiant du jour</th><td id="day_id"></td></tr>
+                      <tr class="hidden"><th>Cellule vide</th><td></td></tr>
+                      
+                      <tr><th>Date de début</th><td id="start_date"></td></tr>
+                      <tr><th>Date de fin</th><td id="end_date"></td></tr>
+                      <tr><th>Salle</th><td id="room"></td></tr>
+                      <tr><th>Heure de début</th><td id="start_time"></td></tr>
+                      <tr><th>Heure de fin</th><td id="end_time"></td></tr>
+                      <tr><th>Classe</th><td id="student_group"></td></tr>
+                      <tr><th id="teachers_header"></th><td id="teachers_cell"></td></tr>
+                      <tr><th>Nom réservation</th><td id="reason_short"></td></tr>
+                      <tr><th>Détails de la réservation</th><td id="reason_details"></td></tr>
+                    </table>
+                    <div class="modify_form hidden">
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label>Nom de la réservation</label>
+                            <input type="text" class="form-control" id="reason_short_input">
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label>Classe</label>
+                            <input type="text" class="form-control" id="student_group_input">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>Raison de la réservation</label>
+                        <textarea class="form-control" rows="5" id="reason_details_input"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+                  <button type="button" class="btn btn-primary hidden" id="cancel_mod_button">Annuler les modifications</button>
+                  <button type="button" class="btn btn-success hidden" id="update_mod_button">Enregistrer les modifications</button>
+                  <button type="button" class="btn btn-primary" id="modify_button">Modifier</button>
+                  <button type="button" class="btn btn-danger" data-dismiss="modal" id="delete_button">Supprimer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-      </div class="col-lg-2 col-md-1"></div>
-    </div>
+      </div>
+    </div><div class="col-lg-2 col-md-1"></div>
+  </div>
 </div>
 {% endblock %}
 
@@ -109,5 +247,6 @@
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>-->
 <script src="{{ url_for('static', filename='datepicker.js') }}"></script>
 <script src="{{ url_for('static', filename='search.js') }}"></script>
-<script src="{{ url_for('static', filename='horaires.js') }}"></script>
+<script src="{{ url_for('static', filename='horaire.js') }}"></script>
+<script src="{{ url_for('static', filename='print.js') }}"></script>
 {% endblock %}

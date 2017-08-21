@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from app import create_app, db
-from app.models import User, Role, Reservation, Room, Timeslot, Weekday, reservations_users, reservations_timeslots
+from app.models import User, Role, Reservation, Room, Timeslot, Weekday, reservations_users, reservations_timeslots, Item, Item_Type
 from flask_script import Manager, Shell, Server
 from flask_migrate import Migrate, MigrateCommand
 
@@ -15,8 +15,11 @@ except:
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-from data.utils import extract_sigles, extract_timeslots, extract_rooms
-from load_csv import load_teachers, load_reservations
+try:
+    from data.utils import extract_sigles, extract_timeslots, extract_rooms
+    from load_csv import load_teachers, load_reservations, load_items
+except:
+    print('Impossible de charger les données')
 
 # On passe les modèles à la création de l'application pour pouvoir y initialiser Flask-Restless 
 models = dict(
@@ -85,6 +88,8 @@ def initdb():
     teachers_edt = load_teachers('data/teachers_edt.csv')
     teachers_admin = load_teachers('data/teachers_admin.csv')
     
+    items = load_items()
+    
     # auto data loading from different datasources
     Timeslot.insert_timeslots(timeslots)
     Weekday.insert_days()
@@ -92,6 +97,11 @@ def initdb():
     User.insert_admin()
     User.insert_teachers(teachers_edt, teachers_admin)
     Room.insert_rooms(rooms)
+    
+    Item_Type.insert_item_types()
+    
+    Item.insert_items(items)
+    
     
     
 @manager.command

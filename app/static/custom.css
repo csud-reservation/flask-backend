@@ -20,7 +20,7 @@
   top: 8px;
 }
 
-.hidden {
+.hidden, .hidden_row {
   display: none;
 }
 
@@ -30,7 +30,6 @@
     margin-bottom: -20px;
 }
 
-
 .espace_dessous {
     padding-bottom: 15px;
 }
@@ -38,14 +37,12 @@
 .bouton_recherche {
     margin-top: 2px;
     margin-right: 15px;
+    position: relative;
+        bottom: 2px;
 }
 
 #message_url {
   margin-bottom: -5px;
-  text-align: center;
-}
-
-.infos_profil {
   text-align: center;
 }
 
@@ -61,8 +58,7 @@ tbody tr:first-child {
 }
 
 .horaire td { 
-    text-align: center;
-    
+    text-align: center; 
 }
 
 #recurrence_on { 
@@ -97,8 +93,8 @@ tbody tr:first-child {
 }
 
 .mod_pw_title {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 7px;
 }
 
 .corps_page {
@@ -119,6 +115,9 @@ tbody tr:first-child {
     .desktop {
         display: block;
     }
+    .type_groupes {
+        margin-bottom: 23px;
+    }
 }
 
 @media(max-width:767px) {
@@ -127,6 +126,11 @@ tbody tr:first-child {
     }
     .desktop {
         display: none;
+    }
+    .bouton_recherche {
+        width: 98px; 
+        margin-left: 15px; 
+        margin-top: 15px;
     }
     .ajustement_sm {
         margin-bottom: 15px;
@@ -138,6 +142,9 @@ tbody tr:first-child {
     #modify {
         position: relative;
             top: 8px;
+    }
+    .type_groupes {
+        margin-bottom: 15px;
     }
 }
 
@@ -165,16 +172,8 @@ tbody tr:first-child {
         bottom: 7px;
 }
 
-#date_non_ponctuelle, .type_salle {
-    max-width:220px;
-}
-
-.bouton_recherche {
-    width: 200px;
-}
-
-table.room-timetable tbody td.reserved {
-    background-color: lightgray;
+#date_non_ponctuelle, .type_salle, .type_objet {
+    max-width: 220px;
 }
 
 table.room-timetable div.timetable.cell-info {
@@ -214,6 +213,125 @@ table.room-timetable div.timetable.cell-info {
     width: 140px;
 }
 
-table.room-timetable tbody td.reserved.reserved_by_teacher {
+#no_hour_selected, #no_available_room {
+    margin-bottom: 2px;
+}
+
+table.room-timetable tbody td.reserved {
     background-color: #d4f7c9;
+}
+
+table.room-timetable tbody td.reserved_by_admin {
+    background-color: lightgray;
+}
+
+.timetable_alert_format {
+    margin-bottom: 5px;
+}
+
+.empty {
+    position: relative;
+}
+
+.empty:hover {
+    background-color: #e6faff;
+}
+
+.empty span {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
+}
+
+span.glyphicon-plus {
+    font-size: 1.2em;
+}
+
+#profil_modify_button, .new_user_button {
+    position: relative; 
+        bottom: 4px;
+}
+
+#res_confirm {
+    margin-left: 6px;
+}
+
+.label_mod_profil, .label_new_profil {
+    text-align: right;
+    position: relative;
+        top: 5px;
+}
+
+.input_mod_profil, .input_new_profil {
+    margin-bottom: 15px;
+}
+
+#profil_alerts {
+    padding-top: 5px; 
+    position: relative; 
+        bottom: 5px;
+    text-align: center;
+}
+
+.wrong_password {
+    margin-bottom: -5px;
+}
+
+.login_error_message {
+    position: relative;
+        top: 2px;
+}
+
+.login_submit_button {
+    margin-top: 6px;
+}
+
+.stripe {
+    background-color: rgb(249,249,249)
+}
+
+#search_input {
+    margin-bottom: 12px;
+    position: relative;
+    top: 2px;
+}
+
+#radioBtn .notActive {
+    color: #3276b1;
+    background-color: #fff;
+}
+
+.free-group-form {
+    margin-top: 35px;
+}
+
+ul.pagination {
+    margin-top: 5px;
+}
+
+.table-reservations {
+    margin-top: 34px;
+}
+
+.room_object_selector {
+    margin-left: 10px;
+    position: relative;
+    bottom: 4px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #result, #result * {
+    visibility: visible;
+  }
+  #result {
+    position: center;
+    left: 0;
+    top: 0;
+  }
 }

@@ -1,3 +1,11 @@
+function create_form() {
+    $('body').last().after('<div id="invisible_form"><div id="input_invisible_base"></div></div>')
+}
+
+function remove_form() {
+    $('#invisible_form').remove()
+}
+
 function input_format(name, value) {
     return '<input type="hidden" name="' + name + '" value="' + value + '" />';
 }
@@ -36,11 +44,39 @@ function remove_days_to_date(date, days_to_remove) {
     (date.getDate()-parseInt(days_to_remove)), 0, 0, 0, 0);
 }
 
-$(function() {
+function change_url(new_url) {
+    history.pushState(null, null, new_url);
+}
+
+// http://stackoverflow.com/questions/19491336/
+function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+function format_dates() {
     $('.date_format').each(function() {
         var original_date = $(this).html();
         var date_formated = convert_sql_dateString_to_Date(original_date);
         var date_string = convert_Date_to_dateString(date_formated);
         $(this).html(date_string);
-    });    
+    }); 
+}
+
+function format_help_block(text) {
+    return '<div class="help-block wrong_password">'+text+'</div>'
+}
+
+$(function() {
+    format_dates()
 });

@@ -1,0 +1,183 @@
+{% set general_student_groups = ["1GY", "1ECG", "1EC", "2GY", "2ECG", "2EC", "3GY", "3ECG", "3EC", "4GY", "4MSPE"] %}
+{% set periods = [
+['Période 1', '8h10 - 8h55'],
+['Période 2', '9h00 - 9h45'],
+['Pause', '9h45 - 10h05'],
+['Période 3', '10h05 - 10h50'],
+['Période 4', '10h55 - 11h40'],
+['Période 5', '11h45 - 12h30'],
+['Période 6', '12h35 - 13h20'],
+['Période 7', '13h25 - 14h10'],
+['Période 8', '14h15 - 15h00'],
+['Période 9', '15h05 - 15h50'],
+['Période 10', '15h55 - 16h40'],
+['Période 11', '16h45 - 17h30'],
+['Période 12', '17h35 - 18h20']
+] %}
+
+{% extends "base.html" %}
+{% block title %}Libérer un groupe d'étudiants{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css">
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+  <div class="container" id="main_container" >
+    <div class="row">
+      <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+        <center>
+          <div class="alert alert-danger hidden" id="no_hour_selected">
+            Vous n'avez sélectionné aucune plage horaire.
+          </div>
+          <div class="alert alert-success hidden" id="free_success">
+          </div>
+        </center>
+        <h1 class="gros_titre">Libérer un groupe d'étudiants</h1>
+
+        <form class="form-horizontal free-group-form">
+          <div class="row espace_dessous">
+            <label class="col-sm-2 control-label">Récurrence</label>
+            <div class="col-sm-1">
+              <div class="checkbox" style="position: relative; bottom: 7px;">
+                <label>
+                  <input type="checkbox" data-toggle="toggle" id="switch">
+                </label>
+              </div>
+            </div>
+            <label class="col-sm-3 control-label">Date</label>
+            <div class="col-sm-6 date_input_form">
+              <div id="recurrence_on">
+                <div class="input-group input-daterange" style="width: 250px;">
+                  <input type="text" id="date_de" class="form-control today">
+                  <div class="input-group-addon">à</div>
+                  <input type="text" id="date_a" class="form-control">
+                </div>
+              </div>
+              <div id="recurrence_off" style="width: 120px;">
+                <input type="text" id="date_non_ponctuelle" class="form-control date today">
+              </div>
+            </div>
+          </div>
+          <div class="row type_groupes">
+            <label class="col-sm-4 control-label">Type de groupes</label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <div id="radioBtn" class="btn-group">
+                  <a class="btn btn-primary btn-sm active" id="select_general">Groupe général</a>
+                  <a class="btn btn-primary btn-sm notActive" id="select_particular">Groupe particulier</a>
+                  <a class="btn btn-primary btn-sm notActive" id="select_room">Salles</a>
+                </div>
+                <input type="hidden" name="group_radio" id="group_radio">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="ajustement_sm">
+              <label class="col-sm-2 control-label" id="label_group_room">
+                Groupe
+              </label>
+              <div class="col-sm-4">
+                <select class="form-control type_salle" id="particular">
+                  {% for group in student_groups %}
+                    <option value={{group}}>{{group}}</option>
+                  {% endfor %}
+                </select>
+                
+                <select class="form-control type_salle" id="general">
+                  {% for group in general_student_groups %}
+                    <option value={{group}}>{{group}}</option>
+                  {% endfor %}
+                </select>
+                
+                <select class="form-control type_salle" id="room">
+                  {% for room in rooms %}
+                    <option value={{room}}>{{room}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <label class="col-sm-2 control-label">Plage horaire</label>
+            <div class="col-sm-2">
+              <button type="button" class="btn btn-default btn-md ajustement_sm" data-toggle="modal" data-target="#myModal">
+                Choisir...
+              </button>
+            </div>
+            <div class="col-sm-2">
+              <button type="button" class="btn btn-primary btn-md" onclick="generateConfirmMessage()">
+                Libérer
+              </button>
+            </div>
+          </div>
+        </form>
+      
+      <!-- Modal des horaires -->
+      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h3 class="modal-title" id="myModalLabel">Plage Horaire
+              <a class="btn btn-xs btn-primary" onclick="$('#hour_select_info').toggleClass('hidden');" href="#">
+                <span class="glyphicon glyphicon-info-sign"></span>
+              </a>
+              </h3>
+              <div class="modal-body">
+                <center>
+                <div class="alert alert-info hidden" id="hour_select_info">
+                  Cliquez sur la première heure, puis sur la deuxième heure que vous voulez réserver. Les heures comprises entre sont automatiquement sélectionnées. Si vous voulez sélectionner une seule heure que plusieurs sont déjà sélectionnées, double-cliquez sur l'heure correspondante.
+                </div>
+                </center>
+                <table class="table table-striped horaire">
+                  <tbody>
+                    {% for i in range(13) %}
+                      <tr id="periode_{{ i }}" onclick="select(this, {{ i }});">
+                        <td>{{ periods[i][0] }}</td>
+                        <td>{{ periods[i][1] }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" onclick="reset_modal_view();">Réinitialiser</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal confirmer -->
+    <div class="modal fade" id="confirm" tabindex="-1" role="dialog" aria-labelledby="confirmLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h3 class="modal-title" id="confirmLabel">Libérer un groupe d'élèves
+            </h3>
+            <div class="modal-body">
+              <div id="confirmMessage"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+              <button type="button" class="btn btn-primary" onclick="free_group();" data-dismiss="modal" >Confirmer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+  {{ super() }}
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>-->
+  <script src="{{ url_for('static', filename='datepicker.js') }}"></script>
+  <!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
+  <script src="{{ url_for('static', filename='switch.js') }}"></script>
+  <script src="{{ url_for('static', filename='search.js') }}"></script>
+  <script src="{{ url_for('static', filename='freeGroup.js') }}"></script>
+{% endblock %}

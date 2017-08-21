@@ -4,11 +4,34 @@
 {% block content %}
   <div class="container">
     <div class="row">
-      <div class="col-lg-offset-1 col-md-offset-1 col-md-10 col-lg-10 blanc espace_dessous col-lg-offset-1">
+      <div class="col-lg-offset-1 col-md-offset-1 col-md-10 col-lg-10 blanc espace_dessous">
         {% if just_reserved %}
           <center>
-            <div class="alert alert-success">
-              Votre réservation a bien été effectuée.
+            <div class="alert alert-success" id="just_reserved">
+              {% if modifications_dates[0] == modifications_dates[1] %}
+                {% if reservation_type == 'room' %}
+                  Votre réservation du {{modifications_dates[0]}} en salle {{old_room}} bien été effectuée.
+                {% elif reservation_type == 'item' %}
+                  Votre réservation de l'objet <strong>{{old_room}}</strong> du {{modifications_dates[0]}} a bien été effectuée.
+                {% endif %}
+              {% else %}
+                {% if reservation_type == 'room' %}
+                  Votre réservation du {{modifications_dates[0]}} au {{modifications_dates[1]}} en salle {{old_room}} bien été effectuée.
+                {% elif reservation_type == 'item' %}
+                  Votre réservation de l'objet <strong>{{old_room}}</strong> du {{modifications_dates[0]}} au {{modifications_dates[1]}} a bien été effectuée.
+                {% endif %}
+              {% endif %}
+
+              {% if modifications %}
+                </br></br>
+                <p>De plus, les cours suivants ont été déplacés : </p></br>
+                
+                <ul>
+                {% for modification in modifications %}
+                  <li>Le cours «{{modification[0]}}» de {{modification[1]}} {{modification[2]}} a été déplacé en salle {{modification[3]}}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
             </div>
           </center>
         {% endif %}
@@ -17,19 +40,21 @@
             Votre réservation a bien été supprimée.
           </div>
         </center>
+        <center>
+          <div class="alert alert-success hidden" id="res_updated_message">
+            Votre réservation a bien été modifiée.
+          </div>
+        </center>
         <h1 class="gros_titre">Mes réservations</h1>
-        
-          
-          <table class="table table-striped">
-              <th>Date de début</th>
-              <th>Date de fin</th>
-              <th>Salle</th>
-              <th>Heure de début</th>
-              <th>Heure de fin</th>
-              <th>Raison</th>
-              <th>Groupe d'étudiants</th>
+          <table class="table table-striped table-reservations">
+              <th>Dates</th>
+              <th>Salle/Objet</th>
+              <th>Période</th>
+              <th>Nom réservation</th>
+              <th>Classe</th>
               <th></th>
             <tbody>
+              <tr class="hidden"></tr>
               {% for res in reservations %}
               {% set timeslots = res.timeslots.all() %}
               
@@ -38,46 +63,115 @@
               {% else %}
                 <tr class="disabled_res">
               {% endif %}
-                  <td class="date_format">{{res.start_date}}</td>
-                  <td class="date_format">{{res.end_date}}</td>
-                  <td>{{res.room.name}}</td>
-                  <td>{{res.timeslots.first().start_time}}</td>
-                  <td>{{timeslots[timeslots|length-1].end_time}}</td>
-                  <td>{{res.reason_details}}</td>
-                  <td>{{res.student_group}}</td>
-                  {% if today <= res.end_date %}
-                  <td id={{res.id}}><button class="btn btn-xs btn-danger delete"><span class="glyphicon glyphicon-trash"></span> </button>
-                  <button class="btn btn-xs btn-primary update"><span class="glyphicon glyphicon-refresh"></span> </button></td>
-                  {% else %}
-                  <td></td>
-                  {% endif %}
+                  <td>
+                    {% if res.start_date == res.end_date %}
+                      <span class="date_format">{{res.start_date}}</span>
+                    {% else %}
+                      <span class="date_format">{{res.start_date}}</span>
+                       - 
+                      <span class="date_format">{{res.end_date}}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{res.room.name}}{{res.item.name}}</td>
+                  <td>{{res.timeslots.first().start_time}} - {{timeslots[timeslots|length-1].end_time}}</td>
+                  <td class="reason_short_info">{{res.reason_short}}
+                  </td>
+                  <td class="student_group_info">{{res.student_group}}</td>
+                  <td id={{res.id}}>
+                    <button class="btn btn-xs btn-primary infos_button">
+                      <span class="glyphicon glyphicon-cog"></span>
+                    </button>
+                    <div class="detailed_infos hidden">
+                      <span class="reservation_id">{{res.id}}</span>
+                      <span class="start_date">{{res.start_date}}</span>
+                      <span class="end_date">{{res.end_date}}</span>
+                      <span class="room">{{res.room.name}}{{res.item.name}}</span>
+                      <span class="start_time">{{res.timeslots.first().start_time}}</span>
+                      <span class="end_time">{{timeslots[timeslots|length-1].end_time}}</span>
+                      <span class="reason_short">{{res.reason_short}}</span>
+                      <span class="student_group">{{res.student_group}}</span>
+                      <span class="reason_details">{{res.reason_details}}</span>
+                    </div>
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
-            
-            <!-- Modal -->
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Annulation de la reservation</h4>
-                  <div class="modal-body">
-                    <p>Êtes-vous certain de vouloir annuler la réservation suivante : </p></br>
-                    <div id="deletedReservation"></div>
+          
+          {% if reservations_total > reservations_per_page %}
+            <center>
+              <ul class="pagination">
+                {% for i in range(1,number_of_pages+1) %}
+                  {% if i == page_number %}
+                    <li class="active"><a href="?page={{i}}">{{ i }}</a></li>
+                  {% else %}
+                    <li><a href="?page={{i}}">{{ i }}</a></li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </center>
+          {% endif %}
 
+          <!-- Modal -->
+          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h3 class="modal-title" id="myModalLabel">Informations sur la réservation</h4>
+                <div class="modal-body">
+                  <div id="modal_view_content">
+                    <center>
+                      <div class="alert alert-info">
+                        Il n'est possible de modifier que le nom, la classe et les détails de la réservation.
+                      </div>
+                    </center>
+                    <table class="table table-striped">
+                      <tr class="hidden"></tr>
+                      <tr class="hidden"><th>Identifiant de la réservation</th><td id="reservation_id"></td></tr>
+                      <tr><th>Date de début</th><td id="start_date"></td></tr>
+                      <tr><th>Date de fin</th><td id="end_date"></td></tr>
+                      <tr><th>Salle/Objet</th><td id="room"></td></tr>
+                      <tr><th>Heure de début</th><td id="start_time"></td></tr>
+                      <tr><th>Heure de fin</th><td id="end_time"></td></tr>
+                      <tr><th>Nom réservation</th><td id="reason_short"></td></tr>
+                      <tr><th>Classe</th><td id="student_group"></td></tr>
+                      <tr><th>Détails de la réservation</th><td id="reason_details"></td></tr>
+                    </table>
+                    <div class="modify_form hidden">
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label>Nom de la réservation</label>
+                            <input type="text" class="form-control" id="reason_short_input">
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label>Classe</label>
+                            <input type="text" class="form-control" id="student_group_input">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label>Raison de la réservation</label>
+                        <textarea class="form-control" rows="5" id="reason_details_input"></textarea>
+                      </div>
+                    </div>
                   </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Retour">Retour</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" id="deleteButton">Confirmer l'annulation</button>
-                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Retour</button>
+                  <button type="button" class="btn btn-primary hidden" id="cancel_mod_button">Annuler les modifications</button>
+                  <button type="button" class="btn btn-success hidden" id="update_mod_button">Enregistrer les modifications</button>
+                  <button type="button" class="btn btn-success" id="timetable">Horaire</button>
+                  <button type="button" class="btn btn-primary" id="modify_button">Modifier</button>
+                  <button type="button" class="btn btn-danger" data-dismiss="modal" id="delete_button">Supprimer</button>
                 </div>
               </div>
             </div>
+          </div>
         </div>
-        
-        
       </div>
     </div class="col-lg-2 col-md-1"></div>
   </div>

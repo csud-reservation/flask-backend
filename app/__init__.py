@@ -7,7 +7,6 @@ from config import config
 
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask_restless import APIManager
 
 bootstrap = Bootstrap()
 mail = Mail()
@@ -54,6 +53,8 @@ def create_app(config_name, models={}):
 
     from .csudadmin import csudadmin as csudadmin_blueprint
     app.register_blueprint(csudadmin_blueprint, url_prefix='/csudadmin')
+    from .sendmail import sendmail as sendmail_blueprint
+    app.register_blueprint(sendmail_blueprint, url_prefix='/sendmail')
     
     return app
     

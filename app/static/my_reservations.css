@@ -1,11 +1,17 @@
-.table-striped {
-    background-color: rgb(247,247,247);
-}
-
-.table-striped>tbody>:nth-child(odd)>td, 
-.table-striped>tbody>tr:nth-child(odd)>th {
-   background-color: white
- }
 .disabled_res {
     color: grey;
+}
+
+.modal-body th {
+    min-width: 130px;
+}
+
+#modal_view_content .alert-info {
+	position: relative;
+		top: 4px;
+}
+
+ul {
+
+    list-style-position: inside;
 }

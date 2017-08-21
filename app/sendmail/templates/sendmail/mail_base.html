@@ -1,0 +1,42 @@
+
+
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <style type="text/css">
+            .email-title {
+                color: red;
+            }
+        </style>
+    </head>
+    
+    <body>
+            
+        {#
+        <h1 class="email-title">
+        Système de réservation du CSUD :
+        <span class="email-subject">
+        {% block mail_subject %} 
+        Default Email Subject
+        {% endblock %}
+        </span>
+        </h1>
+        <hr />
+        #}
+        
+        
+        <div class="container">
+            
+            <p class="opening">
+                Bonjour {{ user.first_name + ' ' + user.last_name }},
+            </p>
+            
+        {% block mail_content %}
+        Default email content ...
+        {% endblock %}
+        </div>
+        
+    </body>
+
+</html>

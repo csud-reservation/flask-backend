@@ -8,15 +8,15 @@ class Config:
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
-    FLASKY_MAIL_SENDER = 'Flasky Admin <flasky@example.com>'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'csud.reservations'
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'maison077'
+    FLASKY_MAIL_SUBJECT_PREFIX = '[CSUD / Système de réservation : ]'
+    FLASKY_MAIL_SENDER = 'CSUD Réservations Admin <csud-reservation@gmail.com>'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
 
     @staticmethod
     def init_app(app):
-        pass 
+        pass
 
 
 class DevelopmentConfig(Config):

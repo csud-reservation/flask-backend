@@ -1,0 +1,151 @@
+{% set rooms_types = [
+  ['ALL','Toutes les salles'],
+  ['INF','Informatique'],
+  ['BIO','Biologie'],
+  ['BIL','Biologie labo'],
+  ['CHI','Chimie'],
+  ['CHL','Chimie labo'],
+  ['PHY','Physique'],
+  ['PHL','Physique labo'],
+  ['MUS','Musique'],
+  ['ARV','Arts visuels'],
+  ['GEO','Géographie'],
+  ['VDO','Vidéo']
+] %}
+
+{% set periods = [
+['Période 1', '8h10 - 8h55'],
+['Période 2', '9h00 - 9h45'],
+['Pause', '9h45 - 10h05'],
+['Période 3', '10h05 - 10h50'],
+['Période 4', '10h55 - 11h40'],
+['Période 5', '11h45 - 12h30'],
+['Période 6', '12h35 - 13h20'],
+['Période 7', '13h25 - 14h10'],
+['Période 8', '14h15 - 15h00'],
+['Période 9', '15h05 - 15h50'],
+['Période 10', '15h55 - 16h40'],
+['Période 11', '16h45 - 17h30'],
+['Période 12', '17h35 - 18h20']
+] %}
+
+{% extends "base.html" %}
+
+{% block title %}Réservation{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css">
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-offset-2 col-md-offset-1 col-md-10 col-lg-8 blanc espace_dessous">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <h1 class="gros_titre">Réservation</h1>
+        </div>
+        <div class="row espace_dessous">
+          <label class="col-sm-3 control-label rec_ajustement" rel="tooltip" title="Activez ce paramètre si vous souhaitez effectuer une réservation qui se répète sur plusieurs semaines">Réservation récurrente</label> 
+          <div class="col-sm-9">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" data-toggle="toggle" id="switch">
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="row marges">
+          <div class="form-group">
+            <div>
+              <label class="col-sm-3 control-label">Date</label>
+              <div class="col-sm-3 date_input_form">
+                <div id="recurrence_on">
+                  <div class="input-group input-daterange">
+                    <input type="text" id="date_de" class="form-control today">
+                    <div class="input-group-addon">à</div>
+                    <input type="text" id="date_a" class="form-control">
+                  </div>
+                </div>
+                  <div id="recurrence_off">
+                    <input type="text" id="date_non_ponctuelle" class="form-control date today">
+                  </div>
+                </div>
+            </div>
+          </div>
+          <!-- Button trigger modal -->
+          <div class="row espace_dessous">
+            <label class="col-sm-3 control-label">Plage horaire</label>
+            <div class="col-sm-9">
+              <button type="button" class="btn btn-default btn-md" data-toggle="modal" data-target="#myModal">
+                Choisir...
+              </button>
+            </div>  
+          </div>
+            
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Plage Horaire</h4>
+                  <div class="modal-body">
+                    <table class="table table-striped horaire">
+                      <tbody>
+                        {% for i in range(13) %}
+                          <tr id="periode_{{ i }}" onclick="select(this, {{ i }});">
+                            <td>{{ periods[i][0] }}</td>
+                            <td>{{ periods[i][1] }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="reset_modal_view();">Réinitialiser</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Valider</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="row ajustement_sm">
+          <label class="col-sm-3 control-label">Type de salle</label>
+          <div class="col-sm-3">
+            <select class="form-control type_salle" id="type_salle_hidden" style="display: none;">
+              {% for room_type in rooms_types %}
+                <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-control type_salle" id="type_salle">
+              {% for room_type in rooms_types %}
+                <option value={{ room_type[0] }}>{{ room_type[1] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </form>
+      <!-- le formulaire invisible est créé en jQuery -->
+      <div id="invisible_form">
+        <div id="input_invisible_base"></div>
+      </div>
+      <div class="form-group">
+        <span class="pull-right btn btn-primary bouton_recherche"
+          onclick="submit_invisible_form();">Rechercher salle disponible</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>-->
+<script src="{{ url_for('static', filename='datepicker.js') }}"></script>
+<!--<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>-->
+<script src="{{ url_for('static', filename='switch.js') }}"></script>
+<script src="{{ url_for('static', filename='search.js') }}"></script>
+{% endblock %}

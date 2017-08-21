@@ -1,7 +1,7 @@
 from . import db
 
 from flask_login import UserMixin
-
+from werkzeug.security import generate_password_hash, check_password_hash
 db.verbosity = 2
 
 
@@ -52,9 +52,9 @@ class User(UserMixin, db.Model):
             db.session.commit()
     
     @staticmethod
-    def insert_teachers(teachers):
-        for t in teachers:
-            teacher = User.query.filter_by(sigle=t['Sigle']).first()
+    def insert_teachers(teachers_edt, teachers_admin):
+        for t in teachers_edt:
+            teacher = User.query.filter_by(sigle=t['ABREV']).first()
             
             roles = {
                 'Enseignant' : 'teacher',
@@ -64,22 +64,35 @@ class User(UserMixin, db.Model):
                 'Admin' : 'staff',
             }
             
+
+            try:
+                teacher_admin = [t_admin for t_admin in teachers_admin if t_admin['Sigle'] == t['ABREV']][0]
+            except:
+                print(teacher_admin)
+            
             role = Role.query.filter_by(
-                name=roles[t['Fonction Identifiant FR']]
+                name=roles[teacher_admin['Fonction Identifiant FR']]
             ).one()
 
             if teacher is None:
                 teacher = User(
-                    first_name=t['Prenom'],
-                    last_name=t['Nom'],
-                    sigle=t['Sigle'],
-                    email=t['Email Ecole'],
-                    password_hash='unsecure',
+                    first_name=t['PRENOM'],
+                    last_name=t['NOM'],
+                    sigle=t['ABREV'],
+                    email=teacher_admin['Email Ecole'],
+                    password_hash=generate_password_hash('unsecure'),
                     role=role
                 )
                 db.session.add(teacher)
                 
         db.session.commit()
+        
+        
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 class Role(db.Model):
@@ -226,7 +239,8 @@ class Weekday(db.Model):
 ## association table from reservations to users (teachers)
 reservations_users = db.Table('reservations_users',
     db.Column('reservation_id', db.Integer, db.ForeignKey('reservations.id'), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    
 )
 
 ## association table from reservations to timeslots

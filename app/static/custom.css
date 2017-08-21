@@ -1,0 +1,219 @@
+.blanc {
+    background-color: white;
+}
+
+.gros_titre {
+    font-size: 40px;
+    text-decoration: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ligne {
+    border-top: solid 3px rgb(235, 235, 235);
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+#login_incorrect {
+  position: relative;
+  top: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+.marges {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: -20px;
+}
+
+
+.espace_dessous {
+    padding-bottom: 15px;
+}
+
+.bouton_recherche {
+    margin-top: 2px;
+    margin-right: 15px;
+}
+
+#message_url {
+  margin-bottom: -5px;
+  text-align: center;
+}
+
+.infos_profil {
+  text-align: center;
+}
+
+.selected { background: #CEE0EC !important; }
+
+tbody tr:first-child {
+    border-top: 2px solid #E1E2E2;
+}
+
+.modal-title {
+    padding-left: 13px;
+    text-align: center;
+}
+
+.horaire td { 
+    text-align: center;
+    
+}
+
+#recurrence_on { 
+    display: none;
+    
+}
+
+.rec_ajustement { 
+    position: relative; 
+        top: 5px; 
+}
+
+.titre_login {
+    margin-bottom: 30px;
+}
+
+.label_login {
+    text-align: right;
+    position: relative;
+        top: 5px;
+    padding-left: 15px;
+    padding-bottom: 5px;
+}
+
+.required {
+    margin-bottom: 8px;
+}
+
+#submit {
+    position: relative;
+        bottom: 35px;
+}
+
+.mod_pw_title {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.corps_page {
+    margin-bottom: 40px;
+}
+
+@media(min-width: 768px) {
+    .input_login {
+        padding-bottom: 15px;
+    }
+    .rm_checkbox {
+        position: relative;
+            bottom: 10px;
+    }
+    .mobile {
+        display: none;
+    }
+    .desktop {
+        display: block;
+    }
+}
+
+@media(max-width:767px) {
+    .mobile {
+        display: block;
+    }
+    .desktop {
+        display: none;
+    }
+    .ajustement_sm {
+        margin-bottom: 15px;
+    }
+    .rm_checkbox {
+        position: relative;
+            bottom: 5px;
+    }
+    #modify {
+        position: relative;
+            top: 8px;
+    }
+}
+
+.success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+.success, .error {
+    opacity: 1;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;   
+    display: block;
+    text-align: center;
+    position: relative;
+        bottom: 7px;
+}
+
+#date_non_ponctuelle, .type_salle {
+    max-width:220px;
+}
+
+.bouton_recherche {
+    width: 200px;
+}
+
+table.room-timetable tbody td.reserved {
+    background-color: lightgray;
+}
+
+table.room-timetable div.timetable.cell-info {
+    margin: auto;
+}
+
+.cell-info.reason-short {
+    font-weight: bold;
+}
+
+.btn_recherche_horaires {
+    width: 144px;
+}
+
+#rooms_numbers_hidden {
+    display: none;
+}
+
+.date_hover {
+    background-color: rgb(238,238,238);
+}
+
+#result {
+    margin-top: 50px;
+}
+
+.nav_week {
+    position: relative;
+    top: 30px;
+}
+
+.previous_week {
+    width: 160px;
+}
+
+.following_week {
+    width: 140px;
+}
+
+table.room-timetable tbody td.reserved.reserved_by_teacher {
+    background-color: #d4f7c9;
+}

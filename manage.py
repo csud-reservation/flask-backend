@@ -6,7 +6,10 @@ from flask_script import Manager, Shell, Server
 from flask_migrate import Migrate, MigrateCommand
 
 # génération schéma relationnel
-import sadisplay
+try:
+    import sadisplay
+except:
+    print("Impossible de charger le module sadisplay ==> génération du modèle relationnel impossible")
 
 # interface d'administration
 from flask_admin import Admin
@@ -24,7 +27,10 @@ models = dict(
     Timeslot=Timeslot,
     Weekday=Weekday
 )
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default', models)
+# une page qui s'affiche à chaque redirection en mode développement
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 manager = Manager(app)
 migrate = Migrate(app, db)
@@ -37,7 +43,10 @@ for model in models.values():
 
 
 def make_shell_context():
-    return dict(dict(app=app, db=db).items() + models.items())
+    preloaded = dict(app=app, db=db)
+    preloaded.update(models)
+    print(preloaded)
+    return preloaded
     
 
 if os.getenv('C9_HOSTNAME'):
@@ -73,13 +82,15 @@ def initdb():
     timeslots = extract_timeslots()
     rooms = extract_rooms()
     sigles = extract_sigles()
+    teachers_edt = load_teachers('data/teachers_edt.csv')
+    teachers_admin = load_teachers('data/teachers_admin.csv')
     
     # auto data loading from different datasources
     Timeslot.insert_timeslots(timeslots)
     Weekday.insert_days()
     Role.insert_roles()
     User.insert_admin()
-    User.insert_teachers(load_teachers())
+    User.insert_teachers(teachers_edt, teachers_admin)
     Room.insert_rooms(rooms)
     
     
@@ -181,3 +192,4 @@ def test():
 
 if __name__ == '__main__':
     manager.run()
+

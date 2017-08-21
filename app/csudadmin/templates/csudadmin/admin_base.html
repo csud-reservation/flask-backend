@@ -1,6 +1,6 @@
-{% extends "bootstrap/base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Système de réservation du CSUD{% endblock %}
+{% block title %}CSUD Réservation (Admin){% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -19,14 +19,13 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">CSUD Réservation</a>
+            <a class="navbar-brand" href="{{ url_for('csudadmin.index') }}">Admin Réservations</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('main.search_page') }}">Réservation</a></li>
-                    <li><a href="{{ url_for('main.horaire') }}">Horaire</a></li>
+                    <li><a href="{{ url_for('main.horaire') }}">Horaires</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">

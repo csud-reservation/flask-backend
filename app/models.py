@@ -5,10 +5,6 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 db.verbosity = 2
 
-def password_generator(length=8) :
-    return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
-
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
@@ -29,6 +25,11 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return '<User %d, %r>' % (self.id, self.email)
+
+    @staticmethod
+    def password_generator(length=8) :
+        return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
+
         
     @staticmethod
     def insert_admin():
@@ -45,12 +46,12 @@ class User(UserMixin, db.Model):
         admin = User.query.filter_by(role=admin_role).first()
         
         
-        password = password_generator()
+        password = User.password_generator()
         
         csv_file = open('account_password.csv','a')
         csv_file.seek(0)
         csv_file.truncate()
-        csv_file.write("morisodi@edufr.ch;"+password+"\n")
+        csv_file.write(admin.email+";"+password+"\n")
         csv_file.close()
         
         
@@ -94,7 +95,7 @@ class User(UserMixin, db.Model):
             ).one()
             
 
-            password = password_generator()
+            password = User.password_generator()
             
             csv_file.write(teacher_admin['Email Ecole']+";"+password+"\n")
             
@@ -109,6 +110,7 @@ class User(UserMixin, db.Model):
                     role=role
                 )
                 db.session.add(teacher)
+                
         csv_file.close()
         db.session.commit()
         

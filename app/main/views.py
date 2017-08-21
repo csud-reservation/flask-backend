@@ -439,7 +439,7 @@ def profil():
         if (user_role != 'admin'):
             return 'operation interdite'
             
-        password = password_generator()
+        password = User.password_generator()
         password_hash = generate_password_hash(password)
             
         db.engine.execute('INSERT INTO users(first_name, last_name, email, sigle, role_id, password_hash) VALUES (?,?,?,?,?,?)',
@@ -636,7 +636,7 @@ def reset_password():
     if user_role != 'admin':
         return 'acces interdit'
     
-    password = password_generator()
+    password = User.password_generator()
     password_hash = generate_password_hash(password)
     
     db.engine.execute('UPDATE users SET password_hash = ? WHERE users.id = ?',

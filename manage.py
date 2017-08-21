@@ -15,8 +15,11 @@ except:
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
-from data.utils import extract_sigles, extract_timeslots, extract_rooms
-from load_csv import load_teachers, load_reservations, load_items
+try:
+    from data.utils import extract_sigles, extract_timeslots, extract_rooms
+    from load_csv import load_teachers, load_reservations, load_items
+except:
+    print('Impossible de charger les données')
 
 # On passe les modèles à la création de l'application pour pouvoir y initialiser Flask-Restless 
 models = dict(

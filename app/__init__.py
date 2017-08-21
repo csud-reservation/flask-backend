@@ -7,7 +7,6 @@ from config import config
 
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required
-from flask_restless import APIManager
 
 bootstrap = Bootstrap()
 mail = Mail()

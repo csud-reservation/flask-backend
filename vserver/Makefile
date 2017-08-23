@@ -6,12 +6,10 @@ SYNC = rsync -raz --delete --progress $(ROOT)
 
 DOCKER_COMPOSE_VERSION = 1.15.0
 
-all: init nodejs docker chaj-docker oci
-
 init: upgrade setup-docker
 	$(SSH_ROOT) 'apt-get -y install curl rsync git build-essential'
 
-setup-docker: put-setup
+setup-docker: put-setup setup-docker-compose
 	cat docker/install.sh | $(SSH_ROOT) sh
 
 setup-docker-compose:
@@ -39,10 +37,7 @@ ssh-root:
 
 ssh: ssh-root
 
-ssh-setup:
-	$(SSH_ROOT) ssh-keygen
-
-ssh-setup-root: ssh-setup
+setup-ssh:
 	cat ~/.ssh/id_rsa.pub | ssh root@$(REMOTE) 'touch .ssh/authorized_keys && cat >> .ssh/authorized_keys'
 
 clean-ssh:

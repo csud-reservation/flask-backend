@@ -1,12 +1,18 @@
 
 HOST=csud-reservation.com
-SSH = ssh root@$(HOST)
+SSH_OPTIONS=-o 'StrictHostKeyChecking no'
+SSH = ssh $(SSH_OPTIONS) root@$(HOST)
 SERVER_DIR=~/csud-reservation
+RSYNC_OPTIONS= -e 'ssh -o StrictHostKeyChecking=no'
+RSYNC=rsync $(RSYNC_OPTIONS)
 
 
 
-production:
-	rsync -raz . root@www.csud-reservation.com:$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
+init:
+	cd vserver && make setup-docker
+
+production: init
+	$(RSYNC) -raz . root@www.csud-reservation.com:$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
 	$(SSH) 'cd $(SERVER_DIR) && docker-compose up -d'
 	$(SSH) 'cd $(SERVER_DIR)/nginx-letsencrypt && docker-compose up -d'
 

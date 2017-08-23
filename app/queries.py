@@ -4,6 +4,11 @@ from .models import *
 
 from sqlalchemy.sql import text
 
+import logging
+
+logging.basicConfig(filename='db.log')
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 def search_query(weekday_id, first_period, last_period, current_date, room_type):
     '''
     Retourne toutes les salles disponibles à la date donnée
@@ -53,6 +58,7 @@ def search_reservations_by_student_group(start_date, end_date, student_group, we
 def update_reservations_by_student_group(start_date, end_date, student_group, weekday_id, first_period, last_period):
     
     data = [start_date-datetime.timedelta(weeks=1), start_date, end_date, "%"+student_group+"%", weekday_id, first_period, last_period]
+
     
     db.engine.execute('''UPDATE reservations
                                 SET end_date = ?
@@ -70,6 +76,9 @@ def update_reservations_by_student_group(start_date, end_date, student_group, we
 def search_reservations_by_room(start_date, end_date, room, weekday_id, first_period, last_period):
     
     data = [start_date, end_date, room, weekday_id, first_period, last_period]
+    
+        
+    print(data)
         
     result = db.engine.execute('''SELECT *
                                           FROM reservations
@@ -81,6 +90,8 @@ def search_reservations_by_room(start_date, end_date, room, weekday_id, first_pe
                                             AND weekday_id = ?
                                             AND item_id IS NULL
                                             AND reservations_timeslots.timeslot_id BETWEEN ? AND ?''', data)
+                                            
+    print("REEE : ", result.fetchall())
                                             
     return result
 

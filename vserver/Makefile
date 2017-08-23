@@ -1,5 +1,6 @@
 REMOTE = csud-reservation.com
 SSH_ROOT = ssh root@$(REMOTE)
+SSH = $(SSH_ROOT)
 ROOT = root@$(REMOTE)
 SYNC = rsync -raz --delete --progress $(ROOT)
 
@@ -7,12 +8,11 @@ DOCKER_COMPOSE_VERSION = 1.15.0
 
 all: init nodejs docker chaj-docker oci
 
-init: upgrade
+init: upgrade setup-docker
 	$(SSH_ROOT) 'apt-get -y install curl rsync git build-essential'
 
-docker:
-	cat setup/docker/install.sh | $(SSH_ROOT) sh
-	$(SSH_ROOT) docker login
+setup-docker: put-setup
+	cat docker/install.sh | $(SSH_ROOT) sh
 
 setup-docker-compose:
 	$(SSH_ROOT) 'curl -L https://github.com/docker/compose/releases/download/$(DOCKER_COMPOSE_VERSION)/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose && chmod +x /usr/bin/docker-compose'	
@@ -44,6 +44,9 @@ ssh-setup:
 
 ssh-setup-root: ssh-setup
 	cat ~/.ssh/id_rsa.pub | ssh root@$(REMOTE) 'touch .ssh/authorized_keys && cat >> .ssh/authorized_keys'
+
+clean-ssh:
+	rm -f ~/.ssh/known_hosts
 
 upgrade:
 	$(SSH_ROOT) apt-get update

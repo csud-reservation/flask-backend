@@ -1,14 +1,11 @@
-version: '3'
-services:
 version: "3"
 
 services:
   web:
     build: .
-    ports:
-      - 8000:8080
+    
     expose:
-      - 8080
+      - "8080"
     environment:
       - C9_HOSTNAME=https://www.csud-reservation.com
       - C9_IP=0.0.0.0
@@ -16,3 +13,5 @@ services:
       - VIRTUAL_HOST=www.csud-reservation.com
       - LETSENCRYPT_HOST=www.csud-reservation.com
       - LETSENCRYPT_EMAIL=csud-reservation@gmail.com
+
+    network_mode: "bridge"

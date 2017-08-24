@@ -49,6 +49,11 @@ data-dev.sqlite
 edt.csv
 
 data/src
+data/*.csv
+
+*.log
+*xlsx
+*bak
 
 # schemas
 erd.png

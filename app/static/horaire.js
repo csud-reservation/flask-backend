@@ -190,7 +190,7 @@ function display_new_res_modal(id) {
     $('#newRes_end_date').html(start_date)
     $('#newRes_start_date').html(start_date)
     $('#newRes_period').html($('#row_'+row).html().replace(' ', ' - '))
-    $('#newRes_room_select').html(getUrlParameter('room'))
+    $('#newRes_room_select').html(getUrlParameter('room').replace('+', ' '))
 }
 
 function display_modal_buttons(id) {

@@ -98,6 +98,9 @@ def get_all_available_items(start_date, end_date, first_period, last_period, ite
         items_with_res[item.name] = Reservation.query.filter_by(item_id = item.id).all()
         
     item_to_del = []
+    
+    weekday_id = start_date.weekday()+1
+    
     for item, reservations in items_with_res.items():
         for res in reservations:
             
@@ -106,10 +109,10 @@ def get_all_available_items(start_date, end_date, first_period, last_period, ite
             res_first_period = timeslots[0].id-1
             res_last_period = timeslots[len(timeslots)-1].id-1
 
-            
-            if (start_date.date() <= res.end_date and start_date.date() >= res.start_date) or (end_date.date() <= res.end_date and end_date.date() >= res.start_date):
-                if (first_period >= res_first_period and first_period <= res_last_period) or (last_period >= res_first_period and last_period <= res_last_period):
-                    item_to_del.append(item)
+            if weekday_id == res.weekday_id:
+                if (start_date.date() <= res.end_date and start_date.date() >= res.start_date) or (end_date.date() <= res.end_date and end_date.date() >= res.start_date):
+                    if (first_period >= res_first_period and first_period <= res_last_period) or (last_period >= res_first_period and last_period <= res_last_period):
+                        item_to_del.append(item)
                     
     
                 
@@ -261,9 +264,8 @@ def new_reservation():
             
             print(all_rooms_with_conflicts[room_select])
             res_to_replace = get_reservation_by_room(start_date, end_date, first_period+1, last_period+1, room_select)
-
+            
             for res in res_to_replace:
-                
 
                 first_free_room = search_query(weekday_id, res.timeslot_id, res.timeslot_id, start_date.date(), "%%").first()
                 
@@ -318,8 +320,22 @@ def new_reservation():
         if all_rooms_with_conflicts[room_select] > 0:
             
             return "La salle demandée n'est plus disponible"
+            
+            
+    if session["reservation_type"] == "room":
     
         room = Room.query.filter_by(name=room_select).first()
+        
+        user = User.query.get(current_user.id)
+        
+        timeslots = Timeslot.query.filter(
+        Timeslot.order.between(
+            first_period,
+            last_period,
+            )
+        ).all()
+        weekday = Weekday.query.get(start_date.weekday()+1)
+    
         
         reservation = Reservation(
             start_date=start_date,
@@ -338,8 +354,19 @@ def new_reservation():
         db.session.add(reservation)
         db.session.commit()
         
-    elif session["reservation_type"] =="item":
+    if session["reservation_type"] =="item":
         item = Item.query.filter_by(name=room_select).first()
+        
+        user = User.query.get(current_user.id)
+        
+        timeslots = Timeslot.query.filter(
+        Timeslot.order.between(
+            first_period,
+            last_period,
+            )
+        ).all()
+        weekday = Weekday.query.get(start_date.weekday()+1)
+    
         
         reservation = Reservation(
             start_date=start_date,

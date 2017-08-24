@@ -72,6 +72,8 @@ def split_reservation_by_room(start_date, end_date, first_period, last_period, r
     
         weekday_id = start_date.weekday()+1
         
+        print("AAAAYYYY")
+        
         res_to_split = search_reservations_by_room(start_date, end_date, room, weekday_id, first_period, last_period)
     
         number_of_weeks = (end_date - start_date)//7
@@ -81,7 +83,7 @@ def split_reservation_by_room(start_date, end_date, first_period, last_period, r
         one_week = timedelta(weeks=1)
 
         for res in res_to_split:
-            #print(res)
+            print("RESERVATIONS : ",res)
 
             user_id = db.engine.execute("SELECT reservations_users.user_id  from reservations  LEFT JOIN reservations_users ON reservations.id = reservations_users.reservation_id  WHERE id=?", [res.reservation_id])
             
@@ -163,13 +165,19 @@ def split_reservation_by_id(date, reservation_id):
         except:
             old_end_date = datetime.strptime(str(res.end_date), "%Y-%m-%d %H:%M:%S")
             
+        try:
+            old_start_date = datetime.strptime(str(res.start_date), "%Y-%m-%d")
+        except:
+            old_start_date = datetime.strptime(str(res.start_date), "%Y-%m-%d %H:%M:%S")
+            
         date = datetime.strptime(date, "%d.%m.%Y")
         
         weekday_id = date.weekday()+1
         
         #Création de la nouvelle réservation avec une date de début correspondant à la date de fin de la suppression
 
-        if date+one_week < old_end_date:
+        if date+one_week <= old_end_date:
+            print("Ayup")
             reservation = Reservation(
                 start_date=date+one_week,
                 end_date=old_end_date,
@@ -190,7 +198,10 @@ def split_reservation_by_id(date, reservation_id):
                 
         #Modification de l'ancienne réservation pour que la date de fin corresponde à la date du début de la suppression
         
-            print(reservation_id)
+        print(reservation_id)
+        
+        if date-one_week >= old_start_date:
+            print("Ayap")
             db.engine.execute('UPDATE reservations SET end_date = ? WHERE id = ?', [date-one_week, reservation_id])
             
             db.session.commit()

@@ -1,9 +1,12 @@
 import csv
+import codecs
 
 from app.models import *
 
+
 def load_teachers(filename):
-    with open(filename, 'r') as csvfile:
+    #with open(filename, 'rb', encoding='cp1252') as csvfile:
+    with codecs.open(filename,"rb","utf-16") as csvfile:
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         
         return list(reader)

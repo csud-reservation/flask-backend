@@ -1,12 +1,16 @@
 import csv
 import codecs
 
+# Pour le fuzzy matching permettant de faire le lien entre les noms et prénoms
+# selon le secrétariat et selon EDT ...
+from fuzzywuzzy import process
+
 from app.models import *
 
 
-def load_teachers(filename):
+def load_teachers(filename, encoding='cp1252'):
     #with open(filename, 'rb', encoding='cp1252') as csvfile:
-    with codecs.open(filename,"rb","utf-16") as csvfile:
+    with codecs.open(filename,"rb",encoding) as csvfile:
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         
         return list(reader)
@@ -27,13 +31,11 @@ def load_items():
     return item_list
 
 
-
-
 def print_row(row):
     for code, value in row.items():
         print(code, " ==> ", value)
-        
-        
+
+
 def insert_reservation(db, row, start_date, end_date):
     '''
     
@@ -62,15 +64,33 @@ def insert_reservation(db, row, start_date, end_date):
     
     #print(teachers_fnames, teachers_lnames)
     teachers = []
+    errors = []
+
+    # Tous les noms et prénom selon la base de données
+    choices = [t.first_name + '|' + t.last_name for t in User.query.all()]
     
     for fn, ln in zip(teachers_fnames, teachers_lnames):
         
         teacher = User.query.filter_by(first_name=fn, last_name=ln).first()
         if teacher is None and (fn + ln).strip() != '':
-            # Discordance entre le fichier CSV et profs-sigles-courriel.txt
-            print('Erreur de chargement : ', row)
+            # Essayer de trouver la meilleure correspondance ... avec une
+            # recherche floue
+            match = process.extract(fn + ln, choices, limit=1)
+            db_full_name = match[0][0]
+            print('Association entre ', fn + ln, "et", match[0][0], match[0][1])
+            fn, ln = db_full_name.split('|')
+            teacher = User.query.filter_by(first_name=fn, last_name=ln).first()
+            
+            #  Discordance entre le fichier CSV et
+            # profs-sigles-courriel.txt
+            print('Erreur de chargement (problème nommage du prof) : ', row)
+            errors.append(row)
             
         teachers.append(teacher)
+
+    with open('profs-error.log', 'w') as fd:
+        for e in errors:
+            fd.write(str(e) + '\n')
     
     # Si le champ 'teacher' est vide, il s'agit d'une heure générique qu'il ne faut pas insérer dans l'occupation des salles. Elle n'est là que pour la forme dans le fichier edt.csv ==> autre alternative serait de faire un prétraitement sur ce fichier edt.csv
     # Ne pas tenir compte des heures de gymnastique
@@ -130,8 +150,8 @@ def insert_reservation(db, row, start_date, end_date):
     db.session.commit()
     
 
-def load_reservations(db, start_date, end_date, filename='data/edt.csv'):
-    with open(filename, 'r') as csvfile:
+def load_reservations(db, start_date, end_date, filename='data/edt.csv', encoding='cp1252'):
+    with codecs.open(filename,"rb", encoding) as csvfile:
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         
         for row in reader:
@@ -139,6 +159,7 @@ def load_reservations(db, start_date, end_date, filename='data/edt.csv'):
                 insert_reservation(db, row, start_date, end_date)
             except Exception as e:
                 print("Impossible d'insérer la réservation", row, "raison : ", str(e))
+                print("Erreur", e)
                 db.session.rollback()
 
 

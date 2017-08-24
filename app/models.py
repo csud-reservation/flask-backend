@@ -3,6 +3,7 @@ import string
 import random
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import current_app
 db.verbosity = 2
 
 class User(UserMixin, db.Model):
@@ -31,92 +32,80 @@ class User(UserMixin, db.Model):
         return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
 
         
-    @staticmethod
-    def insert_admin():
-        admin = User()
-        admin.username = 'admin'
-        admin.email = 'morisodi@edufr.ch'
-        admin.first_name = 'Admin'
-        admin.last_name = 'Admin'
-        admin.sigle="MORI"
         
     @staticmethod
     def insert_admin():
         admin_role = Role.query.filter_by(name='admin').first()
-        admin = User.query.filter_by(role=admin_role).first()
-        
+        admin = User.query.filter_by(role=admin_role).first() or User(
+            first_name="Administrateur",
+            last_name="Système réservation CSUD",
+            email="morisodi@edufr.ch",
+            password_hash='temp_unsecure',
+            sigle='MORI',
+            role=admin_role
+        )
         
         password = User.password_generator()
-        
-        csv_file = open('account_password.csv','a')
-        csv_file.seek(0)
-        csv_file.truncate()
-        csv_file.write(admin.email+";"+password+"\n")
-        csv_file.close()
-        
-        
-        if admin is None:
-            admin = User(
-                first_name="Administrateur",
-                last_name="Système réservation CSUD",
-                email="morisodi@edufr.ch",
-                password_hash=generate_password_hash(password),
-                role=admin_role
-            )
-            
-            db.session.add(admin)
-            db.session.commit()
+        admin.set_password(password)
+        db.session.add(admin)
+        db.session.commit()
+
+    @staticmethod
+    def remove_all_teachers():
+        raise NotImplementedError("To be done")
     
     @staticmethod
-    def insert_teachers(teachers_edt, teachers_admin):
+    def insert_teachers(teachers):
         
-        csv_file = open('account_password.csv','a')       
-        
-        
-        for t in teachers_edt:
-            teacher = User.query.filter_by(sigle=t['ABREV']).first()
-            
-            roles = {
-                'Enseignant' : 'teacher',
-                'Stag_ens' : 'intern',
-                'Rempl' : 'substitute',
-                'Aumônerie' : 'staff',
-                'Admin' : 'staff',
-            }
+        for csv_teacher in teachers:
+            teacher = User.query.filter_by(sigle=csv_teacher['Sigle']).first()
             
 
+            csv_role = csv_teacher['Fonction Identifiant FR']
             try:
-                teacher_admin = [t_admin for t_admin in teachers_admin if t_admin['Sigle'] == t['ABREV']][0]
-            except:
-                print(teacher_admin)
-            
-            role = Role.query.filter_by(
-                name=roles[teacher_admin['Fonction Identifiant FR']]
-            ).one()
-            
+                role = Role.query.filter_by(
+                    description=csv_role
+                ).one()
+            except Exception as e:
+                role = Role.query.filter_by(name='teacher').one()
+                print("enseignant csv", csv_teacher)
+                print("Rôle inconnu : ", csv_role, "... J'ai mis 'Enseignant' à la place !")
 
-            password = User.password_generator()
             
-            csv_file.write(teacher_admin['Email Ecole']+";"+password+"\n")
+            # or print("Problème pour l'enseignant", csv_teacher, " : le rôle", csv_role, "n'existe pas dans la base de données.")
             
-
             if teacher is None:
                 teacher = User(
-                    first_name=t['PRENOM'],
-                    last_name=t['NOM'],
-                    sigle=t['ABREV'],
-                    email=teacher_admin['Email Ecole'],
-                    password_hash=generate_password_hash(password),
+                    first_name=csv_teacher['Prénom'],
+                    last_name=csv_teacher['Nom'],
+                    sigle=csv_teacher['Sigle'],
+                    email=csv_teacher['Email Ecole'],
+                    password_hash='temp',
                     role=role
                 )
+
+                teacher.set_password(User.password_generator())
                 db.session.add(teacher)
                 
-        csv_file.close()
         db.session.commit()
         
         
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+
+        if current_app.config['NOTIFY_PASSWD'] == 'CSV_FILE':
+            # pas performant lors du chargement initial mais ce n'est pas très
+            # grave, ... on pourrait passer en option le fichier csv à écrire
+            print("Création du compte ", self.email, " avec mot de passe", password)
+            with open('account_password.csv','a') as csv_file:     
+                csv_file.write(self.email + ";" + password + "\n")
+            
+        if current_app.config['NOTIFY_PASSWD'] == 'EMAIL':
+            # envoyer le mot de passe par courriel ...
+            pass
+        
+            
+
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -140,13 +129,17 @@ class Role(db.Model):
             # étudiants
             'student' : (1, 'Étudiant'),
             # stagiaires
-            'intern' : (2, 'Stagiaire'),
+            'intern' : (2, 'Stag_ens'),
             # enseignants
             'teacher' : (3, 'Enseignant'),
             # remplaçant
-            'substitute' : (3, 'Remplaçant'),
+            'substitute' : (3, 'Rempl'),
             # personnel administratif
-            'staff' : (3, 'Personnel administratif'),
+            'mediator' : (3, 'Médiation'),
+            # personnel administratif
+            'aumonerie' : (3, 'Aumonerie'),
+            # personnel administratif
+            'staff' : (20, 'Admin'),
             # administrateur
             'admin' : (100, 'Administrateur des réservations'),
         }

@@ -1,7 +1,6 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'lkajsdfoiaueslkjavnlifunacslkj20893740274'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
@@ -13,6 +12,7 @@ class Config:
     FLASKY_MAIL_SUBJECT_PREFIX = '[CSUD / Système de réservation : ]'
     FLASKY_MAIL_SENDER = 'CSUD Réservations Admin <csud-reservation@gmail.com>'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
+    NOTIFY_PASSWD = 'CSV_FILE'
 
     @staticmethod
     def init_app(app):
@@ -34,6 +34,8 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+
+    NOTIFY_PASSWD = 'EMAIL'
 
 
 config = {

@@ -54,3 +54,13 @@ ps:
 
 webapp-shell:
 	$(SSH_SERVER) 
+
+
+local-up:
+	docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml up -d
+local-down:
+	docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml down
+local-restart: local-down local-up
+
+server-restart:
+	$(SSH) restart

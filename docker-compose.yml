@@ -1,7 +1,7 @@
-version: "3"
+version: "3.2"
 
 services:
-  webapp:
+  web:
     build: .
     
     expose:
@@ -16,22 +16,3 @@ services:
 
     network_mode: "bridge"
 
-  nginx-proxy:
-      restart: always
-      image: jwilder/nginx-proxy
-      ports:
-          - "80:80"
-          - "443:443"
-      volumes:
-          - /srv/docker/nginx/certs:/etc/nginx/certs:ro
-          - /etc/nginx/vhost.d
-          - /usr/share/nginx/html
-          - /var/run/docker.sock:/tmp/docker.sock:ro
-
-  nginx-proxy-companion:
-      image: jrcs/letsencrypt-nginx-proxy-companion
-      volumes:
-          - /srv/docker/nginx/certs:/etc/nginx/certs:rw
-          - /var/run/docker.sock:/var/run/docker.sock
-      volumes_from:
-          - nginx-proxy

@@ -97,7 +97,9 @@ def insert_reservation(db, row, start_date, end_date):
     
     # certaines lignes dans le fichier csv se déroulent dans plusieurs salles...
     room_names = [r.strip() for r in row['SALLE'].split(',')]
-    rooms = [Room.query.filter_by(name=room_name).first() for room_name in room_names]
+    # si la salle n'existe pas encore dans la base de données (retourne None),
+    # alors elle est crée
+    rooms = [Room.query.filter_by(name=room_name).first() or Room(name=room_name) for room_name in room_names]
     
     weekday = Weekday.query.filter_by(
         # il faut rajouter .title() pour faire lundi ==> Lundi
@@ -122,11 +124,7 @@ def insert_reservation(db, row, start_date, end_date):
     
     
     # Pour chaque salle, il faut faire une réservation identique
-    for room in rooms:
-        if room is None:
-            print("Erreur salle : ", room)
-            print(row)
-        
+    for room in rooms:        
             
         reservation = Reservation(
             # dates du début et de fin d'année

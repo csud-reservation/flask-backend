@@ -48,6 +48,8 @@ erd_from_sqlite.pdf
 data-dev.sqlite
 edt.csv
 
+account_password.csv
+
 data/src
 data/*.csv
 

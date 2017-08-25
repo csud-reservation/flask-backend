@@ -10,7 +10,6 @@ ADD config.py /csud-reservation
 ADD manage.py /csud-reservation
 ADD data /csud-reservation/data
 ADD load_csv.py /csud-reservation
-ADD data-dev.sqlite /csud-reservation
 
 CMD python manage.py runserver
 

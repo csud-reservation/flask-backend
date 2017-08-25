@@ -8,6 +8,8 @@ RSYNC=rsync $(RSYNC_OPTIONS)
 
 REMOTE_NGINX=$(SSH) docker exec nginxletsencrypt_nginx-proxy_1 
 
+SSH_SERVER=$(SSH) cd $(SERVER_DIR) &&
+
 
 ENVVARS = --env VIRTUAL_HOST=$(HOST) \
 	--env LETSENCRYPT_HOST=$(HOST) \
@@ -28,7 +30,7 @@ push:
 
 up: push
 	$(SSH) 'cd $(SERVER_DIR)/nginx-letsencrypt && docker-compose build && docker-compose up -d'
-	$(SSH) 'cd $(SERVER_DIR) && docker-compose up -d'
+	$(SSH) 'cd $(SERVER_DIR) && docker-compose build && docker-compose up -d'
 down:
 	$(SSH) 'cd $(SERVER_DIR) && docker-compose down'
 	$(SSH) 'cd $(SERVER_DIR)/nginx-letsencrypt && docker-compose down'
@@ -49,3 +51,16 @@ inspect-webapp:
 
 ps:
 	$(SSH) docker ps
+
+webapp-shell:
+	$(SSH_SERVER) 
+
+
+local-up:
+	docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml up -d
+local-down:
+	docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml down
+local-restart: local-down local-up
+
+server-restart:
+	$(SSH) restart

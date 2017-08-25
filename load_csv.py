@@ -18,16 +18,13 @@ def load_teachers(filename, encoding='cp1252'):
         
 def load_items():
     
-    file = open("items.csv").readlines()
+    file = open("data/items.csv").readlines()
     
     item_list = []
     
     for line in file:
         item_list.append(line.strip().split(";"))
-        
-    
-    print(item_list)
-        
+                
     return item_list
 
 

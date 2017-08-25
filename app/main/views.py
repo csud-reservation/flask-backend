@@ -502,7 +502,7 @@ def profil():
 @login_required
 def horaire():
     user_role = Role.query.get(current_user.role_id).name
-    rooms = Room.query.all()
+    rooms = Room.query.order_by('name').all()
     user = db.session.execute(select(['*']).where(User.id == current_user.id)).first()
     return render_template('horaire.html', rooms=rooms, user=user, role=user_role)
 

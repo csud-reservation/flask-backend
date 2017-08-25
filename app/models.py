@@ -31,7 +31,10 @@ class User(UserMixin, db.Model):
     def password_generator(length=8) :
         return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
 
-        
+    @staticmethod
+    def reset_user_passwd(sigle, passwd):
+        user = User.query.filter_by(sigle=sigle).one().set_password(passwd)
+        db.session.commit()
         
     @staticmethod
     def insert_admin():

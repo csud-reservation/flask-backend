@@ -11,6 +11,7 @@ nginx-proxy:
         - /var/run/docker.sock:/tmp/docker.sock:ro
 
 nginx-proxy-companion:
+    restart: always
     image: jrcs/letsencrypt-nginx-proxy-companion
     volumes:
         - /srv/docker/nginx/certs:/etc/nginx/certs:rw

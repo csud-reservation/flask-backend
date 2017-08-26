@@ -16,7 +16,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
 
-from data.utils import extract_sigles, extract_timeslots, extract_rooms
+from data.utils import extract_timeslots
 from load_csv import load_teachers, load_reservations, load_items
 
 # On passe les modèles à la création de l'application pour pouvoir y initialiser Flask-Restless 
@@ -62,7 +62,6 @@ manager.add_command("shell", Shell(make_context=make_shell_context, use_ipython=
 manager.add_command('db', MigrateCommand)
 
 tmp_timetable_txt = "data/timetable.txt"
-tmp_rooms_txt = "data/rooms.txt"
 @manager.command
 def txt(input_pdf, out_txt):
     try:
@@ -81,8 +80,6 @@ def initdb():
     db.create_all()
     
     timeslots = extract_timeslots()
-    rooms = extract_rooms()
-    sigles = extract_sigles()
     teachers_admin = load_teachers('data/teachers_admin.csv', encoding='cp1252')
     
     items = load_items()
@@ -93,7 +90,6 @@ def initdb():
     Role.insert_roles()
     User.insert_admin()
     User.insert_teachers(teachers_admin)
-    Room.insert_rooms(rooms)
     
     Item_Type.insert_item_types()
     

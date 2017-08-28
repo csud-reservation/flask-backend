@@ -65,3 +65,7 @@ schema.*
 .vscode
 
 tags
+
+# secret env files
+backup/aws.env
+*.secret.env

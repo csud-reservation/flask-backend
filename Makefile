@@ -19,6 +19,13 @@ ssh:
 push:
 	$(RSYNC) -raz . root@www.csud-reservation.com:$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
 
+
+backup-up: push
+	$(SSH) 'cd $(SERVER_DIR)/backup && docker-compose build && docker-compose up -d'
+backup-down:
+	$(SSH) 'cd $(SERVER_DIR)/backup && docker-compose down -d'
+backup-restart: backup-down backup-up
+
 server-up: push
 	$(SSH) 'cd $(SERVER_DIR)/nginx-letsencrypt && docker-compose build && docker-compose up -d'
 	$(SSH) 'cd $(SERVER_DIR) && docker-compose build && docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml up -d'

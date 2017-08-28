@@ -17,7 +17,19 @@ services:
       - VIRTUAL_HOST=beta-version.csud-reservation.com
       - LETSENCRYPT_HOST=beta-version.csud-reservation.com
 
+  backup:
+    restart: always
+    build: ./backup
+    env-file:
+      - backup/aws.env
+
+    volumes:
+      - type: volume
+        source: sqlite-data
+        target: /sqlite-data
+        volume:
+          nocopy: true
+
 
 volumes:
   sqlite-data:
-

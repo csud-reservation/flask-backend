@@ -9,7 +9,7 @@ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58
 sudo echo "deb https://apt.dockerproject.org/repo debian-jessie main" > /etc/apt/sources.list.d/docker.list
 
 sudo apt-get -y update
-sudo apt-get -y install docker-engine
+sudo apt-get -y install docker-engine --allow-unauthenticated
 sudo service docker start
 
 # curl https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O ~/.docker-completion.sh '. ~/.docker-completion.sh' >> ~/.bash_rc

@@ -1,10 +1,9 @@
-REMOTE = csud-reservation.com
 SSH_OPTIONS=-o 'StrictHostKeyChecking no'
-SSH_ROOT = ssh $(SSH_OPTIONS) root@$(REMOTE)
+SSH_ROOT = ssh $(SSH_OPTIONS) root@$(HOST)
 RSYNC_OPTIONS= -e 'ssh -o StrictHostKeyChecking=no'
 RSYNC=rsync $(RSYNC_OPTIONS)
 SSH = $(SSH_ROOT) 
-ROOT = root@$(REMOTE)
+ROOT = root@$(HOST)
 SYNC = rsync -raz --delete --progress $(ROOT)
 
 DOCKER_COMPOSE_VERSION = 1.15.0
@@ -18,7 +17,7 @@ setup-docker: init put-setup
 
 # pour pousser les modifications locales sur le serveur
 put-setup:
-	$(RSYNC) -raz * root@$(REMOTE):/root/setup/ --progress --delete
+	$(RSYNC) -raz * root@$(HOST):/root/setup/ --progress --delete
 
 ssh-root:
 	$(SSH)
@@ -36,10 +35,10 @@ upgrade:
 	$(SSH) apt-get upgrade -y
 
 halt:
-	$(SSH) 'halt && sleep 5s && ping $(REMOTE)'
+	$(SSH) 'halt && sleep 5s && ping $(HOST)'
 
 reboot:
 	$(SSH) reboot
-	sleep 2s && ping $(REMOTE)
-	sleep 20s && ping $(REMOTE)
+	sleep 2s && ping $(HOST)
+	sleep 20s && ping $(HOST)
 

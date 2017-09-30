@@ -1,5 +1,5 @@
 
-HOST=csud-reservation.com
+REMOTE=root@$(HOST)
 SSH_OPTIONS=-o 'StrictHostKeyChecking no'
 SSH = ssh $(SSH_OPTIONS) root@$(HOST)
 SERVER_DIR=~/csud-reservation
@@ -16,8 +16,26 @@ init:
 ssh:
 	$(SSH)
 
-push:
-	$(RSYNC) -raz . root@www.csud-reservation.com:$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
+host.env.build:
+	rm -f host.env
+	echo "C9_HOSTNAME=https://$(HOST)" >> host.env
+	echo "VIRTUAL_HOST=$(HOST)" >> host.env
+	echo "LETSENCRYPT_HOST=$(HOST)" >> host.env
+
+push: host.env.build
+	$(RSYNC) -raz . $(REMOTE):$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
+
+
+sqlite-data-pull:
+	$(SSH) docker cp csudreservation_backup_1:/sqlite-data/data.sqlite ./data.sqlite
+	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data.sqlite
+
+sqlite-data-push:
+	$(RSYNC) ./backup/data.sqlite $(REMOTE):/root/data.sqlite --progress
+	$(SSH) docker cp ./data.sqlite csudreservation_backup_1:/sqlite-data/data.sqlite
+
+get-ssh-config:
+	$(RSYNC) -raz $(REMOTE):/root/.ssh ./backup/ssh --progress
 
 
 backup-up: push

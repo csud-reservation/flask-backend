@@ -67,5 +67,8 @@ schema.*
 tags
 
 # secret env files
-backup/aws.env
 *.secret.env
+
+
+host.env
+backup/*.sql

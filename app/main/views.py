@@ -606,7 +606,7 @@ def my_reservations():
         
     return render_template('my_reservations.html',
         reservations=reservations_to_send_final, today=today, just_reserved=just_reserved, 
-        reservation_type = session['reservation_type'],
+        reservation_type = session.get('reservation_type'),
         role=user_role, modifications = session["modifications"], 
         modifications_dates = session["modifications_dates"], 
         old_room = session["old_room"], reservations_total=reservations_total,

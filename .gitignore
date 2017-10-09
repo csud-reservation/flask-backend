@@ -70,5 +70,5 @@ tags
 *.secret.env
 
 
-host.env
+*host.env
 backup/*.sql

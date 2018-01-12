@@ -84,3 +84,10 @@ local-restart: local-down local-up
 up: local-up
 down: local-down
 restart: local-restart
+
+
+# gestion des backups 
+push-dumps: 
+	# ne fonctionne pas à cause d'une offending key mais 'input device is not a TTY'
+	$(SSH) docker exec -it csudreservation_backup_1 /root/dump-and-push.sh
+

@@ -89,5 +89,7 @@ restart: local-restart
 # gestion des backups 
 push-dumps: 
 	# ne fonctionne pas à cause d'une offending key mais 'input device is not a TTY'
+	# il faut se connecter manuellement sur le docker host ...
+	# TODO : trouver un contournement
 	$(SSH) docker exec -it csudreservation_backup_1 /root/dump-and-push.sh
 

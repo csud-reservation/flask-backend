@@ -30,12 +30,20 @@ sqlite-data-pull:
 	$(SSH) docker cp csudreservation_backup_1:/sqlite-data/data.sqlite ./data.sqlite
 	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data.sqlite
 
+
+getbackup:
+	$(SSH) tar -cjf backup.tar.bz2 csud-reservation/backup
+	$(RSYNC) $(REMOTE):/root/backup.tar.bz2 .
+
 sqlite-data-push:
 	$(RSYNC) ./backup/data.sqlite $(REMOTE):/root/data.sqlite --progress
 	$(SSH) docker cp ./data.sqlite csudreservation_backup_1:/sqlite-data/data.sqlite
 
 get-ssh-config:
 	$(RSYNC) -raz $(REMOTE):/root/.ssh ./backup/ssh --progress
+
+
+
 
 
 backup-up: push

@@ -28,7 +28,7 @@ push: host.env.build
 
 sqlite-data-pull:
 	$(SSH) docker cp csudreservation_backup_1:/sqlite-data/data.sqlite ./data.sqlite
-	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data/backup-$(date +%Y-%m-%d_%H:%M).sqlite
+	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data/backup-$(shell date +%Y-%m-%d_%Hh%M).sqlite
 
 
 getbackup:

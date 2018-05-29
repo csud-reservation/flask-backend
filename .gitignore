@@ -77,3 +77,8 @@ tags
 
 *host.env
 backup/*.sql
+
+# Fichiers bidons
+*~
+
+csud-reservation

@@ -34,3 +34,24 @@ $ git remote add origin https://github.com/csud-reservation/flask-backend.git
 $ git fetch
 $ git checkout -t origin/dev
 ```
+
+### Référence de commandes utiles
+
+#### Commande pour ajouter un utilisateur (secrétaire) manuellement
+
+Commencer par ouvrir un terminal
+
+```{bash}
+$ docker exec -it <container> bash
+$ python manage.py shell
+```
+
+Dans le shell Python, faire
+
+```
+secr = User(first_name='Prénom', last_name='Nom', email='email@edufr.ch', sigle='XXXX')
+secr.set_password('...')
+db.session.add(secr)
+db.session.commit()
+```
+

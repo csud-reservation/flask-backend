@@ -1,6 +1,25 @@
 # Système de réservation CSUD
 
-## Installation
+## Déploiement sur un serveur virtuel
+
+Le système de réservation est complètement conteneurisé avec Docker. Pour pouvoir l'installer sur un serveur virtuel distant (VPS), il faut commencer par configurer le serveur distant pour pouvoir lancer des conteneurs Docker.
+
+### Configuration initiale du serveur Ubuntu 16.04 LTS
+
+1. Démarrer le serveur Ubuntu 16.04 LTS
+2. Régler le nom de l'hôte distant dans la variable d'environnement `HOST`
+
+    ```
+    export HOST=csud-reservation
+    ```
+
+1. Exécuter les commandes suivantes :
+
+    ```{bash}
+    cd vserver
+    make init
+    make setup-docker
+    ```
 
 ### Démarrage du projet
 

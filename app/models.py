@@ -63,7 +63,6 @@ class User(UserMixin, db.Model):
         for csv_teacher in teachers:
             sigle = csv_teacher['Sigle']
             teacher = User.query.filter_by(sigle=sigle).first()
-            
 
             csv_role = csv_teacher['Fonction Identifiant FR']
             try:
@@ -79,6 +78,7 @@ class User(UserMixin, db.Model):
             # or print("Problème pour l'enseignant", csv_teacher, " : le rôle", csv_role, "n'existe pas dans la base de données.")
             
             if teacher is None:
+    
                 teacher = User(
                     first_name=csv_teacher['Prénom'],
                     last_name=csv_teacher['Nom'],
@@ -88,21 +88,25 @@ class User(UserMixin, db.Model):
                     role=role
                 )
 
-                teacher.set_password(User.password_generator())
                 db.session.add(teacher)
+                teacher.set_password(User.password_generator())
 
             # mettre à jour les données de l'enseignant si sa ligne a changé
             # dans le fichier CSV
             else:
                 t = teacher
+                print('current teacher', t, t.first_name, t.last_name)
                 nt = csv_teacher
                 print("Mise à jour des données de", sigle)
                 print("Avant:", t.first_name, t.last_name, t.email, t.role)
                 print("Maintenant:", nt['Prénom'], nt['Nom'], nt['Email Ecole'], csv_role)
-                teacher.first_name=csv_teacher['Prénom'],
-                teacher.last_name=csv_teacher['Nom'],
-                teacher.email=csv_teacher['Email Ecole'],
+    
+                t.first_name=csv_teacher['Prénom']
+                t.last_name=csv_teacher['Nom']
+                teacher.email=csv_teacher['Email Ecole']
                 teacher.role=role
+
+                db.session.commit()
                 
         db.session.commit()
         

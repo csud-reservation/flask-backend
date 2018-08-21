@@ -17,10 +17,9 @@ services:
 
   backup:
     restart: always
+    env_file: backup.env
     build:
       context: ./backup
-      args:  
-        - version=2017-production
 
     volumes:
       - type: volume

@@ -61,7 +61,8 @@ class User(UserMixin, db.Model):
     def insert_teachers(teachers):
         
         for csv_teacher in teachers:
-            teacher = User.query.filter_by(sigle=csv_teacher['Sigle']).first()
+            sigle = csv_teacher['Sigle']
+            teacher = User.query.filter_by(sigle=sigle).first()
             
 
             csv_role = csv_teacher['Fonction Identifiant FR']
@@ -89,6 +90,19 @@ class User(UserMixin, db.Model):
 
                 teacher.set_password(User.password_generator())
                 db.session.add(teacher)
+
+            # mettre à jour les données de l'enseignant si sa ligne a changé
+            # dans le fichier CSV
+            else:
+                t = teacher
+                nt = csv_teacher
+                print("Mise à jour des données de", sigle)
+                print("Avant:", t.first_name, t.last_name, t.email, t.role)
+                print("Maintenant:", nt['Prénom'], nt['Nom'], nt['Email Ecole'], csv_role)
+                teacher.first_name=csv_teacher['Prénom'],
+                teacher.last_name=csv_teacher['Nom'],
+                teacher.email=csv_teacher['Email Ecole'],
+                teacher.role=role
                 
         db.session.commit()
         

@@ -115,7 +115,10 @@ def insert_reservation(db, row, start_date, end_date):
     admin_role = Role.query.filter_by(name='admin').first()
     admin_user = User.query.filter_by(role=admin_role).first()
 
-    # Si on est à une heure inférieure à 10h, les heures sont notées 08h10 dans le fichier edt.csv mais 8h10 dans la base de données ==> il faut donc transformer ce qui est dans le fichier csv pour correspondre au format de la base de données
+    # Si on est à une heure inférieure à 10h, les heures sont notées 08h10 dans
+    # le fichier edt.csv mais 8h10 dans la base de données ==> il faut donc
+    # transformer ce qui est dans le fichier csv pour correspondre au format de
+    # la base de données
     hours, minutes = row['H.DEBUT'].split('h')
     hours = hours[1] if hours[0] == '0' else hours
 

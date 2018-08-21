@@ -9,9 +9,9 @@ SYNC = rsync -raz --delete --progress $(ROOT)
 DOCKER_COMPOSE_VERSION = 1.15.0
 
 init: upgrade
-	$(SSH) apt-get -y install curl rsync git build-essential
+	$(SSH) apt-get -y install curl rsync git build-essential --force-yes --fix-missing
 
-setup-docker: init put-setup
+setup-docker: init
 	cat docker/install.sh | $(SSH) sh
 	$(SSH) 'curl -L https://github.com/docker/compose/releases/download/$(DOCKER_COMPOSE_VERSION)/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose && chmod +x /usr/bin/docker-compose'	
 
@@ -25,14 +25,14 @@ ssh-root:
 ssh: ssh-root
 
 setup-ssh:
-	cat ~/.ssh/id_rsa.pub | $(SSH) 'touch .ssh/authorized_keys && cat >> .ssh/authorized_keys'
+	cat ~/.ssh/id_rsa.pub | $(SSH) 'mkdir .ssh && touch .ssh/authorized_keys && cat >> .ssh/authorized_keys'
 
 clean-ssh:
 	rm -f ~/.ssh/known_hosts
 
 upgrade:
-	$(SSH) apt-get update -y
-	$(SSH) apt-get upgrade -y
+	$(SSH) apt-get update -y --force-yes
+	$(SSH) apt-get upgrade -y --force-yes --fix-missing
 
 halt:
 	$(SSH) 'halt && sleep 5s && ping $(HOST)'
@@ -42,3 +42,6 @@ reboot:
 	sleep 2s && ping $(HOST)
 	sleep 20s && ping $(HOST)
 
+# nécessaire de mettre à jour plusieurs fois le DNS sur la machine de test Hyper-V
+update-dns:
+	$(SSH) 'echo "nameserver 8.8.8.8" >> /etc/resolv.conf && service networking restart'

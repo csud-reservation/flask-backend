@@ -1,10 +1,11 @@
-
-REMOTE=root@$(HOST)
+USER=root
+REMOTE=$(USER)@$(HOST)
 SSH_OPTIONS=-o 'StrictHostKeyChecking no'
 SSH = ssh $(SSH_OPTIONS) root@$(HOST)
 SERVER_DIR=~/csud-reservation
 RSYNC_OPTIONS= -e 'ssh -o StrictHostKeyChecking=no'
 RSYNC=rsync $(RSYNC_OPTIONS)
+TIME = $(shell date +%Y-%m-%d_%Hh%M)
 
 REMOTE_NGINX=$(SSH) docker exec nginxletsencrypt_nginx-proxy_1 
 
@@ -16,43 +17,49 @@ init:
 ssh:
 	$(SSH)
 
+# ces variables sont utilisées dans le fichier docker-compos.sqlite.local.yml
 host.env.build:
+	@if test -z "$(HOST)"; then echo "variable HOST not defined"; exit 1; fi
 	rm -f host.env
 	echo "C9_HOSTNAME=https://$(HOST)" >> host.env
 	echo "VIRTUAL_HOST=$(HOST)" >> host.env
 	echo "LETSENCRYPT_HOST=$(HOST)" >> host.env
 
-push: host.env.build
+# permet de savoir sur quelle branche du dépôt de backup on va travailler
+backup.env.build:
+	@if test -z "$(BRANCH)"; then echo "variable BRANCH not defined"; exit 1; fi
+	echo "BRANCH=$(BRANCH)" > backup.env
+
+push: host.env.build backup.env.build
 	$(RSYNC) -raz . $(REMOTE):$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
 
+# getbackup:
+# 	$(SSH) tar -cjf backup.tar.bz2 csud-reservation/backup
+# 	$(RSYNC) $(REMOTE):/root/backup.tar.bz2 .
 
 sqlite-data-pull:
 	$(SSH) docker cp csudreservation_backup_1:/sqlite-data/data.sqlite ./data.sqlite
-	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data/backup-$(shell date +%Y-%m-%d_%Hh%M).sqlite
-
-
-getbackup:
-	$(SSH) tar -cjf backup.tar.bz2 csud-reservation/backup
-	$(RSYNC) $(REMOTE):/root/backup.tar.bz2 .
-
+	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data/backup-$(TIME).sqlite
+	cp -f ./backup/data/backup-$(TIME).sqlite data-dev.sqlite
+sqlite-copy-local:
+	cp -f data-dev.sqlite backup/data/data.sqlite
 sqlite-data-push:
-	$(RSYNC) ./backup/data.sqlite $(REMOTE):/root/data.sqlite --progress
+	$(RSYNC) ./backup/data/data.sqlite $(REMOTE):/root/data.sqlite --progress
 	$(SSH) docker cp ./data.sqlite csudreservation_backup_1:/sqlite-data/data.sqlite
-
-get-ssh-config:
-	$(RSYNC) -raz $(REMOTE):/root/.ssh ./backup/ssh --progress
+sqlite-push-local-data: sqlite-copy-local sqlite-data-push
 
 
+# get-ssh-config:
+# 	$(RSYNC) -raz $(REMOTE):/root/.ssh ./backup/ssh --progress
 
 
+# backup-up: push
+# 	$(SSH) 'cd $(SERVER_DIR)/backup && docker-compose build && docker-compose up -d'
+# backup-down:
+# 	$(SSH) 'cd $(SERVER_DIR)/backup && docker-compose down -d'
+# backup-restart: backup-down backup-up
 
-backup-up: push
-	$(SSH) 'cd $(SERVER_DIR)/backup && docker-compose build && docker-compose up -d'
-backup-down:
-	$(SSH) 'cd $(SERVER_DIR)/backup && docker-compose down -d'
-backup-restart: backup-down backup-up
-
-server-up: push
+server-up:
 	$(SSH) 'cd $(SERVER_DIR)/nginx-letsencrypt && docker-compose build && docker-compose up -d'
 	$(SSH) 'cd $(SERVER_DIR) && docker-compose build && docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml up -d'
 server-down:
@@ -64,17 +71,10 @@ initweb:
 
 server-restart: server-down server-up
 
-olddown:
-	$(SSH) cd $(SERVER_DIR) && 
-oldup:
-oldrestart: down up
-
-
 inspect-nginx-config:
 	$(REMOTE_NGINX)  cat /etc/nginx/conf.d/default.conf
 inspect-webapp:
 	$(SSH) docker inspect csudreservation_web
-
 
 ps:
 	$(SSH) docker ps
@@ -82,20 +82,8 @@ ps:
 webapp-shell:
 	$(SSH_SERVER) 
 
-
-local-up:
-	docker-compose build
-	docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml up -d
-local-down:
-	docker-compose -f docker-compose.yml -f docker-compose.sqlite.local.yml down
-local-restart: local-down local-up
-up: local-up
-down: local-down
-restart: local-restart
-
-
 # gestion des backups 
-push-dumps: 
+dump-and-push: 
 	# ne fonctionne pas à cause d'une offending key mais 'input device is not a TTY'
 	# il faut se connecter manuellement sur le docker host ...
 	# TODO : trouver un contournement

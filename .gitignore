@@ -76,6 +76,7 @@ tags
 
 
 *host.env
+*backup.env
 backup/*.sql
 
 # Fichiers bidons

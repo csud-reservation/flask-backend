@@ -74,3 +74,15 @@ db.session.add(secr)
 db.session.commit()
 ```
 
+#### Commandes pour insérer les données de EDT
+
+Dans un shell bash, utiliser la commande `load` en spécifiant les dates de début
+et de fin des réservations à insérer :
+
+```{bash}
+python manage.py load --data_file data/edt_1819_ok.txt  2018-09-17 2019-07-05
+```
+
+#### Commande pour obtenir la liste des conflits
+
+Cette commande est encore à déterminer mais la requête SQL va être du style

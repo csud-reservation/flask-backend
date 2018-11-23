@@ -7,6 +7,8 @@ RSYNC_OPTIONS= -e 'ssh -o StrictHostKeyChecking=no'
 RSYNC=rsync $(RSYNC_OPTIONS)
 TIME = $(shell date +%Y-%m-%d_%Hh%M)
 
+BACKUP_DIR=~/OneDrive/csud-reservation-backups
+
 REMOTE_NGINX=$(SSH) docker exec nginxletsencrypt_nginx-proxy_1 
 
 SSH_SERVER=$(SSH) cd $(SERVER_DIR) &&
@@ -41,6 +43,7 @@ sqlite-data-pull:
 	$(SSH) docker cp csudreservation_backup_1:/sqlite-data/data.sqlite ./data.sqlite
 	$(RSYNC) $(REMOTE):/root/data.sqlite ./backup/data/backup-$(TIME).sqlite
 	cp -f ./backup/data/backup-$(TIME).sqlite data-dev.sqlite
+	cp -f ./backup/data/backup-$(TIME).sqlite $(BACKUP_DIR)
 sqlite-copy-local:
 	cp -f data-dev.sqlite backup/data/data.sqlite
 sqlite-data-push:

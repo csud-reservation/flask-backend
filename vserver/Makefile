@@ -24,8 +24,11 @@ ssh-root:
 
 ssh: ssh-root
 
+ssh-register-public-key:
+	cat ~/.ssh/id_rsa.pub | $(SSH) 'cat >> .ssh/authorized_keys'
+
 setup-ssh:
-	cat ~/.ssh/id_rsa.pub | $(SSH) 'mkdir .ssh && touch .ssh/authorized_keys && cat >> .ssh/authorized_keys'
+	$(SSH) 'mkdir .ssh && touch .ssh/authorized_keys'
 
 clean-ssh:
 	rm -f ~/.ssh/known_hosts

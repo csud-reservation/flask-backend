@@ -63,7 +63,9 @@ def insert_reservation(db, row, start_date, end_date):
     teachers = []
     errors = []
 
-    # Tous les noms et prénom selon la base de données
+    # Tous les noms et prénom selon la base de données pour faire le matching
+    # flou pour permettre de faire le lien entre le fichier des secrétaires et
+    # celui de EDT qui ne sont parfois pas synchronisés
     choices = [t.first_name + '|' + t.last_name for t in User.query.all()]
     
     for fn, ln in zip(teachers_fnames, teachers_lnames):
@@ -89,8 +91,11 @@ def insert_reservation(db, row, start_date, end_date):
         for e in errors:
             fd.write(str(e) + '\n')
     
-    # Si le champ 'teacher' est vide, il s'agit d'une heure générique qu'il ne faut pas insérer dans l'occupation des salles. Elle n'est là que pour la forme dans le fichier edt.csv ==> autre alternative serait de faire un prétraitement sur ce fichier edt.csv
-    # Ne pas tenir compte des heures de gymnastique
+    # Si le champ 'teacher' est vide, il s'agit d'une heure générique qu'il ne
+    # faut pas insérer dans l'occupation des salles. Elle n'est là que pour la
+    # forme dans le fichier edt.csv ==> autre alternative serait de faire un
+    # prétraitement sur ce fichier edt.csv Ne pas tenir compte des heures de
+    # gymnastique
     if teachers == [None] or row['MAT_CODE'] == 'GY' or row['SALLE'] == '': return
 
     duration = int(row['DUREE'].split('h')[0])
@@ -110,7 +115,10 @@ def insert_reservation(db, row, start_date, end_date):
     admin_role = Role.query.filter_by(name='admin').first()
     admin_user = User.query.filter_by(role=admin_role).first()
 
-    # Si on est à une heure inférieure à 10h, les heures sont notées 08h10 dans le fichier edt.csv mais 8h10 dans la base de données ==> il faut donc transformer ce qui est dans le fichier csv pour correspondre au format de la base de données
+    # Si on est à une heure inférieure à 10h, les heures sont notées 08h10 dans
+    # le fichier edt.csv mais 8h10 dans la base de données ==> il faut donc
+    # transformer ce qui est dans le fichier csv pour correspondre au format de
+    # la base de données
     hours, minutes = row['H.DEBUT'].split('h')
     hours = hours[1] if hours[0] == '0' else hours
 

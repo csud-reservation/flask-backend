@@ -1,1 +1,1 @@
-00 * * * * aws s3 cp /sqlite-data/data.sqlite s3://csud-reservation-backup/
+* * * * * /root/dump-and-push.sh

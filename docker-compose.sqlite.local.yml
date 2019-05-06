@@ -3,25 +3,23 @@ version: "3.2"
 services:
   web:
     ports:
-      - "5000:8080"
+      - "8080:8080"
     volumes:
       - type: volume
         source: sqlite-data
         target: /sqlite-data
         volume:
           nocopy: true
+    env_file: host.env
     environment:
-      - DEV_DATABASE_URL=sqlite:////sqlite-data/data.sqlite
-      - FLASK_CONFIG=development
-      - C9_HOSTNAME=https://beta-version.csud-reservation.com
-      - VIRTUAL_HOST=beta-version.csud-reservation.com
-      - LETSENCRYPT_HOST=beta-version.csud-reservation.com
+      DEV_DATABASE_URL: sqlite:////sqlite-data/data.sqlite
+      FLASK_CONFIG: development
 
   backup:
     restart: always
-    build: ./backup
-    env-file:
-      - backup/aws.env
+    env_file: backup.env
+    build:
+      context: ./backup
 
     volumes:
       - type: volume

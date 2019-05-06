@@ -1,6 +1,25 @@
 # Système de réservation CSUD
 
-## Installation
+## Déploiement sur un serveur virtuel
+
+Le système de réservation est complètement conteneurisé avec Docker. Pour pouvoir l'installer sur un serveur virtuel distant (VPS), il faut commencer par configurer le serveur distant pour pouvoir lancer des conteneurs Docker.
+
+### Configuration initiale du serveur Ubuntu 16.04 LTS
+
+1. Démarrer le serveur Ubuntu 16.04 LTS
+2. Régler le nom de l'hôte distant dans la variable d'environnement `HOST`
+
+    ```
+    export HOST=csud-reservation
+    ```
+
+1. Exécuter les commandes suivantes :
+
+    ```{bash}
+    cd vserver
+    make init
+    make setup-docker
+    ```
 
 ### Démarrage du projet
 
@@ -34,3 +53,36 @@ $ git remote add origin https://github.com/csud-reservation/flask-backend.git
 $ git fetch
 $ git checkout -t origin/dev
 ```
+
+### Référence de commandes utiles
+
+#### Commande pour ajouter un utilisateur (secrétaire) manuellement
+
+Commencer par ouvrir un terminal
+
+```{bash}
+$ docker exec -it <container> bash
+$ python manage.py shell
+```
+
+Dans le shell Python, faire
+
+```
+secr = User(first_name='Prénom', last_name='Nom', email='email@edufr.ch', sigle='XXXX')
+secr.set_password('...')
+db.session.add(secr)
+db.session.commit()
+```
+
+#### Commandes pour insérer les données de EDT
+
+Dans un shell bash, utiliser la commande `load` en spécifiant les dates de début
+et de fin des réservations à insérer :
+
+```{bash}
+python manage.py load --data_file data/edt_1819_ok.txt  2018-09-17 2019-07-05
+```
+
+#### Commande pour obtenir la liste des conflits
+
+Cette commande est encore à déterminer mais la requête SQL va être du style

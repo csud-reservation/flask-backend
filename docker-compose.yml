@@ -10,10 +10,7 @@ services:
     environment:
       - C9_IP=0.0.0.0
       - C9_PORT=8080
-      - C9_HOSTNAME=https://www.csud-reservation.com
-      - VIRTUAL_HOST=www.csud-reservation.com
-      - LETSENCRYPT_HOST=www.csud-reservation.com
-      - LETSENCRYPT_EMAIL=csud-reservation@gmail.com
+      - LETSENCRYPT_EMAIL=21-learning@gmail.com
 
     network_mode: "bridge"
 

@@ -41,6 +41,7 @@ nosetests.xml
 # Virtual environment
 venv
 devenv
+ubuntu
 
 # Database files
 data-dev-ddl.sql
@@ -48,10 +49,14 @@ erd_from_sqlite.pdf
 data-dev.sqlite
 edt.csv
 
+# Backups data
+backup/data/*.sqlite
+
 account_password.csv
 
 data/src
 data/*.csv
+data/*.sql
 
 *.log
 *xlsx
@@ -67,5 +72,14 @@ schema.*
 tags
 
 # secret env files
-backup/aws.env
 *.secret.env
+
+
+*host.env
+*backup.env
+backup/*.sql
+
+# Fichiers bidons
+*~
+
+csud-reservation

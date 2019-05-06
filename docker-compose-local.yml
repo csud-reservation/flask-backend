@@ -10,9 +10,9 @@ services:
     expose:
       - 8080
     environment:
-      - C9_HOSTNAME=https://www.csud-reservation.com
+      - C9_HOSTNAME=https://${HOST}
       - C9_IP=0.0.0.0
       - C9_PORT=8080
-      - VIRTUAL_HOST=www.csud-reservation.com
-      - LETSENCRYPT_HOST=www.csud-reservation.com
-      - LETSENCRYPT_EMAIL=csud-reservation@gmail.com
+      - VIRTUAL_HOST=${HOST}
+      - LETSENCRYPT_HOST=${HOST}
+      - LETSENCRYPT_EMAIL=21-learning@gmail.com

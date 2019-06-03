@@ -52,6 +52,10 @@ sqlite-data-push:
 sqlite-push-local-data: sqlite-copy-local sqlite-data-push
 
 
+ethz-push:
+	$(RSYNC) -raz ~/ethz/* $(REMOTE):/root/ethz --progress
+
+
 # get-ssh-config:
 # 	$(RSYNC) -raz $(REMOTE):/root/.ssh ./backup/ssh --progress
 

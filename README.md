@@ -9,17 +9,17 @@ Le système de réservation est complètement conteneurisé avec Docker. Pour po
 1. Démarrer le serveur Ubuntu 16.04 LTS
 2. Régler le nom de l'hôte distant dans la variable d'environnement `HOST`
 
-    ```
-    export HOST=csud-reservation
-    ```
+   ```
+   export HOST=csud-reservation
+   ```
 
-1. Exécuter les commandes suivantes :
+3. Exécuter les commandes suivantes :
 
-    ```{bash}
-    cd vserver
-    make init
-    make setup-docker
-    ```
+   ```{bash}
+   cd vserver
+   make init
+   make setup-docker
+   ```
 
 ### Démarrage du projet
 
@@ -86,3 +86,25 @@ python manage.py load --data_file data/edt_1819_ok.txt  2018-09-17 2019-07-05
 #### Commande pour obtenir la liste des conflits
 
 Cette commande est encore à déterminer mais la requête SQL va être du style
+
+### Procédure pour introduire les nouveaux horaires de fin d'année
+
+1.  Tirer la base de données sqlite en local
+1.  Utiliser SQLite DB Browser pour travailler avec la base de données en local et **ne pas oublier d'enregistrer les modifications dans SQLite DB Browser** ... je me fais avoir à chaque fois.
+    - Utiliser `sql/update-*.sql` pour modifier les dates de fin.
+    - En particulier la requête qui fait le BACKUP des réservations qui se
+      terminent après le **splitpoint** ==> je n'ai pas cette requête
+1.  Déterminer la date à partir de laquelle l'horaire change
+1.  modifier les réservations actuelles qui commencent au début de l'année et se terminent à la fin d l'année pour qu'elles se terminent le vendredi de la dernière semaine de l'horaire actuel
+1.  Lister les réservations qui se terminent après la date charnière ... manifestement tout ne part pas avec la première manipulation.
+1.  Travailler sur la machine locale avec des données à jour dans un premier temps
+    1.  Importer les heures du fichier CSV en spécifiant les dates de début et de fin de la période
+    1.  Tester en local que tout fonctionne
+1.  Pousser les modifications sur le serveur
+
+
+Pour charger les nouvelles données, exécuter la commande 
+
+```bash
+python manage.py load 
+```

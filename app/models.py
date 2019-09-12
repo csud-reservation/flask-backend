@@ -30,6 +30,13 @@ class User(UserMixin, db.Model):
     @staticmethod
     def password_generator(length=8) :
         return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
+        
+    @staticmethod
+    def email_generator(length=8) :
+        random_part = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(length))
+        return f'{random_part}@example.com' 
+        
+
 
     @staticmethod
     def reset_user_passwd(sigle, passwd):
@@ -83,7 +90,7 @@ class User(UserMixin, db.Model):
                     first_name=csv_teacher['Prénom'],
                     last_name=csv_teacher['Nom'],
                     sigle=csv_teacher['Sigle'],
-                    email=csv_teacher['Email Ecole'],
+                    email=User.email_generator(),
                     password_hash='temp',
                     role=role
                 )
@@ -99,11 +106,11 @@ class User(UserMixin, db.Model):
                 nt = csv_teacher
                 print("Mise à jour des données de", sigle)
                 print("Avant:", t.first_name, t.last_name, t.email, t.role)
-                print("Maintenant:", nt['Prénom'], nt['Nom'], nt['Email Ecole'], csv_role)
+                print("Maintenant:", nt['Prénom'], nt['Nom'], nt.get('Email Ecole', None), csv_role)
     
                 t.first_name=csv_teacher['Prénom']
                 t.last_name=csv_teacher['Nom']
-                teacher.email=csv_teacher['Email Ecole']
+                teacher.email=csv_teacher.get('Email Ecole', User.email_generator())
                 teacher.role=role
 
                 db.session.commit()

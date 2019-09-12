@@ -33,7 +33,7 @@ backup.env.build:
 	echo "BRANCH=$(BRANCH)" > backup.env
 
 push: host.env.build backup.env.build
-	$(RSYNC) -raz . $(REMOTE):$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=__pycache__
+	$(RSYNC) -raz . $(REMOTE):$(SERVER_DIR) --progress --exclude=.git --exclude=venv --exclude=ubuntu --exclude=__pycache__
 
 # getbackup:
 # 	$(SSH) tar -cjf backup.tar.bz2 csud-reservation/backup

@@ -8,7 +8,7 @@ SYNC = rsync -raz --delete --progress $(ROOT)
 
 DOCKER_COMPOSE_VERSION = 1.15.0
 
-init: upgrade
+init: ssh-register-public-key upgrade 
 	$(SSH) apt-get -y install curl rsync git build-essential --force-yes --fix-missing
 
 setup-docker: init

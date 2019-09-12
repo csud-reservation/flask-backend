@@ -7,4 +7,4 @@ INNER JOIN reservations_timeslots ON reservations_timeslots.reservation_id = res
 INNER JOIN timeslots ON timeslots.id = reservations_timeslots.timeslot_id
 INNER JOIN weekdays ON weekdays.id = reservations.weekday_id
 
-WHERE end_date = '2019-06-10 00:00:00' and owner_id = 1
+WHERE end_date = '2020-07-03 00:00:00' and owner_id = 1

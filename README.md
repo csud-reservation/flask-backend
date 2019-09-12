@@ -111,6 +111,10 @@ et de fin des réservations à insérer :
 python manage.py load --data_file data/edt_1819_ok.txt  2018-09-17 2019-07-05
 ```
 
+#### Modifier les dates de fin des réservations edt (celles possédées par l'utilsateur d'id = 1)
+
+Il faut juste changer les dates codées en dur dans cette 
+
 #### Commande pour obtenir la liste des conflits
 
 La requête SQL pour déterminer les conflits se trouve dans le fichier

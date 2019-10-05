@@ -53,7 +53,7 @@ sqlite-push-local-data: sqlite-copy-local sqlite-data-push
 
 
 ethz-push:
-	$(RSYNC) -raz ~/ethz/* $(REMOTE):/root/ethz --progress
+	$(RSYNC) -raz ~/ethz/* $(REMOTE):/root/ethz --progress --exclude=camtasia* --exclude=*-sources-DE
 
 
 # get-ssh-config:

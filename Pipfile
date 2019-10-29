@@ -44,7 +44,7 @@ MarkupSafe = "==1.0"
 prompt_toolkit = "==1.0.15"
 Pygments = "==2.2.0"
 SQLAlchemy = "==1.1.5"
-Werkzeug = "==0.11.15"
+Werkzeug = "==0.15.3"
 WTForms = "==2.1"
 
 [requires]
